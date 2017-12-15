@@ -73,6 +73,7 @@
 
     <string name="pref_sync_frequency_key" translatable="false">pref-sync-frequency</string>
 
+    <string name="pref_sync_frequency_label_5">5 minutes</string>
     <string name="pref_sync_frequency_label_15">15 minutes</string>
     <string name="pref_sync_frequency_label_30">30 minutes</string>
     <string name="pref_sync_frequency_label_60">1 hour</string>
@@ -80,11 +81,14 @@
     <string name="pref_sync_frequency_label_360">6 hours</string>
     <string name="pref_sync_frequency_label_0">Never</string>
 
+    <string name="pref_sync_frequency_5" translatable="false">5</string>
     <string name="pref_sync_frequency_15" translatable="false">15</string>
     <string name="pref_sync_frequency_30" translatable="false">30</string>
     <string name="pref_sync_frequency_60" translatable="false">60</string>
     <string name="pref_sync_frequency_180" translatable="false">180</string>
     <string name="pref_sync_frequency_360" translatable="false">360</string>
     <string name="pref_sync_frequency_0" translatable="false">0</string>
+    <string name="title_exams_available">Available Exams</string>
+    <string name="title_exams_enrolled">Enrolled Exams</string>
 
 </resources>

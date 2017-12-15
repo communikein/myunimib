@@ -7,9 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.app.LoaderManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,24 +17,24 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.communikein.myunimib.data.ExamContract;
-import com.communikein.myunimib.databinding.FragmentBookletBinding;
-import com.communikein.myunimib.sync.booklet.SyncUtilsBooklet;
+import com.communikein.myunimib.databinding.FragmentExamsBinding;
+import com.communikein.myunimib.sync.enrolledexams.SyncUtilsEnrolled;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class BookletFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>{
+public class ExamsEnrolledFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     /*
      * The columns of data that we are interested in displaying within our MainActivity's list of
      * weather data.
      */
-    public static final String[] BOOKLET_PROJECTION = {
-            ExamContract.BookletEntry.COLUMN_COURSE_NAME,
-            ExamContract.BookletEntry.COLUMN_MARK,
-            ExamContract.BookletEntry.COLUMN_STATE
+    public static final String[] EXAM_PROJECTION = {
+            ExamContract.EnrolledExamEntry.COLUMN_COURSE_NAME,
+            ExamContract.EnrolledExamEntry.COLUMN_DATE,
+            ExamContract.EnrolledExamEntry.COLUMN_DESCRIPTION
     };
 
     /*
@@ -42,19 +42,18 @@ public class BookletFragment extends Fragment implements
      * access the data from our query. If the order of the Strings above changes, these indices
      * must be adjusted to match the order of the Strings.
      */
-    public static final int INDEX_BOOKLET_COURSE_NAME = 0;
-    public static final int INDEX_BOOKLET_MARK = 1;
-    public static final int INDEX_BOOKLET_STATE = 2;
+    public static final int INDEX_EXAM_COURSE_NAME = 0;
+    public static final int INDEX_EXAM_DATE = 1;
+    public static final int INDEX_EXAM_DESCRIPTION = 2;
 
+    static final int ID_EXAMS_ENROLLED_LOADER = 46;
 
-    static final int ID_BOOKLET_LOADER = 44;
-
-    private BookletAdapter mBookletAdapter;
+    private EnrolledExamAdapter mExamsAdapter;
     private int mPosition = RecyclerView.NO_POSITION;
 
-    FragmentBookletBinding mBinding;
+    public FragmentExamsBinding mBinding;
 
-    public BookletFragment() {
+    public ExamsEnrolledFragment() {
         // Required empty public constructor
     }
 
@@ -63,7 +62,7 @@ public class BookletFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_booklet, container, false);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_exams, container, false);
 
         /*
          * A LinearLayoutManager is responsible for measuring and positioning item views within a
@@ -103,7 +102,7 @@ public class BookletFragment extends Fragment implements
          * MainActivity implements the ForecastAdapter ForecastOnClickHandler interface, "this"
          * is also an instance of that type of handler.
          */
-        mBookletAdapter = new BookletAdapter(getActivity());
+        mExamsAdapter = new EnrolledExamAdapter(getActivity());
 
         return mBinding.getRoot();
     }
@@ -113,8 +112,7 @@ public class BookletFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
 
         /* Setting the adapter attaches it to the RecyclerView in our layout. */
-        mBinding.rvList.setAdapter(mBookletAdapter);
-
+        mBinding.rvList.setAdapter(mExamsAdapter);
 
         toggleLoading(true);
 
@@ -123,22 +121,24 @@ public class BookletFragment extends Fragment implements
          * created and (if the activity/fragment is currently started) starts the loader. Otherwise
          * the last created loader is re-used.
          */
-        getActivity().getSupportLoaderManager().initLoader(ID_BOOKLET_LOADER, null, this);
+        getActivity().getSupportLoaderManager().initLoader(ID_EXAMS_ENROLLED_LOADER, null, this);
 
-        SyncUtilsBooklet.initialize(getActivity());
+        SyncUtilsEnrolled.initialize(getActivity());
     }
+
 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
         switch (id) {
-            case ID_BOOKLET_LOADER:
+            case ID_EXAMS_ENROLLED_LOADER:
                 /* URI for all rows of weather data in our weather table */
-                Uri bookletQueryUri = ExamContract.BookletEntry.CONTENT_URI;
+                Uri examsQueryUri = ExamContract.EnrolledExamEntry.CONTENT_URI;
 
                 return new CursorLoader(getActivity(),
-                        bookletQueryUri,
-                        BOOKLET_PROJECTION,
+                        examsQueryUri,
+                        EXAM_PROJECTION,
                         null,
                         null,
                         null);
@@ -150,7 +150,7 @@ public class BookletFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mBookletAdapter.swapCursor(data);
+        mExamsAdapter.swapCursor(data);
 
         if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
 
@@ -165,7 +165,7 @@ public class BookletFragment extends Fragment implements
          * Since this Loader's data is now invalid, we need to clear the Adapter that is
          * displaying the data.
          */
-        mBookletAdapter.swapCursor(null);
+        mExamsAdapter.swapCursor(null);
     }
 
     private void toggleLoading(boolean show) {
@@ -174,4 +174,5 @@ public class BookletFragment extends Fragment implements
         /* Finally, show the loading indicator */
         mBinding.pbLoadingIndicator.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
+
 }

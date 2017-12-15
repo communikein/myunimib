@@ -19,29 +19,22 @@ public class Exam {
 
     public static final String EXAM = "EXAM";
 
-    public static final String ARG_NAME = "ARG_NAME";
-    public static final String ARG_DATE = "ARG_DATE";
-    public static final String ARG_DESCRIPTION = "ARG_DESCRIPTION";
-    public static final String ARG_BUILDING = "ARG_BUILDING";
-    public static final String ARG_ROOM = "ARG_ROOM";
+    private static final String ARG_NAME = "ARG_NAME";
+    private static final String ARG_DATE = "ARG_DATE";
+    private static final String ARG_DESCRIPTION = "ARG_DESCRIPTION";
 
     protected ExamID id;
     private String name;
     private Date date;
     private String description;
-    private String building;
-    private String room;
 
 
-    public Exam(ExamID id, String name, Date date, String description,
-                String building, String room) {
+    public Exam(ExamID id, String name, Date date, String description) {
         setId(id);
 
         this.setName(name);
         this.setDate(date);
         this.setDescription(description);
-        this.setBuilding(building);
-        this.setRoom(room);
     }
 
     public Exam(JSONObject obj) throws JSONException, NullPointerException, ParseException {
@@ -55,12 +48,8 @@ public class Exam {
 
         if (obj.has(ARG_DESCRIPTION))
             setDescription(obj.getString(ARG_DESCRIPTION));
-        if (obj.has(ARG_ROOM))
-            setRoom(obj.getString(ARG_ROOM));
         if (obj.has(ARG_NAME))
             setName(obj.getString(ARG_NAME));
-        if (obj.has(ARG_BUILDING))
-            setBuilding(obj.getString(ARG_BUILDING));
         if (obj.has(ARG_DATE))
             setDate(Utils.sdf.parse(obj.getString(ARG_DATE)));
     }
@@ -72,38 +61,6 @@ public class Exam {
 
     private void setId(ExamID id) {
         this.id = id;
-    }
-
-    public String getBuilding() {
-        return building;
-    }
-
-    public void setBuilding(String building) {
-        this.building = building;
-    }
-
-    public String getRoom() {
-        return room;
-    }
-
-    public void setRoom(String room) {
-        this.room = room;
-    }
-
-    public String getAddress(){
-        if (!getRoom().equals("")) {
-            String ris = "Milano, Bicocca ";
-
-            try {
-                ris = ris + getRoom().substring(0, getRoom().indexOf("-"));
-            } catch (Exception e) {
-                ris = ris + getBuilding() + " " + getRoom();
-            }
-
-            return ris;
-        }
-        else
-            return "";
     }
 
     public void setName(String name) {
@@ -139,9 +96,7 @@ public class Exam {
             obj.put(ExamID.EXAM_ID, getId().toJSON());
 
             obj.put(ARG_NAME, getName());
-            obj.put(ARG_BUILDING, getBuilding());
             obj.put(ARG_DATE, Utils.sdf.format(getDate()));
-            obj.put(ARG_ROOM, getRoom());
             obj.put(ARG_DESCRIPTION, getDescription());
         } catch (JSONException e){
             obj = new JSONObject();

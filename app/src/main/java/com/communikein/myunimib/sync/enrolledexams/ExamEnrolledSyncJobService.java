@@ -1,7 +1,9 @@
-package com.communikein.myunimib.sync.availableExams;
+package com.communikein.myunimib.sync.enrolledexams;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.text.format.DateUtils;
+import android.util.Log;
 
 import com.communikein.myunimib.sync.SyncTask;
 import com.firebase.jobdispatcher.Job;
@@ -9,11 +11,13 @@ import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.firebase.jobdispatcher.RetryStrategy;
 
+import java.util.Date;
+
 /**
- * Created by eliam on 12/7/2017.
+ * Created by eliam on 12/15/2017.
  */
 
-public class ExamsSyncJobService extends JobService {
+public class ExamEnrolledSyncJobService extends JobService {
 
     private AsyncTask<Void, Void, Void> mFetchDataTask;
 
@@ -34,7 +38,17 @@ public class ExamsSyncJobService extends JobService {
             @Override
             protected Void doInBackground(Void... voids) {
                 Context context = getApplicationContext();
-                SyncTask.syncExams(context);
+                String now = DateUtils.formatDateTime(context,
+                        (new Date()).getTime(),
+                        DateUtils.FORMAT_SHOW_TIME);
+
+                Log.d(SyncUtilsEnrolled.REMINDER_JOB_TAG, now + ": Sync started.");
+                SyncTask.syncEnrolledExams(context);
+                now = DateUtils.formatDateTime(context,
+                        (new Date()).getTime(),
+                        DateUtils.FORMAT_SHOW_TIME);
+                Log.d(SyncUtilsEnrolled.REMINDER_JOB_TAG, now + ": Sync ended.");
+
                 jobFinished(jobParameters, false);
                 return null;
             }
@@ -66,3 +80,4 @@ public class ExamsSyncJobService extends JobService {
     }
 
 }
+

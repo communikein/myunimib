@@ -10,7 +10,12 @@ import com.communikein.myunimib.User;
 import com.communikein.myunimib.data.ExamContract;
 import com.communikein.myunimib.data.type.AvailableExam;
 import com.communikein.myunimib.data.type.BookletEntry;
+import com.communikein.myunimib.data.type.EnrolledExam;
 import com.communikein.myunimib.data.type.ExamEnrollmentInfo;
+import com.communikein.myunimib.data.type.ExamID;
+import com.communikein.myunimib.sync.availableexams.SyncUtilsAvailable;
+import com.communikein.myunimib.sync.booklet.SyncUtilsBooklet;
+import com.communikein.myunimib.sync.enrolledexams.SyncUtilsEnrolled;
 import com.communikein.myunimib.utilities.MyunimibDateUtils;
 import com.communikein.myunimib.utilities.S3JsonUtils;
 import com.communikein.myunimib.utilities.UserUtils;
@@ -39,11 +44,12 @@ import javax.net.ssl.HttpsURLConnection;
 
 import static com.communikein.myunimib.sync.S3Helper.getHTML;
 
-/**
- * Created by eliam on 12/6/2017.
- */
-
 public class SyncTask {
+
+    final private static String CDS_ESA_ID = "CDS_ESA_ID";
+    final private static String ATT_DID_ESA_ID = "ATT_DID_ESA_ID";
+    final private static String APP_ID = "APP_ID";
+    final private static String ADSCE_ID = "ADSCE_ID";
 
     private static final String PARAM_KEY_HTML = "param-key-html";
     private static final String PARAM_KEY_RESPONSE = "param-key-response";
@@ -60,11 +66,11 @@ public class SyncTask {
 
         try {
             /* Retrieve the JSON */
-            String jsonBookletResponse = downloadBooklet(context).toString();
+            String jsonResponse = downloadBooklet(context).toString();
 
             /* Parse the JSON into a list of booklet values */
             ContentValues[] bookletValues = S3JsonUtils
-                    .getBookletContentValuesFromJson(jsonBookletResponse);
+                    .getBookletContentValuesFromJson(jsonResponse);
 
             if (bookletValues != null && bookletValues.length != 0) {
                 /* Get a handle on the ContentResolver to delete and insert data */
@@ -96,15 +102,15 @@ public class SyncTask {
      *
      * @param context Used to access utility methods and the ContentResolver
      */
-    synchronized public static void syncExams(Context context) {
+    synchronized public static void syncAvailableExams(Context context) {
 
         try {
             /* Retrieve the JSON */
-            String jsonBookletResponse = downloadAvailableExams(context).toString();
+            String jsonResponse = downloadAvailableExams(context).toString();
 
             /* Parse the JSON into a list of exams values */
             ContentValues[] examsValues = S3JsonUtils
-                    .getAvailableExamsValuesFromJson(jsonBookletResponse);
+                    .getAvailableExamsValuesFromJson(jsonResponse);
 
             if (examsValues != null && examsValues.length != 0) {
                 /* Get a handle on the ContentResolver to delete and insert data */
@@ -119,6 +125,46 @@ public class SyncTask {
                 /* Insert new booklet data into the ContentProvider */
                 myunimibContentResolver.bulkInsert(
                         ExamContract.AvailableExamEntry.CONTENT_URI,
+                        examsValues);
+            }
+
+        } catch (Exception e) {
+            /* Server probably invalid */
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Performs the network request for updated available exams info, parses the JSON from that
+     * request, and inserts the new information into the ContentProvider. Will notify the user if
+     * new data has been loaded (provided the user they haven't disabled notifications in the
+     * preferences screen).
+     *
+     * @param context Used to access utility methods and the ContentResolver
+     */
+    synchronized public static void syncEnrolledExams(Context context) {
+
+        try {
+            /* Retrieve the JSON */
+            String jsonResponse = downloadEnrolledExams(context).toString();
+
+            /* Parse the JSON into a list of exams values */
+            ContentValues[] examsValues = S3JsonUtils
+                    .getEnrolledExamsValuesFromJson(jsonResponse);
+
+            if (examsValues != null && examsValues.length != 0) {
+                /* Get a handle on the ContentResolver to delete and insert data */
+                ContentResolver myunimibContentResolver = context.getContentResolver();
+
+                /* Delete old booklet data */
+                myunimibContentResolver.delete(
+                        ExamContract.EnrolledExamEntry.CONTENT_URI,
+                        null,
+                        null);
+
+                /* Insert new booklet data into the ContentProvider */
+                myunimibContentResolver.bulkInsert(
+                        ExamContract.EnrolledExamEntry.CONTENT_URI,
                         examsValues);
             }
 
@@ -206,9 +252,9 @@ public class SyncTask {
                     return new JSONArray();
             }
         } catch (SocketTimeoutException e) {
-            Log.i("BOOKLET_SYNC", "SOCKET_TIMEOUT");
+            Log.i(SyncUtilsBooklet.REMINDER_JOB_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
-            Log.e("BOOKLET_SYNC_ERROR", e.getMessage());
+            Log.e(SyncUtilsBooklet.REMINDER_JOB_TAG, e.getMessage());
             Utils.saveBugReport(e);
         }
 
@@ -278,10 +324,136 @@ public class SyncTask {
                     return new JSONArray();
             }
         } catch (SocketTimeoutException e){
-            Log.i("EXAMS_A_SYNC", "SOCKET_TIMEOUT");
+            Log.i(SyncUtilsAvailable.REMINDER_JOB_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
-            Log.e("EXAMS_A_SYNC_ERROR", e.getMessage());
+            Log.e(SyncUtilsAvailable.REMINDER_JOB_TAG, e.getMessage());
             Utils.saveBugReport(e);
+        }
+
+        return null;
+    }
+
+    private static JSONArray downloadEnrolledExams(Context context) {
+        if (context == null)
+            return null;
+
+        User user = UserUtils.getUser(context);
+
+        try {
+            // Try to get the private page
+            Bundle result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, context);
+
+            String html = result.getString(PARAM_KEY_HTML);
+            int s3_response = result.getInt(PARAM_KEY_RESPONSE);
+
+            // Se l'utente è autenticato
+            if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
+                Document doc = Jsoup.parse(html);
+                Elements rows = doc.select("div#esse3old table.detail_table");
+
+                ArrayList<EnrolledExam> exams = new ArrayList<>();
+                for (Element el : rows) {
+                    Elements exam_rows = el.select("tr");
+                    String exam_name = exam_rows.get(0).text();
+                    String code = exam_name;
+                    String description = exam_name;
+                    exam_name = exam_name.substring(0, exam_name.indexOf(" - ["));
+                    code = code.substring(code.indexOf(" - [") + 4, code.indexOf("] - "));
+                    description = description.substring(description.indexOf("] - ") + 4);
+
+                    Element exam_data = exam_rows.get(5);
+                    String date = exam_data.child(0).text();
+                    String time = exam_data.child(1).text();
+                    String building = exam_data.child(2).text();
+                    String room = exam_data.child(3).text();
+                    String reserved = exam_data.child(4).text();
+                    ArrayList<String> teachers = getTeachers(exam_rows);
+                    String dateTimeTmp = date;
+                    if (!time.isEmpty()) dateTimeTmp += " " + time;
+                    dateTimeTmp = dateTimeTmp.replaceAll("\\s+", " ");
+                    Date dateStart = MyunimibDateUtils.dateTimeFormat.parse(dateTimeTmp);
+
+                    // Save the exams ID
+                    ExamID examID = getExamID(exam_data);
+                    EnrolledExam newExam = new EnrolledExam(examID,
+                            exam_name, dateStart, description, code,
+                            building, room, reserved, teachers, "");
+
+                    exams.add(newExam);
+                }
+
+                JSONArray array = new JSONArray();
+                if (exams.size() > 0)
+                    array = UserUtils.enrolledExamsToJson(exams);
+
+                if (array != null)
+                    return array;
+                else
+                    return new JSONArray();
+            }
+        } catch (SocketTimeoutException e){
+            Log.i(SyncUtilsEnrolled.REMINDER_JOB_TAG, "SOCKET_TIMEOUT");
+        } catch (Exception e) {
+            Log.e(SyncUtilsEnrolled.REMINDER_JOB_TAG, e.getMessage());
+            Utils.saveBugReport(e);
+        }
+
+        return null;
+    }
+
+    private static ArrayList<String> getTeachers(Elements rows) {
+        ArrayList<String> teachers = new ArrayList<>();
+
+        int i, j = -1;
+        for (i=0; i<rows.size(); i++){
+            if (rows.get(i).text().toLowerCase().contains("docenti")) {
+                Elements tmp = rows.get(i).children();
+                for (j=0; j<tmp.size(); j++)
+                    if (tmp.get(j).text().toLowerCase().contains("docenti"))
+                        break;
+            }
+            if (j >= 0)
+                break;
+        }
+
+        teachers.add(rows.get(i+2).child(j).text());
+        if (j >= 0)
+            for(i=j+1; i<rows.size(); i++)
+                teachers.add(rows.get(i).text());
+
+        return teachers;
+    }
+
+    private static ExamID getExamID(Element exam_data) {
+        Element printForm = exam_data
+                .select("td[title='stampa promemoria della prenotazione'] form")
+                .first();
+
+        if (printForm != null) {
+            Element cds_esa_id = printForm
+                    .select("input[name='" + CDS_ESA_ID + "']")
+                    .first();
+
+            Element app_id = printForm
+                    .select("input[name='" + APP_ID + "']")
+                    .first();
+
+            Element att_did_esa_id = printForm
+                    .select("input[name='" + ATT_DID_ESA_ID + "']")
+                    .first();
+
+            Element adsce_id = printForm
+                    .select("input[name='" + ADSCE_ID + "']")
+                    .first();
+
+            if (cds_esa_id != null && app_id != null && att_did_esa_id != null && adsce_id != null)
+                return new ExamID(
+                        app_id.attr("value"),
+                        cds_esa_id.attr("value"),
+                        att_did_esa_id.attr("value"),
+                        adsce_id.attr("value"));
+            else
+                return null;
         }
 
         return null;

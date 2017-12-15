@@ -12,10 +12,10 @@ import android.widget.TextView;
 import com.communikein.myunimib.utilities.MyunimibDateUtils;
 
 /**
- * Created by eliam on 12/7/2017.
+ * Created by eliam on 12/15/2017.
  */
 
-public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdapter.ExamAdapterViewHolder> {
+public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapter.ExamAdapterViewHolder> {
 
     /* The context we use to utility methods, app resources and layout inflaters */
     private final Context mContext;
@@ -27,14 +27,14 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdap
      *
      * @param context Used to talk to the UI and app resources
      */
-    public AvailableExamAdapter(@NonNull Context context) {
+    public EnrolledExamAdapter(@NonNull Context context) {
         mContext = context;
     }
 
     @Override
     public ExamAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.available_exam_list_item, parent, false);
+                .inflate(R.layout.enrolled_exam_list_item, parent, false);
 
         view.setFocusable(true);
 

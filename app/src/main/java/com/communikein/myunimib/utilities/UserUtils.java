@@ -7,6 +7,7 @@ import android.util.Base64;
 import com.communikein.myunimib.User;
 import com.communikein.myunimib.data.type.AvailableExam;
 import com.communikein.myunimib.data.type.BookletEntry;
+import com.communikein.myunimib.data.type.EnrolledExam;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -157,6 +158,15 @@ public class UserUtils {
         JSONArray array = new JSONArray();
 
         for (AvailableExam entry : exams)
+            array.put(entry.toJSON());
+
+        return array;
+    }
+
+    public static JSONArray enrolledExamsToJson(ArrayList<EnrolledExam> exams) {
+        JSONArray array = new JSONArray();
+
+        for (EnrolledExam entry : exams)
             array.put(entry.toJSON());
 
         return array;

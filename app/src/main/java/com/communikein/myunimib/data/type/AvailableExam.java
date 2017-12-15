@@ -23,7 +23,7 @@ public class AvailableExam extends Exam {
 
     public AvailableExam(ExamEnrollmentInfo enrollmentInfo, String name, Date date,
                          String description, Date begin_enrollment, Date end_enrollment) {
-        super(enrollmentInfo.getId(), name, date, description, "", "");
+        super(enrollmentInfo.getId(), name, date, description);
 
         this.setBegin_enrollment(begin_enrollment);
         this.setEnd_enrollment(end_enrollment);

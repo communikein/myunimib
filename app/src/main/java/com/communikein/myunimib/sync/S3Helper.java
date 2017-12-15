@@ -3,17 +3,11 @@ package com.communikein.myunimib.sync;
 import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.communikein.myunimib.R;
-import com.communikein.myunimib.utilities.GraphicUtils;
 import com.communikein.myunimib.utilities.UserUtils;
 import com.communikein.myunimib.utilities.Utils;
 import com.communikein.myunimib.User;
@@ -24,8 +18,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,9 +44,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-/**
- * Created by eliam on 12/2/2017.
- */
 
 public class S3Helper {
 
@@ -64,11 +53,11 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/Home.do;";
     private static final String URL_LOGIN =
             "https://s3w.si.unimib.it/esse3/auth/Logon.do;";
-    public static final String URL_LOGOUT =
+    static final String URL_LOGOUT =
             "https://s3w.si.unimib.it/esse3/Logout.do;";
     static final String URL_AVAILABLE_EXAMS =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/Appelli.do;";
-    public static final String URL_ENROLLED_EXAMS =
+    static final String URL_ENROLLED_EXAMS =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/BachecaPrenotazioni.do;";
     public static final String URL_PROFILE_PICTURE =
             "https://s3w.si.unimib.it/esse3/auth/AddressBook/DownloadFoto.do;";
@@ -77,28 +66,21 @@ public class S3Helper {
     public static final String URL_CORTESIA =
             "http://www.si.unimib.it/cortesias3.html";
 
-    public static final String CONN_TIMEOUT_ERROR_KEY = "connection_timeout_error";
-    public static final String S3_NOT_AVAILABLE_ERROR_KEY = "s3_not_available_error";
-
     public static final int ERROR_GENERIC = -1;
     public static final int ERROR_S3_NOT_AVAILABLE = -2;
     public static final int ERROR_WRONG_PASSWORD = -3;
     public static final int ERROR_CONNECTION_TIMEOUT = -4;
-    public static final int ERROR_FACULTY_TO_CHOOSE = -6;
-    public static final int ERROR_DOWNLOAD_FACULTY_LIST = -7;
-    public static final int ERROR_CAREER_OVER = -8;
+    public static final int ERROR_FACULTY_TO_CHOOSE = -5;
+    public static final int ERROR_CAREER_OVER = -6;
 
     public static final int OK_LOGGED_IN = 1;
     public static final int OK_LOGGED_OUT = 2;
 
-    public static final String S3_RESPONSE = "S3_RESPONSE";
-    public static final String COURSES_NAMES = "COURSES_NAMES";
-    public static final String COURSES_URLS = "COURSES_URLS";
 
     private S3Helper() {}
 
 
-    public static URL buildUrl(User user, String url) {
+    private static URL buildUrl(User user, String url) {
         String url_string = url +
                 "JSESSIONID=" + user.getSessionID();
         if (user.isFacultyChosen())
@@ -113,7 +95,7 @@ public class S3Helper {
         return result;
     }
 
-    public static SSLSocketFactory getSocketFactory(Context context) {
+    static SSLSocketFactory getSocketFactory(Context context) {
 
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -172,7 +154,7 @@ public class S3Helper {
         return con;
     }
 
-    public static HttpsURLConnection getPage(User user, String url, HashMap<String, String> headers,
+    static HttpsURLConnection getPage(User user, String url, HashMap<String, String> headers,
                                              Context context) throws IOException,
             CertificateException, KeyStoreException, NoSuchAlgorithmException,
             KeyManagementException, NoSuchProviderException {
@@ -205,7 +187,7 @@ public class S3Helper {
         return con;
     }
 
-    public static String getHTML(InputStream instream) throws IOException {
+    static String getHTML(InputStream instream) throws IOException {
         BufferedReader rd;
         String ris;
         rd = new BufferedReader(new InputStreamReader(instream));
@@ -364,7 +346,7 @@ public class S3Helper {
 
 
 
-    public static void downloadUserData(User user, Context context) throws IOException, CertificateException,
+    private static void downloadUserData(User user, Context context) throws IOException, CertificateException,
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
             NoSuchProviderException{
         HashMap<String, String> headers = new HashMap<>();
@@ -421,7 +403,7 @@ public class S3Helper {
         }
     }
 
-    public static SparseArray<String> hasMultiFaculty(User user, String html, Context context,
+    private static SparseArray<String> hasMultiFaculty(User user, String html, Context context,
                                                           boolean downloadList) throws IOException,
             CertificateException, NoSuchAlgorithmException, KeyStoreException,
             KeyManagementException, NoSuchProviderException {
@@ -447,7 +429,7 @@ public class S3Helper {
         return null;
     }
 
-    public static SparseArray<String> downloadFacultiesList(User user, Context context) throws IOException,
+    private static SparseArray<String> downloadFacultiesList(User user, Context context) throws IOException,
             CertificateException, NoSuchAlgorithmException, KeyStoreException,
             KeyManagementException, NoSuchProviderException {
         SparseArray<String> courses = new SparseArray<>();

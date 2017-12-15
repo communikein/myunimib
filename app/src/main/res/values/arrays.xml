@@ -2,6 +2,7 @@
 <resources>
     <!-- Label ordering must match values -->
     <array name="pref_sync_frequency_titles">
+        <item>@string/pref_sync_frequency_label_5</item>
         <item>@string/pref_sync_frequency_label_15</item>
         <item>@string/pref_sync_frequency_label_30</item>
         <item>@string/pref_sync_frequency_label_60</item>
@@ -10,6 +11,7 @@
         <item>@string/pref_sync_frequency_label_0</item>
     </array>
     <array name="pref_sync_frequency_values">
+        <item>@string/pref_sync_frequency_5</item>
         <item>@string/pref_sync_frequency_15</item>
         <item>@string/pref_sync_frequency_30</item>
         <item>@string/pref_sync_frequency_60</item>

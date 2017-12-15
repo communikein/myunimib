@@ -32,11 +32,13 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final int INDEX_FRAGMENT_HOME = 0;
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
-    private static final int INDEX_FRAGMENT_EXAMS = 2;
+    private static final int INDEX_FRAGMENT_EXAMS_AVAILABLE = 2;
+    private static final int INDEX_FRAGMENT_EXAMS_ENROLLED = 3;
 
     private static final String TAG_FRAGMENT_HOME = "tab-home";
     private static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
-    private static final String TAG_FRAGMENT_EXAMS = "tab-exams";
+    private static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
+    private static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
 
     private static final int LOADER_LOGOUT_ID = 2200;
 
@@ -71,7 +73,8 @@ public class MainActivity extends AppCompatActivity implements
     private void buildFragmentsList() {
         fragments.add(new HomeFragment());
         fragments.add(new BookletFragment());
-        fragments.add(new ExamsFragment());
+        fragments.add(new ExamsAvailableFragment());
+        fragments.add(new ExamsEnrolledFragment());
     }
 
     private boolean switchFragment(int tab_id) {
@@ -87,9 +90,13 @@ public class MainActivity extends AppCompatActivity implements
                 index = INDEX_FRAGMENT_BOOKLET;
                 tag = TAG_FRAGMENT_BOOKLET;
                 break;
-            case R.id.navigation_exams:
-                index = INDEX_FRAGMENT_EXAMS;
-                tag = TAG_FRAGMENT_EXAMS;
+            case R.id.navigation_exams_available:
+                index = INDEX_FRAGMENT_EXAMS_AVAILABLE;
+                tag = TAG_FRAGMENT_EXAMS_AVAILABLE;
+                break;
+            case R.id.navigation_exams_enrolled:
+                index = INDEX_FRAGMENT_EXAMS_ENROLLED;
+                tag = TAG_FRAGMENT_EXAMS_ENROLLED;
                 break;
             default:
                 return false;

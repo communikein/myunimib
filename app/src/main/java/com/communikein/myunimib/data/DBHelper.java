@@ -5,14 +5,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.communikein.myunimib.data.ExamContract.AvailableExamEntry;
+import com.communikein.myunimib.data.ExamContract.EnrolledExamEntry;
 import com.communikein.myunimib.data.ExamContract.BookletEntry;
+
 /**
  * Created by eliam on 12/5/2017.
  */
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
     private static final String DATABASE_NAME = "S3data.db";
 
 
@@ -43,32 +45,50 @@ public class DBHelper extends SQLiteOpenHelper {
                 AvailableExamEntry._ID                      + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 AvailableExamEntry.COLUMN_COURSE_NAME       + " TEXT NOT NULL," +
                 AvailableExamEntry.COLUMN_DESCRIPTION       + " TEXT, " +
-                AvailableExamEntry.COLUMN_BUILDING          + " TEXT, " +
-                AvailableExamEntry.COLUMN_ROOM              + " TEXT, " +
                 AvailableExamEntry.COLUMN_DATE              + " INTEGER, " +
                 AvailableExamEntry.COLUMN_BEGIN_ENROLLMENT  + " INTEGER, " +
                 AvailableExamEntry.COLUMN_END_ENROLLMENT    + " INTEGER, " +
 
                 AvailableExamEntry.COLUMN_ADSCE_ID          + " INTEGER, " +
-                AvailableExamEntry.COLUMN_DB_ID             + " INTEGER, " +
                 AvailableExamEntry.COLUMN_CDS_ESA_ID        + " INTEGER, " +
                 AvailableExamEntry.COLUMN_ATT_DID_ESA_ID    + " INTEGER, " +
                 AvailableExamEntry.COLUMN_APP_ID            + " INTEGER, " +
 
-                "UNIQUE (" + BookletEntry.COLUMN_ADSCE_ID   + ") ON CONFLICT FAIL);";
+                "UNIQUE (" + AvailableExamEntry.COLUMN_ADSCE_ID   + ") ON CONFLICT FAIL);";
 
+        final String SQL_CREATE_ENROLLED_EXAMS_TABLE = "CREATE TABLE " +
+                EnrolledExamEntry.TABLE_NAME                + " (" +
+                EnrolledExamEntry._ID                       + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                EnrolledExamEntry.COLUMN_COURSE_NAME        + " TEXT NOT NULL," +
+                EnrolledExamEntry.COLUMN_DESCRIPTION        + " TEXT, " +
+                EnrolledExamEntry.COLUMN_DATE               + " INTEGER, " +
+                EnrolledExamEntry.COLUMN_CODE               + " STRING, " +
+                EnrolledExamEntry.COLUMN_BUILDING           + " STRING, " +
+                EnrolledExamEntry.COLUMN_ROOM               + " STRING, " +
+                EnrolledExamEntry.COLUMN_RESERVED           + " STRING, " +
+                EnrolledExamEntry.COLUMN_TEACHERS           + " STRING, " +
+                EnrolledExamEntry.COLUMN_CERTIFICATE_FILE_NAME + " STRING, " +
+
+                EnrolledExamEntry.COLUMN_ADSCE_ID           + " INTEGER, " +
+                EnrolledExamEntry.COLUMN_CDS_ESA_ID         + " INTEGER, " +
+                EnrolledExamEntry.COLUMN_ATT_DID_ESA_ID     + " INTEGER, " +
+                EnrolledExamEntry.COLUMN_APP_ID             + " INTEGER, " +
+
+                "UNIQUE (" + EnrolledExamEntry.COLUMN_ADSCE_ID   + ") ON CONFLICT FAIL);";
         /*
          * After we've spelled out our SQLite table creation statement above, we actually execute
          * that SQL with the execSQL method of our SQLite database object.
          */
         db.execSQL(SQL_CREATE_BOOKLET_TABLE);
         db.execSQL(SQL_CREATE_AVAILABLE_EXAMS_TABLE);
+        db.execSQL(SQL_CREATE_ENROLLED_EXAMS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + BookletEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + AvailableExamEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + EnrolledExamEntry.TABLE_NAME);
         onCreate(db);
     }
 

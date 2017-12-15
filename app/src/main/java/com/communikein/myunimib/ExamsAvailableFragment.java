@@ -12,20 +12,19 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.communikein.myunimib.data.ExamContract;
 import com.communikein.myunimib.databinding.FragmentExamsBinding;
-import com.communikein.myunimib.sync.availableExams.SyncUtils;
+import com.communikein.myunimib.sync.availableexams.SyncUtilsAvailable;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ExamsFragment extends Fragment implements
+public class ExamsAvailableFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     /*
@@ -47,14 +46,14 @@ public class ExamsFragment extends Fragment implements
     public static final int INDEX_EXAM_DATE = 1;
     public static final int INDEX_EXAM_DESCRIPTION = 2;
 
-    static final int ID_EXAMS_LOADER = 45;
+    static final int ID_EXAMS_AVAILABLE_LOADER = 45;
 
     private AvailableExamAdapter mExamsAdapter;
     private int mPosition = RecyclerView.NO_POSITION;
 
     FragmentExamsBinding mBinding;
 
-    public ExamsFragment() {
+    public ExamsAvailableFragment() {
         // Required empty public constructor
     }
 
@@ -122,9 +121,9 @@ public class ExamsFragment extends Fragment implements
          * created and (if the activity/fragment is currently started) starts the loader. Otherwise
          * the last created loader is re-used.
          */
-        getActivity().getSupportLoaderManager().initLoader(ID_EXAMS_LOADER, null, this);
+        getActivity().getSupportLoaderManager().initLoader(ID_EXAMS_AVAILABLE_LOADER, null, this);
 
-        SyncUtils.initialize(getActivity());
+        SyncUtilsAvailable.initialize(getActivity());
     }
 
 
@@ -133,7 +132,7 @@ public class ExamsFragment extends Fragment implements
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
         switch (id) {
-            case ID_EXAMS_LOADER:
+            case ID_EXAMS_AVAILABLE_LOADER:
                 /* URI for all rows of weather data in our weather table */
                 Uri examsQueryUri = ExamContract.AvailableExamEntry.CONTENT_URI;
 

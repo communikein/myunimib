@@ -1,4 +1,4 @@
-package com.communikein.myunimib.sync.booklet;
+package com.communikein.myunimib.sync.availableexams;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -14,12 +14,12 @@ import com.firebase.jobdispatcher.RetryStrategy;
 import java.util.Date;
 
 /**
- * Created by eliam on 12/6/2017.
+ * Created by eliam on 12/7/2017.
  */
 
-public class BookletJobService extends JobService {
+public class ExamAvailableSyncJobService extends JobService {
 
-    private AsyncTask<Void, Void, Void> mFetchBookletTask;
+    private AsyncTask<Void, Void, Void> mFetchDataTask;
 
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
@@ -34,7 +34,7 @@ public class BookletJobService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
 
-        mFetchBookletTask = new AsyncTask<Void, Void, Void>(){
+        mFetchDataTask = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... voids) {
                 Context context = getApplicationContext();
@@ -42,12 +42,12 @@ public class BookletJobService extends JobService {
                         (new Date()).getTime(),
                         DateUtils.FORMAT_SHOW_TIME);
 
-                Log.d(SyncUtilsBooklet.REMINDER_JOB_TAG, now + ": Sync started.");
-                SyncTask.syncBooklet(context);
+                Log.d(SyncUtilsAvailable.REMINDER_JOB_TAG, now + ": Sync started.");
+                SyncTask.syncAvailableExams(context);
                 now = DateUtils.formatDateTime(context,
                         (new Date()).getTime(),
                         DateUtils.FORMAT_SHOW_TIME);
-                Log.d(SyncUtilsBooklet.REMINDER_JOB_TAG, now + ": Sync ended.");
+                Log.d(SyncUtilsAvailable.REMINDER_JOB_TAG, now + ": Sync ended.");
 
                 jobFinished(jobParameters, false);
                 return null;
@@ -59,7 +59,7 @@ public class BookletJobService extends JobService {
             }
         };
 
-        mFetchBookletTask.execute();
+        mFetchDataTask.execute();
         return true;
     }
 
@@ -73,8 +73,8 @@ public class BookletJobService extends JobService {
      */
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
-        if (mFetchBookletTask != null) {
-            mFetchBookletTask.cancel(true);
+        if (mFetchDataTask != null) {
+            mFetchDataTask.cancel(true);
         }
         return true;
     }

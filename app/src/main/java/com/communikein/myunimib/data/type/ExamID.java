@@ -11,15 +11,11 @@ public class ExamID {
 
     final public static String EXAM_ID = "EXAM_ID";
 
-    /* The first four fields are enough to download the enrollment certificate */
     final public static String ARG_CDS_ESA_ID = "ARG_CDS_ESA_ID";
     final public static String ARG_ATT_DID_ESA_ID = "ARG_ATT_DID_ESA_ID";
     final public static String ARG_APP_ID = "ARG_APP_ID";
     final public static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
-    /***************************************************************************/
-    final public static String ARG_DB_ID = "ARG_DB_ID";
 
-    private int db_id = -1;
     private int cds_esa_id;
     private int att_did_esa_id;
     private int app_id;
@@ -29,8 +25,6 @@ public class ExamID {
     public ExamID(JSONObject obj) throws JSONException, NullPointerException {
         if (obj == null) throw new NullPointerException();
 
-        if (obj.has(ARG_DB_ID))
-            setDB_ID(obj.getInt(ARG_DB_ID));
         if (obj.has(ARG_ATT_DID_ESA_ID))
             setATT_DID_ESA_ID(obj.getInt(ARG_ATT_DID_ESA_ID));
         if (obj.has(ARG_CDS_ESA_ID))
@@ -48,24 +42,22 @@ public class ExamID {
         this.cds_esa_id = cds_esa_id;
     }
 
+    public ExamID(String app_id, String cds_esa_id, String att_did_esa_id, String adsce_id) {
+        this.adsce_id = Integer.parseInt(adsce_id);
+        this.app_id = Integer.parseInt(app_id);
+        this.att_did_esa_id = Integer.parseInt(att_did_esa_id);
+        this.cds_esa_id = Integer.parseInt(cds_esa_id);
+    }
+
     public ExamID(ExamID from) throws NullPointerException {
         if (from == null) throw new NullPointerException();
 
-        this.db_id = from.getDB_ID();
         this.adsce_id = from.getADSCE_ID();
         this.app_id = from.getAPP_ID();
         this.att_did_esa_id = from.getATT_DID_ESA_ID();
         this.cds_esa_id = from.getCDS_ESA_ID();
     }
 
-
-    public int getDB_ID() {
-        return db_id;
-    }
-
-    public void setDB_ID(int DB_ID) {
-        this.db_id = DB_ID;
-    }
 
     public int getADSCE_ID() {
         return adsce_id;
@@ -104,7 +96,6 @@ public class ExamID {
         JSONObject obj = new JSONObject();
 
         try {
-            obj.put(ARG_DB_ID, getDB_ID());
             obj.put(ARG_CDS_ESA_ID, getCDS_ESA_ID());
             obj.put(ARG_APP_ID, getAPP_ID());
             obj.put(ARG_ADSCE_ID, getADSCE_ID());

@@ -1,4 +1,4 @@
-package com.communikein.myunimib.sync.booklet;
+package com.communikein.myunimib.sync.availableexams;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -12,13 +12,13 @@ import com.communikein.myunimib.sync.SyncTask;
 import java.util.Date;
 
 /**
- * Created by eliam on 12/6/2017.
+ * Created by eliam on 12/7/2017.
  */
 
-public class BookletSyncIntentService extends IntentService {
+public class ExamAvailableSyncIntentService extends IntentService {
 
-    public BookletSyncIntentService() {
-        super("BookletSyncIntentService");
+    public ExamAvailableSyncIntentService() {
+        super("ExamAvailableSyncIntentService");
     }
 
     @Override
@@ -28,11 +28,11 @@ public class BookletSyncIntentService extends IntentService {
                 (new Date()).getTime(),
                 DateUtils.FORMAT_SHOW_TIME);
 
-        Log.d(SyncUtilsBooklet.REMINDER_JOB_TAG, now + ": Sync started.");
-        SyncTask.syncBooklet(context);
+        Log.d(SyncUtilsAvailable.REMINDER_JOB_TAG, now + ": Sync started.");
+        SyncTask.syncAvailableExams(context);
         now = DateUtils.formatDateTime(context,
                 (new Date()).getTime(),
                 DateUtils.FORMAT_SHOW_TIME);
-        Log.d(SyncUtilsBooklet.REMINDER_JOB_TAG, now + ": Sync ended.");
+        Log.d(SyncUtilsAvailable.REMINDER_JOB_TAG, now + ": Sync ended.");
     }
 }

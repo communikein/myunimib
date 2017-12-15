@@ -1,4 +1,4 @@
-package com.communikein.myunimib.sync.availableExams;
+package com.communikein.myunimib.sync.availableexams;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Created by eliam on 12/7/2017.
  */
 
-public class SyncUtils {
+public class SyncUtilsAvailable {
 
     private static final int SYNC_INTERVAL_MAX_MINUTES = 10;
     private static int SYNC_INTERVAL_MIN_SECONDS;
@@ -29,7 +29,7 @@ public class SyncUtils {
             (int) TimeUnit.MINUTES.toSeconds(SYNC_INTERVAL_MAX_MINUTES);
     private static int SYNC_WINDOW_SECONDS;
 
-    private static final String REMINDER_JOB_TAG = "sync-available-exams-tag";
+    public static final String REMINDER_JOB_TAG = "sync-available-exams";
 
     private static boolean sInitialized;
 
@@ -39,7 +39,7 @@ public class SyncUtils {
         Driver driver = new GooglePlayDriver(context);
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(driver);
         Job constraintReminderJob = dispatcher.newJobBuilder()
-                .setService(ExamsSyncJobService.class)
+                .setService(ExamAvailableSyncJobService.class)
                 .setTag(REMINDER_JOB_TAG)
                 .setLifetime(Lifetime.FOREVER)
                 .setReplaceCurrent(true)
@@ -102,7 +102,7 @@ public class SyncUtils {
                  * row. In our queries where we display data, we need to PROJECT more columns
                  * to determine what weather details need to be displayed.
                  */
-                String[] projectionColumns = {ExamContract.BookletEntry._ID};
+                String[] projectionColumns = {ExamContract.ExamEntry._ID};
 
                 /* Here, we perform the query to check to see if we have any weather data */
                 Cursor cursor = context.getContentResolver().query(
@@ -135,7 +135,7 @@ public class SyncUtils {
      * @param context The Context used to start the IntentService for the sync.
      */
     private static void startImmediateSync(@NonNull final Context context) {
-        Intent intentToSyncImmediately = new Intent(context, ExamsSyncIntentService.class);
+        Intent intentToSyncImmediately = new Intent(context, ExamAvailableSyncIntentService.class);
         context.startService(intentToSyncImmediately);
     }
 

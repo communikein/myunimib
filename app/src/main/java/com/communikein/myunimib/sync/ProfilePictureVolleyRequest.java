@@ -3,14 +3,12 @@ package com.communikein.myunimib.sync;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Network;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -23,14 +21,9 @@ import com.android.volley.toolbox.ImageRequest;
 import com.communikein.myunimib.User;
 import com.communikein.myunimib.utilities.UserUtils;
 
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * Created by eliam on 12/14/2017.
- */
 
 public class ProfilePictureVolleyRequest {
 
@@ -85,7 +78,7 @@ public class ProfilePictureVolleyRequest {
          * @param queue      The RequestQueue to use for making image requests.
          * @param imageCache The cache to use as an L1 cache.
          */
-        public ProfilePictureLoader(User user, RequestQueue queue, ImageCache imageCache) {
+        ProfilePictureLoader(User user, RequestQueue queue, ImageCache imageCache) {
             super(queue, imageCache);
 
             this.mUser = user;
@@ -122,7 +115,7 @@ public class ProfilePictureVolleyRequest {
 
         private User mUser;
 
-        public ProfilePictureRequest(User user, Response.Listener<Bitmap> listener, int maxWidth,
+        ProfilePictureRequest(User user, Response.Listener<Bitmap> listener, int maxWidth,
                                 int maxHeight, ImageView.ScaleType scaleType,
                                 Bitmap.Config decodeConfig, Response.ErrorListener errorListener) {
             super(S3Helper.URL_PROFILE_PICTURE, listener, maxWidth, maxHeight, scaleType,

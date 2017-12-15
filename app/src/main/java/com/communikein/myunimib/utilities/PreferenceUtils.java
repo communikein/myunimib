@@ -18,7 +18,7 @@ public class PreferenceUtils {
         String syncKey = context.getResources()
                 .getString(R.string.pref_sync_frequency_key);
         String syncFrequencyDefault = context.getResources()
-                .getString(R.string.pref_sync_frequency_30);
+                .getString(R.string.pref_sync_frequency_5);
 
         return Integer.parseInt(sharedPreferences.getString(syncKey, syncFrequencyDefault));
     }

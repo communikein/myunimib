@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import com.communikein.myunimib.data.ExamContract;
 import com.communikein.myunimib.data.type.AvailableExam;
 import com.communikein.myunimib.data.type.BookletEntry;
+import com.communikein.myunimib.data.type.EnrolledExam;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,12 +95,6 @@ public class S3JsonUtils {
                         ExamContract.AvailableExamEntry.COLUMN_DESCRIPTION,
                         entry.getDescription());
                 value.put(
-                        ExamContract.AvailableExamEntry.COLUMN_BUILDING,
-                        entry.getBuilding());
-                value.put(
-                        ExamContract.AvailableExamEntry.COLUMN_ROOM,
-                        entry.getRoom());
-                value.put(
                         ExamContract.AvailableExamEntry.COLUMN_BEGIN_ENROLLMENT,
                         entry.getBegin_enrollment().getTime());
                 value.put(
@@ -110,8 +105,66 @@ public class S3JsonUtils {
                         ExamContract.AvailableExamEntry.COLUMN_ADSCE_ID,
                         entry.getId().getADSCE_ID());
                 value.put(
-                        ExamContract.AvailableExamEntry.COLUMN_DB_ID,
-                        entry.getId().getDB_ID());
+                        ExamContract.AvailableExamEntry.COLUMN_CDS_ESA_ID,
+                        entry.getId().getCDS_ESA_ID());
+                value.put(
+                        ExamContract.AvailableExamEntry.COLUMN_ATT_DID_ESA_ID,
+                        entry.getId().getATT_DID_ESA_ID());
+                value.put(
+                        ExamContract.AvailableExamEntry.COLUMN_APP_ID,
+                        entry.getId().getAPP_ID());
+
+                contentValues[i] = value;
+            }
+        } catch (ParseException e) {
+            contentValues = new ContentValues[0];
+        }
+
+        return contentValues;
+    }
+
+    public static ContentValues[] getEnrolledExamsValuesFromJson(String jsonString)
+            throws JSONException{
+
+        JSONArray array = new JSONArray(jsonString);
+        ContentValues[] contentValues = new ContentValues[array.length()];
+
+        try {
+            for (int i = 0; i < array.length(); i++) {
+                EnrolledExam entry = new EnrolledExam(array.getJSONObject(i));
+
+                ContentValues value = new ContentValues();
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_COURSE_NAME,
+                        entry.getName());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_DATE,
+                        entry.getDate().getTime());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_CODE,
+                        entry.getCode());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_DESCRIPTION,
+                        entry.getDescription());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_BUILDING,
+                        entry.getBuilding());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_ROOM,
+                        entry.getRoom());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_RESERVED,
+                        entry.getReserved());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_TEACHERS,
+                        entry.getTeachersJson().toString());
+                value.put(
+                        ExamContract.EnrolledExamEntry.COLUMN_CERTIFICATE_FILE_NAME,
+                        entry.getCertificatePath());
+
+                value.put(
+                        ExamContract.AvailableExamEntry.COLUMN_ADSCE_ID,
+                        entry.getId().getADSCE_ID());
                 value.put(
                         ExamContract.AvailableExamEntry.COLUMN_CDS_ESA_ID,
                         entry.getId().getCDS_ESA_ID());

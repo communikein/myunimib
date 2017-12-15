@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Created by eliam on 12/5/2017.
  */
 
-public class SyncUtils {
+public class SyncUtilsBooklet {
 
     private static final int SYNC_INTERVAL_MAX_MINUTES = 10;
     private static int SYNC_INTERVAL_MIN_SECONDS;
@@ -29,7 +29,7 @@ public class SyncUtils {
             (int) TimeUnit.MINUTES.toSeconds(SYNC_INTERVAL_MAX_MINUTES);
     private static int SYNC_WINDOW_SECONDS;
 
-    private static final String REMINDER_JOB_TAG = "sync-booklet-tag";
+    public static final String REMINDER_JOB_TAG = "sync-booklet";
 
     private static boolean sInitialized;
 

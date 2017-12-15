@@ -28,8 +28,11 @@ public class ExamContract {
         public static final String COLUMN_COURSE_NAME = "course_name";
         public static final String COLUMN_DATE = "date_exam";
         public static final String COLUMN_DESCRIPTION = "description";
-        public static final String COLUMN_BUILDING = "building";
-        public static final String COLUMN_ROOM = "room";
+
+        public static final String COLUMN_ADSCE_ID = "ADSCE_ID".toLowerCase();
+        public static final String COLUMN_CDS_ESA_ID = "CDS_ESA_ID".toLowerCase();
+        public static final String COLUMN_ATT_DID_ESA_ID = "ATT_DID_ESA_ID".toLowerCase();
+        public static final String COLUMN_APP_ID = "APP_ID".toLowerCase();
     }
 
     public static final class AvailableExamEntry extends ExamEntry {
@@ -42,12 +45,6 @@ public class ExamContract {
 
         public static final String COLUMN_BEGIN_ENROLLMENT = "begin_enrollment";
         public static final String COLUMN_END_ENROLLMENT = "end_enrollment";
-
-        public static final String COLUMN_ADSCE_ID = "ADSCE_ID".toLowerCase();
-        public static final String COLUMN_DB_ID = "DB_ID".toLowerCase();
-        public static final String COLUMN_CDS_ESA_ID = "CDS_ESA_ID".toLowerCase();
-        public static final String COLUMN_ATT_DID_ESA_ID = "ATT_DID_ESA_ID".toLowerCase();
-        public static final String COLUMN_APP_ID = "APP_ID".toLowerCase();
     }
 
     public static final class EnrolledExamEntry extends ExamEntry {
@@ -57,6 +54,13 @@ public class ExamContract {
                 .build();
 
         public static final String TABLE_NAME = "exam_enrolled";
+
+        public static final String COLUMN_CODE = "code";
+        public static final String COLUMN_BUILDING = "building";
+        public static final String COLUMN_ROOM = "room";
+        public static final String COLUMN_RESERVED = "reserved";
+        public static final String COLUMN_TEACHERS = "teachers";
+        public static final String COLUMN_CERTIFICATE_FILE_NAME = "certificate_file_name";
     }
 
     public static final class BookletEntry implements BaseColumns {

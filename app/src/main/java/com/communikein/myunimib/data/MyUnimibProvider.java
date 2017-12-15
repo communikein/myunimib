@@ -10,8 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import com.communikein.myunimib.utilities.MyunimibDateUtils;
-
 /**
  * Created by eliam on 12/6/2017.
  */
@@ -29,6 +27,9 @@ public class MyUnimibProvider extends ContentProvider {
 
     public static final int CODE_AVAILABLE_EXAMS_ALL = 200;
     public static final int CODE_AVAILABLE_EXAMS_WITH_ID = 201;
+
+    public static final int CODE_ENROLLED_EXAMS_ALL = 300;
+    public static final int CODE_ENROLLED_EXAMS_WITH_ID = 301;
 
     /*
      * The URI Matcher used by this content provider. The leading "s" in this variable name
@@ -72,6 +73,11 @@ public class MyUnimibProvider extends ContentProvider {
                 ExamContract.PATH_EXAMS_AVAILABLE, CODE_AVAILABLE_EXAMS_ALL);
         matcher.addURI(authority,
                 ExamContract.PATH_EXAMS_AVAILABLE + "/#", CODE_AVAILABLE_EXAMS_WITH_ID);
+
+        matcher.addURI(authority,
+                ExamContract.PATH_EXAMS_ENROLLED, CODE_ENROLLED_EXAMS_ALL);
+        matcher.addURI(authority,
+                ExamContract.PATH_EXAMS_ENROLLED + "/#", CODE_ENROLLED_EXAMS_WITH_ID);
 
         return matcher;
     }
@@ -126,6 +132,9 @@ public class MyUnimibProvider extends ContentProvider {
             case CODE_AVAILABLE_EXAMS_ALL:
                 TABLE_NAME = ExamContract.AvailableExamEntry.TABLE_NAME;
                 break;
+
+            case CODE_ENROLLED_EXAMS_ALL:
+                TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
 
             default:
                 return super.bulkInsert(uri, values);
@@ -257,6 +266,36 @@ public class MyUnimibProvider extends ContentProvider {
                 break;
             }
 
+            case CODE_ENROLLED_EXAMS_WITH_ID: {
+                String id = uri.getLastPathSegment();
+
+                String[] selectionArguments = new String[]{id};
+
+                cursor = mOpenHelper.getReadableDatabase().query(
+                        ExamContract.EnrolledExamEntry.TABLE_NAME,
+                        projection,
+                        ExamContract.EnrolledExamEntry.COLUMN_ADSCE_ID+ " = ? ",
+                        selectionArguments,
+                        null,
+                        null,
+                        sortOrder);
+
+                break;
+            }
+
+            case CODE_ENROLLED_EXAMS_ALL: {
+                cursor = mOpenHelper.getReadableDatabase().query(
+                        ExamContract.EnrolledExamEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+
+                break;
+            }
+
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -298,6 +337,10 @@ public class MyUnimibProvider extends ContentProvider {
                 TABLE_NAME = ExamContract.AvailableExamEntry.TABLE_NAME;
                 break;
 
+            case CODE_ENROLLED_EXAMS_ALL:
+                TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
+                break;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -333,6 +376,10 @@ public class MyUnimibProvider extends ContentProvider {
 
             case CODE_AVAILABLE_EXAMS_ALL:
                 TABLE_NAME = ExamContract.AvailableExamEntry.TABLE_NAME;
+                break;
+
+            case CODE_ENROLLED_EXAMS_ALL:
+                TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
                 break;
 
             default:
