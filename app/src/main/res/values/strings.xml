@@ -1,0 +1,90 @@
+<resources>
+    <!-- START General APP info -->
+    <string name="app_name">MyUNIMIB</string>
+
+    <string name="content_authority">com.communikein.myunimib</string>
+    <!-- END General APP info -->
+
+    <!-- START Navigation Drawer stuff -->
+    <string name="nav_entry_home">Login test</string>
+    <string name="nav_entry_timetable">Timetable</string>
+    <string name="nav_entry_settings">Settings</string>
+    <string name="nav_entry_logout">Logout</string>
+    <!-- END Navigation Drawer stuff -->
+
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_university_email">Enter university e-mail address</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_volley">Sign in - Volley</string>
+    <string name="terms_and_conditions">I accept this service\'s Terms and Conditions.</string>
+
+
+    <string name="error_user_invalid">Username not valid</string>
+    <string name="error_user_empty">Username required</string>
+    <string name="error_user_with_blank_spaces">The username can\'t contain blank spaces</string>
+    <string name="error_user_complete_email">The username is the part before the @ of the university mail</string>
+
+    <string name="error_password_incorrect">Password not valid</string>
+    <string name="error_password_empty">Password required</string>
+    <string name="error_password_less_then_10_chars">The password must be at least 10 prints</string>
+    <string name="error_password_more_then_20_chars">The password must be no more than 20 prints</string>
+    <string name="error_password_less_then_2_digits">The password must contain at least two digits [0–9]</string>
+
+    <string name="title_logging_in">Logging in</string>
+
+    <string name="send">Send</string>
+    <string name="error_mail_needed">Mail address needed.</string>
+    <string name="choose_faculty">Scegli facoltà</string>
+
+    <string name="faculty_to_choose">Almost there, choose the faculty now</string>
+    <string name="error_S3_not_available">S3 not available.</string>
+    <string name="error_connection_timeout">Connection timeout</string>
+    <string name="login_succeded">Login OK :D</string>
+    <string name="error_generic_exception">Error generic.</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Booklet</string>
+    <string name="title_notifications">Exams</string>
+
+    <string name="account_name">UNIMIB</string>
+    <string name="permissions_granted">Thanks for the trust ;)</string>
+    <string name="retry">Retry</string>
+    <string name="error_permission_accounts_necessary">I need this permission to create an account :(</string>
+    <string name="error_no_internet">No internet available :(</string>
+    <string name="terms_not_checked">Please, accept the terms before using this service</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_logging_out">Log out in progress..</string>
+    <string name="dialog_logout">Logout</string>
+    <string name="dialog_logout_message_ok">Logout completed.</string>
+    <string name="title_activity_settings">Settings</string>
+
+
+    <!-- Strings related to Settings -->
+
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+
+    <string name="pref_sync_frequency_key" translatable="false">pref-sync-frequency</string>
+
+    <string name="pref_sync_frequency_label_15">15 minutes</string>
+    <string name="pref_sync_frequency_label_30">30 minutes</string>
+    <string name="pref_sync_frequency_label_60">1 hour</string>
+    <string name="pref_sync_frequency_label_180">3 hours</string>
+    <string name="pref_sync_frequency_label_360">6 hours</string>
+    <string name="pref_sync_frequency_label_0">Never</string>
+
+    <string name="pref_sync_frequency_15" translatable="false">15</string>
+    <string name="pref_sync_frequency_30" translatable="false">30</string>
+    <string name="pref_sync_frequency_60" translatable="false">60</string>
+    <string name="pref_sync_frequency_180" translatable="false">180</string>
+    <string name="pref_sync_frequency_360" translatable="false">360</string>
+    <string name="pref_sync_frequency_0" translatable="false">0</string>
+
+</resources>
