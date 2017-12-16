@@ -47,7 +47,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
     private static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1001;
 
     private static final int LOADER_LOGIN_ID = 2100;
-    private static final int LOADER_CONFIRM_FACULTY_ID = 2101;
+    private static final int LOADER_FAKE_LOGIN_ID = 2101;
+    private static final int LOADER_CONFIRM_FACULTY_ID = 2102;
 
     private ProgressDialog progress;
 
@@ -175,10 +176,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
                         // Now that the user has selected the faculty, do the login again
                         Log.d("LOGIN_CHOOSE_FACULTY", "Trying to tell the server.");
 
-                        getLoaderManager()
-                                .initLoader(LOADER_CONFIRM_FACULTY_ID,
-                                        null,
-                                        LoginActivity.this)
+                        getLoaderManager().initLoader(LOADER_CONFIRM_FACULTY_ID,
+                                null, LoginActivity.this)
                                 .forceLoad();
 
                         showProgress(true);
@@ -243,6 +242,14 @@ public class LoginActivity extends AuthAppCompatActivity implements
     }
 
     private void attemptLogin() {
+        if (mBinding.fakeLoginCheck.isChecked()) {
+            getLoaderManager()
+                    .initLoader(LOADER_FAKE_LOGIN_ID, null, this)
+                    .forceLoad();
+
+            return;
+        }
+
         if (mBinding.termsCheck.isChecked()) {
             if (NetworkUtils.isDeviceOnline(this)) {
                 Utils.hideKeyboard(this);
@@ -340,8 +347,16 @@ public class LoginActivity extends AuthAppCompatActivity implements
             case LOADER_LOGIN_ID:
                 String username = mBinding.editTextUniversityMail.getText().toString();
                 String password = mBinding.editTextPassword.getText().toString();
+                User temp_user = new User(username, password);
+                temp_user.setFake(false);
 
-                return new S3Helper.LoginLoader(this, username, password);
+                return new S3Helper.LoginLoader(this, temp_user);
+
+            case LOADER_FAKE_LOGIN_ID:
+                temp_user = new User("fake", "fake");
+                temp_user.setFake(true);
+
+                return new S3Helper.LoginLoader(this, temp_user);
 
             case LOADER_CONFIRM_FACULTY_ID:
                 return new S3Helper.ConfirmFacultyLoader(this, UserUtils.getUser(this));
@@ -357,13 +372,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
         switch (loader_id) {
             case LOADER_LOGIN_ID:
-                handleLoginResults(this, (User) data);
-                break;
-
+            case LOADER_FAKE_LOGIN_ID:
             case LOADER_CONFIRM_FACULTY_ID:
-                // Salvo i dati scaricati dell'utente attuale su dispositivo
-                UserUtils.saveUser(Utils.user, this);
-
                 handleLoginResults(this, (User) data);
                 break;
 
@@ -373,9 +383,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
     }
 
     @Override
-    public void onLoaderReset(Loader loader) {
-
-    }
+    public void onLoaderReset(Loader loader) {}
 
 
 

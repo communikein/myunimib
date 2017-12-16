@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.CursorLoader;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 import com.communikein.myunimib.data.ExamContract;
 import com.communikein.myunimib.databinding.FragmentBookletBinding;
 import com.communikein.myunimib.sync.booklet.SyncUtilsBooklet;
+import com.communikein.myunimib.utilities.UserUtils;
 
 
 /**
@@ -59,7 +61,7 @@ public class BookletFragment extends Fragment implements
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         /* Inflate the layout for this fragment */
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_booklet, container, false);
@@ -92,7 +94,7 @@ public class BookletFragment extends Fragment implements
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
@@ -104,10 +106,12 @@ public class BookletFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        toggleLoading(true);
-        getActivity().getSupportLoaderManager().initLoader(ID_BOOKLET_LOADER, null, this);
+        if (!UserUtils.getUser(getActivity()).isFake()) {
+            toggleLoading(true);
+            getActivity().getSupportLoaderManager().initLoader(ID_BOOKLET_LOADER, null, this);
 
-        SyncUtilsBooklet.initialize(getActivity());
+            SyncUtilsBooklet.initialize(getActivity());
+        }
     }
 
     /**

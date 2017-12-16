@@ -2,11 +2,23 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
-        android:defaultValue="@string/pref_sync_frequency_5"
-        android:entries="@array/pref_sync_frequency_titles"
-        android:entryValues="@array/pref_sync_frequency_values"
-        android:key="@string/pref_sync_frequency_key"
-        android:title="@string/pref_title_sync_frequency" />
+    <PreferenceCategory
+        android:title="@string/pref_header_data_sync">
+
+        <ListPreference
+            android:defaultValue="@string/pref_sync_frequency_5"
+            android:entries="@array/pref_sync_frequency_titles"
+            android:entryValues="@array/pref_sync_frequency_values"
+            android:key="@string/pref_sync_frequency_key"
+            android:title="@string/pref_title_sync_frequency" />
+
+        <ListPreference
+            android:defaultValue="@string/pref_network_type_both"
+            android:entries="@array/pref_network_type_titles"
+            android:entryValues="@array/pref_network_type_values"
+            android:key="@string/pref_network_type_key"
+            android:title="@string/pref_title_network_type" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

@@ -31,6 +31,7 @@ public class User {
     public static final String PREF_AVERAGE_MARK = "user_average_mark";
     public static final String PREF_TOTAL_CFU = "user_total_cfu";
     public static final String PREF_TAG = "user_tag";
+    public static final String PREF_FAKE = "user_fake";
 
     public static final float ERROR_AVERAGE_MARK = -1;
     public static final int ERROR_TOTAL_CFU = -1;
@@ -47,6 +48,7 @@ public class User {
     private float mAverageMark;
     private int mTotalCFU;
     private Object mTag;
+    private boolean mFake;
 
     public User(String username, String password){
         setUsername(username);
@@ -140,6 +142,14 @@ public class User {
 
     public void setIsFirstLogin(boolean isFirstLogin) {
         this.mIsFirstLogin = isFirstLogin;
+    }
+
+    public void setFake(boolean fake) {
+        this.mFake = fake;
+    }
+
+    public boolean isFake() {
+        return this.mFake;
     }
 
 

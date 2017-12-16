@@ -56,14 +56,13 @@ public class MainActivity extends AppCompatActivity implements
     private void initUI(){
         buildFragmentsList();
 
-        switchFragment(R.id.navigation_home);
-
         mBinding.navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 return switchFragment(item.getItemId());
             }
         });
+        mBinding.navigation.setSelectedItemId(R.id.navigation_home);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.label_logging_out));
@@ -71,10 +70,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void buildFragmentsList() {
-        fragments.add(new HomeFragment());
-        fragments.add(new BookletFragment());
-        fragments.add(new ExamsAvailableFragment());
-        fragments.add(new ExamsEnrolledFragment());
+        fragments.add(INDEX_FRAGMENT_HOME, new HomeFragment());
+        fragments.add(INDEX_FRAGMENT_BOOKLET, new BookletFragment());
+        fragments.add(INDEX_FRAGMENT_EXAMS_AVAILABLE, new ExamsAvailableFragment());
+        fragments.add(INDEX_FRAGMENT_EXAMS_ENROLLED, new ExamsEnrolledFragment());
     }
 
     private boolean switchFragment(int tab_id) {

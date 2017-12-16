@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import com.communikein.myunimib.data.ExamContract;
 import com.communikein.myunimib.databinding.FragmentExamsBinding;
 import com.communikein.myunimib.sync.enrolledexams.SyncUtilsEnrolled;
+import com.communikein.myunimib.utilities.UserUtils;
 
 
 /**
@@ -104,10 +105,12 @@ public class ExamsEnrolledFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        toggleLoading(true);
-        getActivity().getSupportLoaderManager().initLoader(ID_EXAMS_ENROLLED_LOADER, null, this);
+        if (!UserUtils.getUser(getActivity()).isFake()) {
+            toggleLoading(true);
+            getActivity().getSupportLoaderManager().initLoader(ID_EXAMS_ENROLLED_LOADER, null, this);
 
-        SyncUtilsEnrolled.initialize(getActivity());
+            SyncUtilsEnrolled.initialize(getActivity());
+        }
     }
 
     /**

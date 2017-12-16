@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Label ordering must match values -->
+
     <array name="pref_sync_frequency_titles">
         <item>@string/pref_sync_frequency_label_5</item>
         <item>@string/pref_sync_frequency_label_15</item>
@@ -18,5 +19,16 @@
         <item>@string/pref_sync_frequency_180</item>
         <item>@string/pref_sync_frequency_360</item>
         <item>@string/pref_sync_frequency_0</item>
+    </array>
+
+    <array name="pref_network_type_titles">
+        <item>@string/pref_network_type_label_cellular</item>
+        <item>@string/pref_network_type_label_wifi</item>
+        <item>@string/pref_network_type_label_both</item>
+    </array>
+    <array name="pref_network_type_values">
+        <item>@string/pref_network_type_cellular</item>
+        <item>@string/pref_network_type_wifi</item>
+        <item>@string/pref_network_type_both</item>
     </array>
 </resources>

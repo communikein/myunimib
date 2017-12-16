@@ -54,6 +54,7 @@ public class UserUtils {
         }
 
         editor.putBoolean(User.PREF_IS_FIRST_LOGIN, user.isFirstLogin());
+        editor.putBoolean(User.PREF_FAKE, user.isFake());
 
         editor.apply();
     }
@@ -76,6 +77,7 @@ public class UserUtils {
         editor.remove(User.PREF_FACULTIES_VALUES);
         editor.remove(User.PREF_SELECTED_FACULTY);
         editor.remove(User.PREF_IS_FIRST_LOGIN);
+        editor.remove(User.PREF_FAKE);
         editor.apply();
 
         Utils.user = null;
@@ -90,7 +92,7 @@ public class UserUtils {
 
         if (Utils.user == null && pref.contains(User.PREF_USERNAME)){
             String username, password, name, matricola, session_id;
-            boolean isFirstLogin;
+            boolean isFirstLogin, isFake;
             int total_cfu;
             float average_mark;
 
@@ -105,10 +107,12 @@ public class UserUtils {
             average_mark = pref.getFloat(User.PREF_AVERAGE_MARK, User.ERROR_AVERAGE_MARK);
 
             isFirstLogin = pref.getBoolean(User.PREF_IS_FIRST_LOGIN, true);
+            isFake = pref.getBoolean(User.PREF_FAKE, false);
 
             Utils.user = new User(username, password, name, average_mark, total_cfu, matricola,
                     isFirstLogin);
             Utils.user.setSessionID(session_id);
+            Utils.user.setFake(isFake);
 
             String faculties_tmp = pref.getString(User.PREF_FACULTIES, null);
             if (faculties_tmp != null) {

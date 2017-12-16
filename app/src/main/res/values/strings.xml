@@ -71,6 +71,18 @@
     <string name="pref_sync_frequency_180" translatable="false">180</string>
     <string name="pref_sync_frequency_360" translatable="false">360</string>
     <string name="pref_sync_frequency_0" translatable="false">0</string>
+
+    <string name="pref_title_network_type">Network Type</string>
+
+    <string name="pref_network_type_key" translatable="false">pref-network-type</string>
+
+    <string name="pref_network_type_label_cellular">Cellular</string>
+    <string name="pref_network_type_label_wifi">Wi-Fi</string>
+    <string name="pref_network_type_label_both">Cellular &amp; Wi-Fi</string>
+
+    <string name="pref_network_type_cellular" translatable="false">cellular</string>
+    <string name="pref_network_type_wifi" translatable="false">wifi</string>
+    <string name="pref_network_type_both" translatable="false">both</string>
     <!-- END -->
 
     <string name="score_out_of_label">/ 30</string>
@@ -89,4 +101,5 @@
     <string name="label_logging_out">Log out in progress..</string>
     <string name="dialog_logout">Logout</string>
     <string name="dialog_logout_message_ok">Logout completed.</string>
+    <string name="label_do_fake_login">Do fake login</string>
 </resources>

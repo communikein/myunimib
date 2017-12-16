@@ -209,9 +209,16 @@ public class S3Helper {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Accept", "text/html");
         try {
-            // Try to contact the server
-            HttpsURLConnection resp = getPage(user, URL_LIBRETTO, headers, context);
-            int respCode = resp.getResponseCode();
+            int respCode;
+            HttpsURLConnection resp = null;
+
+            if (!user.isFake()) {
+                // Try to contact the server
+                resp = getPage(user, URL_LIBRETTO, headers, context);
+                respCode = resp.getResponseCode();
+            } else {
+                respCode = HttpURLConnection.HTTP_OK;
+            }
 
             // If the server is not available
             if (respCode == HttpURLConnection.HTTP_MOVED_TEMP) {
@@ -222,16 +229,18 @@ public class S3Helper {
                 Log.d("LOGIN_PROCESS", "S3 available.");
                 String html = null;
 
-                // If the server gives me a new JSESSIONID cookie value
-                if (resp.getHeaderField("Set-Cookie") != null) {
-                    // Save it
-                    String jsessionid = resp.getHeaderField("Set-Cookie");
-                    user = UserUtils.updateSessionId(user, jsessionid, context);
+                if (!user.isFake()) {
+                    // If the server gives me a new JSESSIONID cookie value
+                    if (resp != null && resp.getHeaderField("Set-Cookie") != null) {
+                        // Save it
+                        String jsessionid = resp.getHeaderField("Set-Cookie");
+                        user = UserUtils.updateSessionId(user, jsessionid, context);
 
-                    Log.d("LOGIN_PROCESS", "Got new JSESSIONID");
+                        Log.d("LOGIN_PROCESS", "Got new JSESSIONID");
+                    }
+                    Log.d("LOGIN_PROCESS", "SESSION ID = " + user.getSessionID());
+                    Log.d("LOGIN_PROCESS", "AUTH TOKEN = " + user.getAuthToken());
                 }
-                Log.d("LOGIN_PROCESS", "SESSION ID = " + user.getSessionID());
-                Log.d("LOGIN_PROCESS", "AUTH TOKEN = " + user.getAuthToken());
 
                 // If the user needs to authenticate
                 if (respCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
@@ -267,32 +276,40 @@ public class S3Helper {
                     else {
                         Log.d("LOGIN_PROCESS", "User might have multiple faculties.");
 
-                        // If the app has the list of faculty to choose but the user hasn't chosen
+                        // If the app has the list of faculty to choose
+                        // but the user hasn't chosen one yet
                         if (user.shouldChooseFaculty()) {
                             Log.d("LOGIN_PROCESS", "User needs to choose the faculty.");
                             ris = ERROR_FACULTY_TO_CHOOSE;
+                        }
 
-                            // If the user has chosen the faculty
-                        } else if (user.isFacultyChosen()) {
+                        // If the user has chosen the faculty
+                        else if (user.isFacultyChosen()) {
                             Log.d("LOGIN_PROCESS", "User has chosen the faculty.");
                             ris = handleFacultyChoice(user, context);
+                        }
 
-
-                            // If the app doesn't know if the user has more faculties to choose from
-                        } else {
+                        // If the app doesn't know if the user has multiple faculties,
+                        // hence the app doesn't have the list of faculties
+                        else {
                             SparseArray<String> faculties = hasMultiFaculty(user, html, context);
 
+                            // If the user has only one faculty
                             if (faculties == null) {
                                 Log.d("LOGIN_PROCESS", "ONLY ONE FACULTY.");
 
                                 ris = OK_LOGGED_IN;
+                            }
 
-                                // If the app doesn't have the list of faculties
-                            } else {
+                            // If the user has multiple faculties
+                            else {
                                 Log.d("LOGIN_PROCESS", "Multiple faculties found.");
                                 for (int i=0; i<faculties.size(); i++)
                                     Log.d("LOGIN_PROCESS",
                                             "Faculty: " + faculties.valueAt(i));
+
+                                user.setFaculties(faculties);
+                                UserUtils.saveUser(user, context);
 
                                 ris = ERROR_FACULTY_TO_CHOOSE;
                             }
@@ -320,6 +337,7 @@ public class S3Helper {
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
             NoSuchProviderException {
         boolean ris = false;
+        if (user.isFake()) return false;
 
         try {
             HashMap<String, String> headers = new HashMap<>();
@@ -346,6 +364,17 @@ public class S3Helper {
     private static void downloadUserData(User user, Context context) throws IOException, CertificateException,
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
             NoSuchProviderException{
+
+        if (user.isFake()) {
+            Utils.user.setMatricola("293640");
+            Utils.user.setName("Pippo Pluto");
+            Utils.user.setTotalCFU(42);
+            Utils.user.setAverageMark(24);
+
+            UserUtils.saveUser(Utils.user, context);
+            return;
+        }
+
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Accept", "text/html");
 
@@ -403,6 +432,8 @@ public class S3Helper {
     private static SparseArray<String> hasMultiFaculty(User user, String html, Context context)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
             KeyManagementException, NoSuchProviderException {
+        if (user.isFake()) return downloadFacultiesList(user, context);
+
         if (html == null) {
             HashMap<String, String> headers = new HashMap<>();
             headers.put("Accept", "text/html");
@@ -426,6 +457,15 @@ public class S3Helper {
             CertificateException, NoSuchAlgorithmException, KeyStoreException,
             KeyManagementException, NoSuchProviderException {
         SparseArray<String> courses = new SparseArray<>();
+
+        if (user.isFake()) {
+            courses.put(34829, "Faculty of IT");
+            courses.put(19347, "Faculty of Science");
+            courses.put(58240, "Faculty of Chemistry");
+
+            return courses;
+        }
+
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Accept", "text/html");
 
@@ -437,8 +477,8 @@ public class S3Helper {
             Document doc = Jsoup.parse(result);
             Elements els = doc.select("table#gu_table_sceltacarriera tbody tr");
 
-            if (!els.isEmpty())
-                for (Element el : els){
+            if (!els.isEmpty()) {
+                for (Element el : els) {
                     String name = el.child(1).text() + " in " + el.child(2).text();
                     String relativeUrl = el.select("#gu_toolbar_sceltacarriera a")
                             .attr("href");
@@ -447,10 +487,6 @@ public class S3Helper {
 
                     courses.put(stu_id, name);
                 }
-
-            if (courses.size() > 0){
-                user.setFaculties(courses);
-                //Utils.user.setIsFacultyChosen(false);
             }
         } catch (SocketTimeoutException e) {
             throw e;
@@ -474,6 +510,12 @@ public class S3Helper {
             headers.put("Accept", "text/html");
 
             try {
+                if (user.isFake()) {
+                    downloadUserData(user, context);
+
+                    return OK_LOGGED_IN;
+                }
+
                 // Load the chosen faculty
                 String faculty = user.getSelectedFacultyUrl();
 
@@ -529,13 +571,15 @@ public class S3Helper {
 
         private final String mUsername;
         private final String mPassword;
+        private final boolean mFake;
 
-        public LoginLoader(Activity activity, String username, String password) {
+        public LoginLoader(Activity activity, User user) {
             super(activity);
 
             this.mActivity = new WeakReference<>(activity);
-            this.mUsername = username;
-            this.mPassword = password;
+            this.mUsername = user.getUsername();
+            this.mPassword = user.getPassword();
+            this.mFake = user.isFake();
         }
 
         @Override
@@ -547,7 +591,10 @@ public class S3Helper {
             if (context == null) return null;
 
             User user = UserUtils.getUser(context);
-            if (user == null) user = new User(mUsername, mPassword);
+            if (user == null) {
+                user = new User(mUsername, mPassword);
+                user.setFake(mFake);
+            }
 
             try {
                 Log.d("LOGIN", "Trying to login");
