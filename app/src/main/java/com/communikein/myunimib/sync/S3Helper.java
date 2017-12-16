@@ -300,12 +300,11 @@ public class S3Helper {
                         // If the app doesn't know if the user has multiple faculties,
                         // hence the app doesn't have the list of faculties
                         else {
-                            SparseArray<String> faculties = hasMultiFaculty(user, html, context);
+                            SparseArray<String> faculties = hasMultiFaculty(user, html);
 
                             // If the user has only one faculty
                             if (faculties == null) {
                                 Log.d("LOGIN_PROCESS", "ONLY ONE FACULTY.");
-
                                 ris = OK_LOGGED_IN;
                             }
 
@@ -437,18 +436,8 @@ public class S3Helper {
         }
     }
 
-    private static SparseArray<String> hasMultiFaculty(User user, String html, Context context)
-            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            KeyManagementException, NoSuchProviderException {
+    private static SparseArray<String> hasMultiFaculty(User user, String html) {
         if (user.isFake()) return downloadFacultiesList(user, null);
-
-        if (html == null) {
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Accept", "text/html");
-
-            HttpsURLConnection response = S3Helper.getPage(user, S3Helper.URL_LIBRETTO, headers, context);
-            html = S3Helper.getHTML(response.getInputStream());
-        }
 
         Document doc = Jsoup.parse(html);
         Element el1 = doc.select("#titolo-menu-principale").first();
