@@ -1,13 +1,17 @@
 package com.communikein.myunimib.sync;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.communikein.myunimib.R;
+import com.communikein.myunimib.accountmanager.AccountUtils;
 import com.communikein.myunimib.utilities.UserUtils;
 import com.communikein.myunimib.utilities.Utils;
 import com.communikein.myunimib.User;
@@ -249,8 +253,12 @@ public class S3Helper {
                     headers.put("Accept", "text/html");
 
                     // Do login
-                    resp = getPage(user, URL_LOGIN, headers, context);
+                    resp = getPage(user, URL_LIBRETTO, headers, context);
                     respCode = resp.getResponseCode();
+                }
+
+                /* Get the HTML of the response */
+                if (!user.isFake() && resp != null) {
                     try {
                         html = getHTML(resp.getInputStream());
                     } catch (IOException e) {
@@ -316,6 +324,7 @@ public class S3Helper {
                         }
                     }
                 }
+
                 // Otherwise the the password is not valid
                 else {
                     Log.d("LOGIN_PROCESS", "WRONG PASSWORD.");
@@ -361,18 +370,17 @@ public class S3Helper {
 
 
 
-    private static void downloadUserData(User user, Context context) throws IOException, CertificateException,
+    private static User downloadUserData(User user, Context context) throws IOException, CertificateException,
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
             NoSuchProviderException{
 
         if (user.isFake()) {
-            Utils.user.setMatricola("293640");
-            Utils.user.setName("Pippo Pluto");
-            Utils.user.setTotalCFU(42);
-            Utils.user.setAverageMark(24);
+            user.setMatricola("293640");
+            user.setName("Pippo Pluto");
+            user.setTotalCFU(42);
+            user.setAverageMark(24);
 
-            UserUtils.saveUser(Utils.user, context);
-            return;
+            return user;
         }
 
         HashMap<String, String> headers = new HashMap<>();
@@ -392,7 +400,7 @@ public class S3Helper {
                     matricola = matricola.substring(matricola.indexOf("MAT. ") + 5);
                     matricola = matricola.substring(0, 6);
 
-                    Utils.user.setMatricola(matricola);
+                    user.setMatricola(matricola);
                     Log.d("LOGIN_USER_DATA", "Matricola: " + matricola);
                 }
             }
@@ -403,7 +411,7 @@ public class S3Helper {
             Element el = doc.select("div#sottotitolo-menu-principale").first();
 
             String name = el.text();
-            Utils.user.setName(name);
+            user.setName(name);
             Log.d("LOGIN_USER_DATA", "Name: " + name);
 
             Elements els = doc.select("div#gu-boxRiepilogoEsami dl.record-riga dd");
@@ -413,13 +421,13 @@ public class S3Helper {
             cfuTmp = cfuTmp.substring(0, cfuTmp.indexOf("/"));
             float averageMark = Float.parseFloat(averageTmp);
             int totalCfu = Integer.parseInt(cfuTmp);
-            Utils.user.setTotalCFU(totalCfu);
-            Utils.user.setAverageMark(averageMark);
+            user.setTotalCFU(totalCfu);
+            user.setAverageMark(averageMark);
 
             Log.d("LOGIN_USER_DATA", "Average mark: " + averageTmp);
             Log.d("LOGIN_USER_DATA", "CFU: " + cfuTmp);
 
-            UserUtils.saveUser(Utils.user, context);
+            return user;
         } catch (SocketTimeoutException e) {
             throw e;
         } catch (IOException e){
@@ -432,13 +440,13 @@ public class S3Helper {
     private static SparseArray<String> hasMultiFaculty(User user, String html, Context context)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
             KeyManagementException, NoSuchProviderException {
-        if (user.isFake()) return downloadFacultiesList(user, context);
+        if (user.isFake()) return downloadFacultiesList(user, null);
 
         if (html == null) {
             HashMap<String, String> headers = new HashMap<>();
             headers.put("Accept", "text/html");
 
-            HttpsURLConnection response = S3Helper.getPage(user, S3Helper.URL_HOME, headers, context);
+            HttpsURLConnection response = S3Helper.getPage(user, S3Helper.URL_LIBRETTO, headers, context);
             html = S3Helper.getHTML(response.getInputStream());
         }
 
@@ -448,14 +456,12 @@ public class S3Helper {
         boolean hasMultiFaculty = el1.text().toLowerCase().equals("registrato");
 
         if (hasMultiFaculty)
-            return downloadFacultiesList(user, context);
+            return downloadFacultiesList(user, html);
         else
             return null;
     }
 
-    private static SparseArray<String> downloadFacultiesList(User user, Context context) throws IOException,
-            CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            KeyManagementException, NoSuchProviderException {
+    private static SparseArray<String> downloadFacultiesList(User user, String html) {
         SparseArray<String> courses = new SparseArray<>();
 
         if (user.isFake()) {
@@ -466,33 +472,18 @@ public class S3Helper {
             return courses;
         }
 
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Accept", "text/html");
+        Document doc = Jsoup.parse(html);
+        Elements els = doc.select("table#gu_table_sceltacarriera tbody tr");
+        if (!els.isEmpty()) {
+            for (Element el : els) {
+                String name = el.child(1).text() + " in " + el.child(2).text();
+                String relativeUrl = el.select("#gu_toolbar_sceltacarriera a")
+                        .attr("href");
+                relativeUrl = relativeUrl.substring(relativeUrl.indexOf("?stu_id=") + 8);
+                int stu_id = Integer.parseInt(relativeUrl);
 
-        try{
-            HttpURLConnection response = S3Helper.getPage(user, S3Helper.URL_LIBRETTO,
-                    headers, context);
-            String result = S3Helper.getHTML(response.getInputStream());
-
-            Document doc = Jsoup.parse(result);
-            Elements els = doc.select("table#gu_table_sceltacarriera tbody tr");
-
-            if (!els.isEmpty()) {
-                for (Element el : els) {
-                    String name = el.child(1).text() + " in " + el.child(2).text();
-                    String relativeUrl = el.select("#gu_toolbar_sceltacarriera a")
-                            .attr("href");
-                    relativeUrl = relativeUrl.substring(relativeUrl.indexOf("?stu_id=") + 8);
-                    int stu_id = Integer.parseInt(relativeUrl);
-
-                    courses.put(stu_id, name);
-                }
+                courses.put(stu_id, name);
             }
-        } catch (SocketTimeoutException e) {
-            throw e;
-        } catch (IOException e){
-            Utils.saveBugReport(e);
-            throw e;
         }
 
         return courses;
@@ -510,11 +501,7 @@ public class S3Helper {
             headers.put("Accept", "text/html");
 
             try {
-                if (user.isFake()) {
-                    downloadUserData(user, context);
-
-                    return OK_LOGGED_IN;
-                }
+                if (user.isFake()) return OK_LOGGED_IN;
 
                 // Load the chosen faculty
                 String faculty = user.getSelectedFacultyUrl();
@@ -524,12 +511,8 @@ public class S3Helper {
                     // Tell the server which faculty the user wants
                     int code = getPage(user, faculty, headers, context).getResponseCode();
                     if (code == HttpURLConnection.HTTP_OK) {
-                        if (!isCareerOver(user, context)) {
+                        if (!isCareerOver(user, context))
                             ris = OK_LOGGED_IN;
-
-                            Log.d("LOGIN", "Downloading user data");
-                            downloadUserData(user, context);
-                        }
                         else
                             ris = ERROR_CAREER_OVER;
                     }
@@ -538,12 +521,8 @@ public class S3Helper {
                         code = getPage(user, faculty, headers, context).getResponseCode();
 
                         if (code == HttpURLConnection.HTTP_OK) {
-                            if (!isCareerOver(user, context)) {
+                            if (!isCareerOver(user, context))
                                 ris = OK_LOGGED_IN;
-
-                                Log.d("LOGIN", "Downloading user data");
-                                downloadUserData(user, context);
-                            }
                             else
                                 ris = ERROR_CAREER_OVER;
                         }
@@ -569,17 +548,13 @@ public class S3Helper {
         // Weak references will still allow the Context to be garbage-collected
         private final WeakReference<Activity> mActivity;
 
-        private final String mUsername;
-        private final String mPassword;
-        private final boolean mFake;
+        private User mUser;
 
         public LoginLoader(Activity activity, User user) {
             super(activity);
 
             this.mActivity = new WeakReference<>(activity);
-            this.mUsername = user.getUsername();
-            this.mPassword = user.getPassword();
-            this.mFake = user.isFake();
+            this.mUser = user;
         }
 
         @Override
@@ -590,25 +565,18 @@ public class S3Helper {
             Context context = mActivity.get();
             if (context == null) return null;
 
-            User user = UserUtils.getUser(context);
-            if (user == null) {
-                user = new User(mUsername, mPassword);
-                user.setFake(mFake);
-            }
-
             try {
                 Log.d("LOGIN", "Trying to login");
-                loggedIn = doLogin(user, context);
+                loggedIn = doLogin(mUser, context);
 
                 if (loggedIn == OK_LOGGED_IN) {
                     Log.d("LOGIN", "RESULT: LOGIN COMPLETED. (" + loggedIn + ")");
 
                     Log.d("LOGIN", "Downloading user data");
-                    downloadUserData(user, context);
+                    mUser = downloadUserData(mUser, context);
+                    mUser.setIsFirstLogin(false);
 
-                    user.setIsFirstLogin(false);
-
-                    UserUtils.saveUser(user, context);
+                    UserUtils.saveUser(mUser, context);
                 }
             } catch (SocketTimeoutException e){
                 loggedIn = ERROR_CONNECTION_TIMEOUT;
@@ -617,49 +585,14 @@ public class S3Helper {
                 Utils.saveBugReport(e);
             }
 
-            user.setTag(loggedIn);
+            mUser.setTag(loggedIn);
 
-            return user;
+            return mUser;
         }
 
         @Override
         protected void onStopLoading() {
             cancelLoad();
-        }
-    }
-
-    public static class ConfirmFacultyLoader extends  AsyncTaskLoader<User> {
-
-        // Weak references will still allow the Context to be garbage-collected
-        private final WeakReference<Activity> mActivity;
-        private final User mUser;
-
-        public ConfirmFacultyLoader(Activity activity, User user) {
-            super(activity);
-
-            this.mActivity = new WeakReference<>(activity);
-
-            if (user == null) user = UserUtils.getUser(activity);
-            this.mUser = user;
-        }
-
-
-        @Override
-        public User loadInBackground() {
-            int ris;
-            Context context = mActivity.get();
-
-            try {
-                ris = doLogin(mUser, context);
-            } catch (SocketTimeoutException e){
-                ris = ERROR_CONNECTION_TIMEOUT;
-            } catch (Exception e) {
-                ris = ERROR_GENERIC;
-                Utils.saveBugReport(e);
-            }
-            mUser.setTag(ris);
-
-            return mUser;
         }
     }
 
@@ -683,11 +616,16 @@ public class S3Helper {
             headers.put("Accept", "text/html");
 
             try {
-                getPage(mUser, URL_LOGOUT, headers, context);
+                String username = mUser.getUsername();
+                if (!mUser.isFake())
+                    getPage(mUser, URL_LOGOUT, headers, context);
                 boolean loggedOut = UserUtils.removeUser(context);
 
-                if (loggedOut)
+                if (loggedOut) {
                     mUser.setTag(OK_LOGGED_OUT);
+
+                    removeAccount(context, username);
+                }
                 else
                     return null;
             } catch (Exception e) {
@@ -695,6 +633,23 @@ public class S3Helper {
             }
 
             return mUser;
+        }
+
+        void removeAccount(final Context context, final String accountName) {
+            final AccountManager accountManager = AccountManager.get(context);
+            final Account account = new Account(accountName, AccountUtils.ACCOUNT_TYPE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                /*
+                 * Trying to call this on an older Android version results in a
+                 * NoSuchMethodError exception. There is no AppCompat version of the
+                 * AccountManager API to avoid the need for this version check at runtime.
+                 */
+                accountManager.removeAccount(account, null, null, null);
+            } else {
+                /* Note that this needs the MANAGE_ACCOUNT permission on SDK <= 22. */
+                accountManager.removeAccount(account, null, null);
+            }
         }
     }
     

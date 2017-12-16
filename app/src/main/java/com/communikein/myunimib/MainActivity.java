@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements
                             });
                 }
                 else {
-                    builder.setMessage(getString(R.string.dialog_logout_message_ok));
+                    builder.setMessage(getString(R.string.label_logout_failed));
 
                     String positiveText = getString(android.R.string.ok);
                     builder.setPositiveButton(positiveText, null);

@@ -54,7 +54,7 @@ public class HomeFragment extends Fragment {
         mBinding.averageMarkTextView.setText(Utils.markFormat.format(Utils.user.getAverageMark()));
         mBinding.cfuTextView.setText(String.valueOf(Utils.user.getTotalCFU()));
 
-        //loadProfilePicture();
+        loadProfilePicture();
     }
 
     /**
@@ -69,16 +69,21 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadProfilePicture(){
-        ProfilePictureVolleyRequest profilePictureVolleyRequest =
-                new ProfilePictureVolleyRequest(getActivity(), Utils.user);
-        ImageLoader imageLoader = profilePictureVolleyRequest.getImageLoader();
+        if (Utils.user.isFake()) {
+            mBinding.userImageView.setDefaultImageResId(R.drawable.ic_person_black_24dp);
+        }
+        else {
+            ProfilePictureVolleyRequest profilePictureVolleyRequest =
+                    new ProfilePictureVolleyRequest(getActivity(), Utils.user);
+            ImageLoader imageLoader = profilePictureVolleyRequest.getImageLoader();
 
-        imageLoader.get(S3Helper.URL_PROFILE_PICTURE,
-                ImageLoader.getImageListener(
-                        mBinding.userImageView,
-                        R.drawable.ic_person_black_24dp,
-                        android.R.drawable.ic_dialog_alert)
-        );
-        mBinding.userImageView.setImageUrl(S3Helper.URL_PROFILE_PICTURE, imageLoader);
+            imageLoader.get(S3Helper.URL_PROFILE_PICTURE,
+                    ImageLoader.getImageListener(
+                            mBinding.userImageView,
+                            R.drawable.ic_person_black_24dp,
+                            android.R.drawable.ic_dialog_alert)
+            );
+            mBinding.userImageView.setImageUrl(S3Helper.URL_PROFILE_PICTURE, imageLoader);
+        }
     }
 }

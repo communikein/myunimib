@@ -34,8 +34,8 @@
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/userImageView"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="104dp"
+            android:layout_height="128dp"
             android:layout_marginTop="16dp"
             android:adjustViewBounds="true"
             android:src="@mipmap/ic_launcher_round"
@@ -83,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
-            android:textColor="@color/secondary_text"
+            android:textColor="@color/primary_text"
             android:textSize="32sp"
             app:layout_constraintLeft_toLeftOf="@+id/averageMarkTextView"
             app:layout_constraintRight_toRightOf="@+id/averageMarkTextView"

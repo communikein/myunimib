@@ -23,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.communikein.myunimib.accountmanager.AccountUtils;
@@ -52,7 +53,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
     private ProgressDialog progress;
 
-    private int selectedCourse = -1;
+    private int selected = Spinner.INVALID_POSITION;
+    private int selectedFaculty = -1;
 
 
     @Override
@@ -118,7 +120,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
         mBinding.coursesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCourse = position;
+                selected = position;
 
                 Log.d("LOGIN_CHOOSE_FACULTY", "New faculty selected: " + position);
             }
@@ -165,17 +167,12 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 mBinding.dialogButtonOK.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        int selected = user.getFaculties().keyAt(selectedCourse);
-
+                        /* Save the chosen faculty */
+                        selectedFaculty = user.getFaculties().keyAt(selected);
                         Log.d("LOGIN_CHOOSE_FACULTY", "Faculty chosen: " + selected);
-
-                        // Set and save the chosen faculty
-                        user.setSelectedFaculty(selected);
-                        UserUtils.saveUser(user, getBaseContext());
 
                         // Now that the user has selected the faculty, do the login again
                         Log.d("LOGIN_CHOOSE_FACULTY", "Trying to tell the server.");
-
                         getLoaderManager().initLoader(LOADER_CONFIRM_FACULTY_ID,
                                 null, LoginActivity.this)
                                 .forceLoad();
@@ -345,6 +342,10 @@ public class LoginActivity extends AuthAppCompatActivity implements
     public Loader onCreateLoader(int id, Bundle args) {
         switch (id) {
             case LOADER_LOGIN_ID:
+                /*
+                 * Get the username and password inserted by the user, create an
+                 * authentic user, then start the login process.
+                 */
                 String username = mBinding.editTextUniversityMail.getText().toString();
                 String password = mBinding.editTextPassword.getText().toString();
                 User temp_user = new User(username, password);
@@ -353,13 +354,18 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 return new S3Helper.LoginLoader(this, temp_user);
 
             case LOADER_FAKE_LOGIN_ID:
+                /* Create a fake user and start the fake login process. */
                 temp_user = new User("fake", "fake");
                 temp_user.setFake(true);
 
                 return new S3Helper.LoginLoader(this, temp_user);
 
             case LOADER_CONFIRM_FACULTY_ID:
-                return new S3Helper.ConfirmFacultyLoader(this, UserUtils.getUser(this));
+                /* Get the user, save the chosen faculty, then complete the login process. */
+                Utils.user = UserUtils.getUser(this);
+                Utils.user.setSelectedFaculty(selectedFaculty);
+
+                return new S3Helper.LoginLoader(this, Utils.user);
 
             default:
                 return null;
