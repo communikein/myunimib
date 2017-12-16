@@ -10,19 +10,14 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by eliam on 12/6/2017.
- */
 
 public class MyunimibDateUtils {
 
     /* Milliseconds in a day */
-    public static final long DAY_IN_MILLIS = TimeUnit.DAYS.toMillis(1);
+    private static final long DAY_IN_MILLIS = TimeUnit.DAYS.toMillis(1);
 
     public static final DateFormat dateFormat =
             new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    public static final DateFormat dateFormatFile =
-            new SimpleDateFormat("ddMMyyyy", Locale.getDefault());
     public static final DateFormat dateTimeFormat =
             new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
@@ -86,9 +81,7 @@ public class MyunimibDateUtils {
          * midnight in GMT time. We will need to account for local time zone offsets when
          * extracting this information from the database.
          */
-        long normalizedUtcMidnightMillis = TimeUnit.DAYS.toMillis(daysSinceEpochLocal);
-
-        return normalizedUtcMidnightMillis;
+        return TimeUnit.DAYS.toMillis(daysSinceEpochLocal);
     }
 
     /**
@@ -131,8 +124,7 @@ public class MyunimibDateUtils {
      */
     public static long normalizeDate(long date) {
         long daysSinceEpoch = elapsedDaysSinceEpoch(date);
-        long millisFromEpochToTodayAtMidnightUtc = daysSinceEpoch * DAY_IN_MILLIS;
-        return millisFromEpochToTodayAtMidnightUtc;
+        return daysSinceEpoch * DAY_IN_MILLIS;
     }
 
     /**
@@ -169,8 +161,7 @@ public class MyunimibDateUtils {
          * time.
          */
         long gmtOffset = timeZone.getOffset(normalizedUtcDate);
-        long localMidnightMillis = normalizedUtcDate - gmtOffset;
-        return localMidnightMillis;
+        return normalizedUtcDate - gmtOffset;
     }
 
     /**

@@ -10,9 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-/**
- * Created by eliam on 12/6/2017.
- */
 
 public class MyUnimibProvider extends ContentProvider {
 
@@ -21,15 +18,15 @@ public class MyUnimibProvider extends ContentProvider {
      * advantage of the UriMatcher class to make that matching MUCH easier than doing something
      * ourselves, such as using regular expressions.
      */
-    public static final int CODE_BOOKLET_ALL = 100;
-    public static final int CODE_BOOKLET_WITH_ID = 101;
-    public static final int CODE_COURSES_NAMES = 102;
+    private static final int CODE_BOOKLET_ALL = 100;
+    private static final int CODE_BOOKLET_WITH_ID = 101;
+    private static final int CODE_COURSES_NAMES = 102;
 
-    public static final int CODE_AVAILABLE_EXAMS_ALL = 200;
-    public static final int CODE_AVAILABLE_EXAMS_WITH_ID = 201;
+    private static final int CODE_AVAILABLE_EXAMS_ALL = 200;
+    private static final int CODE_AVAILABLE_EXAMS_WITH_ID = 201;
 
-    public static final int CODE_ENROLLED_EXAMS_ALL = 300;
-    public static final int CODE_ENROLLED_EXAMS_WITH_ID = 301;
+    private static final int CODE_ENROLLED_EXAMS_ALL = 300;
+    private static final int CODE_ENROLLED_EXAMS_WITH_ID = 301;
 
     /*
      * The URI Matcher used by this content provider. The leading "s" in this variable name
@@ -40,22 +37,11 @@ public class MyUnimibProvider extends ContentProvider {
     private DBHelper mOpenHelper;
 
     /**
-     * Creates the UriMatcher that will match each URI to the CODE_WEATHER and
-     * CODE_WEATHER_WITH_DATE constants defined above.
-     * <p>
-     * It's possible you might be thinking, "Why create a UriMatcher when you can use regular
-     * expressions instead? After all, we really just need to match some patterns, and we can
-     * use regular expressions to do that right?" Because you're not crazy, that's why.
-     * <p>
-     * UriMatcher does all the hard work for you. You just have to tell it which code to match
-     * with which URI, and it does the rest automagically. Remember, the best programmers try
-     * to never reinvent the wheel. If there is a solution for a problem that exists and has
-     * been tested and proven, you should almost always use it unless there is a compelling
-     * reason not to.
+     * Creates the UriMatcher that will match each URI to the CODE_* constants defined above.
      *
-     * @return A UriMatcher that correctly matches the constants for CODE_WEATHER and CODE_WEATHER_WITH_DATE
+     * @return A UriMatcher that correctly matches the constants
      */
-    public static UriMatcher buildUriMatcher() {
+    private static UriMatcher buildUriMatcher() {
 
         /*
          * All paths added to the UriMatcher have a corresponding code to return when a match is
@@ -135,6 +121,7 @@ public class MyUnimibProvider extends ContentProvider {
 
             case CODE_ENROLLED_EXAMS_ALL:
                 TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
+                break;
 
             default:
                 return super.bulkInsert(uri, values);

@@ -1,73 +1,56 @@
 <resources>
-    <!-- START General APP info -->
+    <!-- Strings related to general APP info -->
     <string name="app_name">MyUNIMIB</string>
+    <string name="account_name">UNIMIB</string>
 
     <string name="content_authority">com.communikein.myunimib</string>
-    <!-- END General APP info -->
+    <!-- END -->
 
-    <!-- START Navigation Drawer stuff -->
-    <string name="nav_entry_home">Login test</string>
-    <string name="nav_entry_timetable">Timetable</string>
-    <string name="nav_entry_settings">Settings</string>
-    <string name="nav_entry_logout">Logout</string>
-    <!-- END Navigation Drawer stuff -->
+    <!-- Strings related to navigation  -->
+    <string name="nav_home">@string/title_home</string>
+    <string name="nav_timetable">@string/title_timetable</string>
+    <string name="nav_booklet">@string/title_booklet</string>
+    <string name="nav_exams_available">@string/title_exams_available</string>
+    <string name="nav_exams_enrolled">@string/title_exams_enrolled</string>
 
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_login">Sign in</string>
+    <string name="title_home">Home</string>
+    <string name="title_timetable">Timetable</string>
+    <string name="title_booklet">Booklet</string>
+    <string name="title_exams_available">Available Exams</string>
+    <string name="title_exams_enrolled">Enrolled Exams</string>
+    <string name="title_settings">Settings</string>
+    <!-- END -->
 
     <!-- Strings related to login -->
     <string name="prompt_university_email">Enter university e-mail address</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
-    <string name="action_sign_in_volley">Sign in - Volley</string>
     <string name="terms_and_conditions">I accept this service\'s Terms and Conditions.</string>
-
 
     <string name="error_user_invalid">Username not valid</string>
     <string name="error_user_empty">Username required</string>
     <string name="error_user_with_blank_spaces">The username can\'t contain blank spaces</string>
-    <string name="error_user_complete_email">The username is the part before the @ of the university mail</string>
 
     <string name="error_password_incorrect">Password not valid</string>
     <string name="error_password_empty">Password required</string>
-    <string name="error_password_less_then_10_chars">The password must be at least 10 prints</string>
-    <string name="error_password_more_then_20_chars">The password must be no more than 20 prints</string>
+    <string name="error_password_less_then_10_chars">The password must be at least 10 chars</string>
+    <string name="error_password_more_then_20_chars">The password must be no more than 20 chars</string>
     <string name="error_password_less_then_2_digits">The password must contain at least two digits [0–9]</string>
 
-    <string name="title_logging_in">Logging in</string>
+    <string name="label_logging_in">Login in progress..</string>
 
-    <string name="send">Send</string>
-    <string name="error_mail_needed">Mail address needed.</string>
-    <string name="choose_faculty">Scegli facoltà</string>
+    <string name="choose_faculty">Choose faculty</string>
 
     <string name="faculty_to_choose">Almost there, choose the faculty now</string>
     <string name="error_S3_not_available">S3 not available.</string>
     <string name="error_connection_timeout">Connection timeout</string>
-    <string name="login_succeded">Login OK :D</string>
     <string name="error_generic_exception">Error generic.</string>
-    <string name="today">Today</string>
-    <string name="tomorrow">Tomorrow</string>
-    <string name="title_activity_main">MainActivity</string>
 
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Booklet</string>
-    <string name="title_notifications">Exams</string>
-
-    <string name="account_name">UNIMIB</string>
-    <string name="permissions_granted">Thanks for the trust ;)</string>
-    <string name="retry">Retry</string>
-    <string name="error_permission_accounts_necessary">I need this permission to create an account :(</string>
-    <string name="error_no_internet">No internet available :(</string>
     <string name="terms_not_checked">Please, accept the terms before using this service</string>
-    <string name="action_logout">Logout</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_logging_out">Log out in progress..</string>
-    <string name="dialog_logout">Logout</string>
-    <string name="dialog_logout_message_ok">Logout completed.</string>
-    <string name="title_activity_settings">Settings</string>
-
+    <!-- END -->
 
     <!-- Strings related to Settings -->
-
     <string name="pref_header_data_sync">Data &amp; sync</string>
     <string name="pref_title_sync_frequency">Sync frequency</string>
 
@@ -88,7 +71,22 @@
     <string name="pref_sync_frequency_180" translatable="false">180</string>
     <string name="pref_sync_frequency_360" translatable="false">360</string>
     <string name="pref_sync_frequency_0" translatable="false">0</string>
-    <string name="title_exams_available">Available Exams</string>
-    <string name="title_exams_enrolled">Enrolled Exams</string>
+    <!-- END -->
 
+    <string name="score_out_of_label">/ 30</string>
+    <string name="cfu_label">CFU</string>
+
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+
+    <string name="permissions_granted">Thanks for the trust ;)</string>
+    <string name="retry">Retry</string>
+    <string name="error_permission_accounts_necessary">I need this permission to create an account :(</string>
+    <string name="error_no_internet">No internet available :(</string>
+
+    <string name="action_logout">Logout</string>
+    <string name="action_settings">Settings</string>
+    <string name="label_logging_out">Log out in progress..</string>
+    <string name="dialog_logout">Logout</string>
+    <string name="dialog_logout_message_ok">Logout completed.</string>
 </resources>

@@ -5,22 +5,18 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.util.Date;
 
-/**
- * Created by eliam on 12/5/2017.
- */
 
 public class BookletEntry {
 
-    final public static String ARG_NAME = "ARG_NAME";
-    final public static String ARG_CFU = "ARG_CFU";
-    final public static String ARG_SCORE = "ARG_SCORE";
-    final public static String ARG_DATE = "ARG_DATE";
-    final public static String ARG_STATE = "ARG_STATE";
-    final public static String ARG_CODE = "ARG_CODE";
-    final public static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
+    private final static String ARG_NAME = "ARG_NAME";
+    private final static String ARG_CFU = "ARG_CFU";
+    private final static String ARG_SCORE = "ARG_SCORE";
+    private final static String ARG_DATE = "ARG_DATE";
+    private final static String ARG_STATE = "ARG_STATE";
+    private final static String ARG_CODE = "ARG_CODE";
+    private final static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
 
     private String name;
     private Date date;
@@ -41,7 +37,7 @@ public class BookletEntry {
         setCode(code);
     }
 
-    public BookletEntry(JSONObject json) throws JSONException, ParseException {
+    public BookletEntry(JSONObject json) throws JSONException {
         if (json == null) throw new IllegalArgumentException();
 
         if (json.has(ARG_CFU))
@@ -70,7 +66,7 @@ public class BookletEntry {
         return adsce_id;
     }
 
-    public void setADSCE_ID(int adsce_id) {
+    private void setADSCE_ID(int adsce_id) {
         this.adsce_id = adsce_id;
     }
 
@@ -78,11 +74,11 @@ public class BookletEntry {
         return name;
     }
 
-    public void setName(String name) {
+    private void setName(String name) {
         this.name = name;
     }
 
-    public Date getDate() {
+    private Date getDate() {
         return date;
     }
 
@@ -93,7 +89,7 @@ public class BookletEntry {
             return getDate().getTime();
     }
 
-    public void setDate(Date date) {
+    private void setDate(Date date) {
         this.date = date;
     }
 
@@ -101,7 +97,7 @@ public class BookletEntry {
         return code;
     }
 
-    public void setCode(String code) {
+    private void setCode(String code) {
         this.code = code;
     }
 
@@ -109,7 +105,7 @@ public class BookletEntry {
         return state;
     }
 
-    public void setState(String state) {
+    private void setState(String state) {
         this.state = state;
     }
 
@@ -117,7 +113,7 @@ public class BookletEntry {
         return cfu;
     }
 
-    public void setCFU(int cfu) {
+    private void setCFU(int cfu) {
         this.cfu = cfu;
     }
 
@@ -125,7 +121,7 @@ public class BookletEntry {
         return score;
     }
 
-    public void setScore(String score) {
+    private void setScore(String score) {
         this.score = score;
     }
 

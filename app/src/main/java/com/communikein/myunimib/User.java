@@ -1,6 +1,5 @@
 package com.communikein.myunimib;
 
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.SparseArray;
 
@@ -11,11 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-/**
- * Created by eliam on 12/2/2017.
- */
 
 public class User {
 
@@ -31,7 +26,7 @@ public class User {
     public static final String PREF_FACULTIES_VALUES = "user_faculties_values";
     public static final String PREF_SELECTED_FACULTY = "selected_faculty";
     public static final String PREF_IS_FIRST_LOGIN = "is_first_login";
-    public static final String PREF_MATRICOLA = "user_matr";
+    public static final String PREF_MATRICOLA = "user_matricola";
     public static final String PREF_NAME = "user_name";
     public static final String PREF_AVERAGE_MARK = "user_average_mark";
     public static final String PREF_TOTAL_CFU = "user_total_cfu";
@@ -87,7 +82,7 @@ public class User {
         return mUsername;
     }
 
-    public void setUsername(String username) {
+    private void setUsername(String username) {
         if (username != null) this.mUsername = username;
         else this.mUsername = "";
     }
@@ -96,7 +91,7 @@ public class User {
         return mPassword;
     }
 
-    public void setPassword(String password) {
+    private void setPassword(String password) {
         if (password != null) this.mPassword = password;
         else this.mPassword = "";
     }
@@ -232,7 +227,7 @@ public class User {
         return !isFacultyChosen() && hasMultiFaculty();
     }
 
-    public boolean hasMultiFaculty() {
+    private boolean hasMultiFaculty() {
         return hasFacultiesList();
     }
 

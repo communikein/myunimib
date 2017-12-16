@@ -1,8 +1,5 @@
 package com.communikein.myunimib.accountmanager;
 
-/**
- * Created by eliam on 12/9/2017.
- */
 
 public class AccountUtils {
 

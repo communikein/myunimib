@@ -11,9 +11,6 @@ import android.widget.TextView;
 
 import com.communikein.myunimib.utilities.MyunimibDateUtils;
 
-/**
- * Created by eliam on 12/15/2017.
- */
 
 public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapter.ExamAdapterViewHolder> {
 
@@ -56,9 +53,9 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapte
         mCursor.moveToPosition(position);
 
         /* Read exam's name from the cursor */
-        String name = mCursor.getString(ExamsAvailableFragment.INDEX_EXAM_COURSE_NAME);
-        String description = mCursor.getString(ExamsAvailableFragment.INDEX_EXAM_DESCRIPTION);
-        long date = (long) mCursor.getInt(ExamsAvailableFragment.INDEX_EXAM_DATE);
+        String name = mCursor.getString(ExamsEnrolledFragment.INDEX_EXAM_COURSE_NAME);
+        String description = mCursor.getString(ExamsEnrolledFragment.INDEX_EXAM_DESCRIPTION);
+        long date = (long) mCursor.getInt(ExamsEnrolledFragment.INDEX_EXAM_DATE);
 
         examAdapterViewHolder.corseNameTextView.setText(name);
         examAdapterViewHolder.descriptionTextView.setText(description);

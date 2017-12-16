@@ -6,24 +6,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by eliam on 12/5/2017.
- */
 
 public class AvailableExam extends Exam {
 
-    public static final String ARG_BEGIN_ENROLLMENT = "ARG_BEGIN_ENROLLMENT";
-    public static final String ARG_END_ENROLLMENT = "ARG_END_ENROLLMENT";
+    private static final String ARG_BEGIN_ENROLLMENT = "ARG_BEGIN_ENROLLMENT";
+    private static final String ARG_END_ENROLLMENT = "ARG_END_ENROLLMENT";
 
     private Date begin_enrollment;
     private Date end_enrollment;
 
-    public AvailableExam(ExamEnrollmentInfo enrollmentInfo, String name, Date date,
+    public AvailableExam(ExamID examID, String name, Date date,
                          String description, Date begin_enrollment, Date end_enrollment) {
-        super(enrollmentInfo.getId(), name, date, description);
+        super(examID, name, date, description);
 
         this.setBegin_enrollment(begin_enrollment);
         this.setEnd_enrollment(end_enrollment);
@@ -49,11 +45,11 @@ public class AvailableExam extends Exam {
         return end_enrollment;
     }
 
-    void setBegin_enrollment(Date begin_enrollment) {
+    private void setBegin_enrollment(Date begin_enrollment) {
         this.begin_enrollment = begin_enrollment;
     }
 
-    void setEnd_enrollment(Date end_enrollment) {
+    private void setEnd_enrollment(Date end_enrollment) {
         this.end_enrollment = end_enrollment;
     }
 

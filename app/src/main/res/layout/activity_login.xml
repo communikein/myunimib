@@ -25,7 +25,6 @@
                 android:ems="10"
                 android:inputType="textEmailAddress"
                 tools:text="e.maracani"
-                android:text="e.maracani"
                 android:hint="@string/prompt_university_email"/>
 
             <EditText

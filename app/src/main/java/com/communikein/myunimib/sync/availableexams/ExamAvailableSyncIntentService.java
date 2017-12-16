@@ -11,9 +11,6 @@ import com.communikein.myunimib.sync.SyncTask;
 
 import java.util.Date;
 
-/**
- * Created by eliam on 12/7/2017.
- */
 
 public class ExamAvailableSyncIntentService extends IntentService {
 

@@ -17,9 +17,6 @@ import com.firebase.jobdispatcher.Trigger;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by eliam on 12/15/2017.
- */
 
 public class SyncUtilsEnrolled {
     private static final int SYNC_INTERVAL_MAX_MINUTES = 10;

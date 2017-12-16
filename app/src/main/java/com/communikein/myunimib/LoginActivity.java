@@ -2,7 +2,6 @@ package com.communikein.myunimib;
 
 import android.Manifest;
 import android.accounts.Account;
-import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.app.LoaderManager;
 import android.app.ProgressDialog;
@@ -15,6 +14,7 @@ import android.support.design.widget.Snackbar;
 
 
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,35 +32,26 @@ import com.communikein.myunimib.utilities.NetworkUtils;
 import com.communikein.myunimib.utilities.UserUtils;
 import com.communikein.myunimib.utilities.Utils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class LoginActivity extends AccountAuthenticatorActivity implements
+public class LoginActivity extends AuthAppCompatActivity implements
         LoaderManager.LoaderCallbacks, EasyPermissions.PermissionCallbacks {
 
     private ActivityLoginBinding mBinding;
 
     private AccountManager mAccountManager;
-    public static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1001;
+    private static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1001;
 
     private static final int LOADER_LOGIN_ID = 2100;
     private static final int LOADER_CONFIRM_FACULTY_ID = 2101;
 
     private ProgressDialog progress;
 
-    int selectedCourse = -1;
+    private int selectedCourse = -1;
 
 
     @Override
@@ -102,7 +93,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements
                     Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
-    public void initUI() {
+    private void initUI() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
         mBinding.editTextPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -138,8 +129,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements
         });
 
         progress = new ProgressDialog(this);
-        progress.setMessage(getString(R.string.title_logging_in));
+        progress.setMessage(getString(R.string.label_logging_in));
         progress.setCancelable(false);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setTitle(R.string.title_login);
     }
 
     private void handleLoginResults(final Context context, final User user){
@@ -177,7 +172,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements
                         user.setSelectedFaculty(selected);
                         UserUtils.saveUser(user, getBaseContext());
 
-                        // Rieffettuo il login, con il corso di studio selezionato
+                        // Now that the user has selected the faculty, do the login again
                         Log.d("LOGIN_CHOOSE_FACULTY", "Trying to tell the server.");
 
                         getLoaderManager()
@@ -250,7 +245,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements
     private void attemptLogin() {
         if (mBinding.termsCheck.isChecked()) {
             if (NetworkUtils.isDeviceOnline(this)) {
-                Utils.hideKeyboard(this, true);
+                Utils.hideKeyboard(this);
 
                 // Reset errors.
                 mBinding.editTextUniversityMail.setError(null);
@@ -430,6 +425,5 @@ public class LoginActivity extends AccountAuthenticatorActivity implements
     public void onPermissionsDenied(int requestCode, List<String> perms) {
         // Do nothing
     }
-
 }
 

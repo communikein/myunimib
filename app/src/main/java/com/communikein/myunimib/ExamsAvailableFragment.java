@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,40 +23,39 @@ import com.communikein.myunimib.sync.availableexams.SyncUtilsAvailable;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * The {@link Fragment} responsible for showing the user's Available Exams.
  */
 public class ExamsAvailableFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    /*
-     * The columns of data that we are interested in displaying within our MainActivity's list of
-     * weather data.
-     */
-    public static final String[] EXAM_PROJECTION = {
+    /* The columns of data that we are interested in displaying. */
+    private static final String[] EXAM_PROJECTION = {
             ExamContract.AvailableExamEntry.COLUMN_COURSE_NAME,
             ExamContract.AvailableExamEntry.COLUMN_DATE,
             ExamContract.AvailableExamEntry.COLUMN_DESCRIPTION
     };
 
     /*
-     * We store the indices of the values in the array of Strings above to more quickly be able to
-     * access the data from our query. If the order of the Strings above changes, these indices
-     * must be adjusted to match the order of the Strings.
+     * The indices of the values in the array of Strings above.
+     * If the order of the Strings above changes, these indices must be adjusted
+     * to match the order of the Strings.
      */
     public static final int INDEX_EXAM_COURSE_NAME = 0;
     public static final int INDEX_EXAM_DATE = 1;
     public static final int INDEX_EXAM_DESCRIPTION = 2;
 
-    static final int ID_EXAMS_AVAILABLE_LOADER = 45;
+    /* Booklet Loader unique identifier */
+    private static final int ID_EXAMS_AVAILABLE_LOADER = 45;
 
+    /*  */
     private AvailableExamAdapter mExamsAdapter;
     private int mPosition = RecyclerView.NO_POSITION;
 
-    FragmentExamsBinding mBinding;
+    /*  */
+    private FragmentExamsBinding mBinding;
 
-    public ExamsAvailableFragment() {
-        // Required empty public constructor
-    }
+    /* Required empty public constructor */
+    public ExamsAvailableFragment() {}
 
 
     @Override
@@ -67,14 +67,9 @@ public class ExamsAvailableFragment extends Fragment implements
         /*
          * A LinearLayoutManager is responsible for measuring and positioning item views within a
          * RecyclerView into a linear list. This means that it can produce either a horizontal or
-         * vertical list depending on which parameter you pass in to the LinearLayoutManager
-         * constructor. In our case, we want a vertical list, so we pass in the constant from the
-         * LinearLayoutManager class for vertical lists, LinearLayoutManager.VERTICAL.
+         * vertical list.
          *
-         * There are other LayoutManagers available to display your data in uniform grids,
-         * staggered grids, and more! See the developer documentation for more details.
-         *
-         * The third parameter (shouldReverseLayout) should be true if you want to reverse your
+         * The third parameter (reverseLayout) should be true if you want to reverse your
          * layout. Generally, this is only true with horizontal lists that need to support a
          * right-to-left layout.
          */
@@ -82,8 +77,6 @@ public class ExamsAvailableFragment extends Fragment implements
                 getActivity(),
                 LinearLayoutManager.VERTICAL,
                 false);
-
-        /* setLayoutManager associates the LayoutManager we created above with our RecyclerView */
         mBinding.rvList.setLayoutManager(layoutManager);
 
         /*
@@ -92,16 +85,7 @@ public class ExamsAvailableFragment extends Fragment implements
          */
         mBinding.rvList.setHasFixedSize(true);
 
-        /*
-         * The ForecastAdapter is responsible for linking our weather data with the Views that
-         * will end up displaying our weather data.
-         *
-         * Although passing in "this" twice may seem strange, it is actually a sign of separation
-         * of concerns, which is best programming practice. The ForecastAdapter requires an
-         * Android Context (which all Activities are) as well as an onClickHandler. Since our
-         * MainActivity implements the ForecastAdapter ForecastOnClickHandler interface, "this"
-         * is also an instance of that type of handler.
-         */
+        /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
         mExamsAdapter = new AvailableExamAdapter(getActivity());
 
         return mBinding.getRoot();
@@ -110,20 +94,31 @@ public class ExamsAvailableFragment extends Fragment implements
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setTitle();
 
         /* Setting the adapter attaches it to the RecyclerView in our layout. */
         mBinding.rvList.setAdapter(mExamsAdapter);
 
-        toggleLoading(true);
-
         /*
-         * Ensures a loader is initialized and active. If the loader doesn't already exist, one is
-         * created and (if the activity/fragment is currently started) starts the loader. Otherwise
-         * the last created loader is re-used.
+         * Ensures a loader is initialized and active and shows the loading view.
+         * If the loader doesn't already exist, one is created and (if the activity/fragment is
+         * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
+        toggleLoading(true);
         getActivity().getSupportLoaderManager().initLoader(ID_EXAMS_AVAILABLE_LOADER, null, this);
 
         SyncUtilsAvailable.initialize(getActivity());
+    }
+
+    /**
+     * Change the Activity's ActionBar title.
+     */
+    private void setTitle() {
+        /* Get a reference to the MainActivity ActionBar */
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+        /* If there is an ActionBar, set it's title */
+        if (actionBar != null)
+            actionBar.setTitle(R.string.title_exams_available);
     }
 
 
@@ -133,9 +128,13 @@ public class ExamsAvailableFragment extends Fragment implements
 
         switch (id) {
             case ID_EXAMS_AVAILABLE_LOADER:
-                /* URI for all rows of weather data in our weather table */
+                /* URI for all rows of Exams data in our AvailableExam table */
                 Uri examsQueryUri = ExamContract.AvailableExamEntry.CONTENT_URI;
 
+                /*
+                 * Create a new CursorLoader and pass in the URI for the data and the list
+                 * of parameters that we are interested in.
+                 */
                 return new CursorLoader(getActivity(),
                         examsQueryUri,
                         EXAM_PROJECTION,
@@ -144,18 +143,22 @@ public class ExamsAvailableFragment extends Fragment implements
                         null);
 
             default:
+                /* If any other Loader is required, fail.  */
                 throw new RuntimeException("Loader Not Implemented: " + id);
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        /* We've got new data to display, so we swap it into the adapter */
         mExamsAdapter.swapCursor(data);
 
+        /* If no position is chosen, choose the first */
         if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-
+        /* Smoothly scroll the recyclerview to the chosen position */
         mBinding.rvList.smoothScrollToPosition(mPosition);
 
+        /* Hide the loading view and show the data */
         toggleLoading(false);
     }
 
@@ -168,10 +171,16 @@ public class ExamsAvailableFragment extends Fragment implements
         mExamsAdapter.swapCursor(null);
     }
 
+    /**
+     * Show or hide the loading view and the data view.
+     *
+     * @param show If this is set to true, this method will show the loading view and hide the
+     *             data view. If its set to false, it'll do the opposite.
+     */
     private void toggleLoading(boolean show) {
-        /* Then, hide the weather data */
+        /* Hide the recyclerview since there is no data to show yet */
         mBinding.rvList.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
-        /* Finally, show the loading indicator */
+        /* Show the loading since we're trying to get the data to display */
         mBinding.pbLoadingIndicator.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 

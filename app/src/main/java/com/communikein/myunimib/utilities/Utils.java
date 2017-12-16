@@ -12,17 +12,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-/**
- * Created by eliam on 12/2/2017.
- */
 
 public class Utils {
-    public static final int OK = 1;
-
-    public static final int HTTP_OK = 200;
-    public static final int HTTP_REDIRECT = 302;
-    public static final int HTTP_UNAUTHORIZED = 401;
-    public static final String EXCEPTION_OCCURED = "EXCEPTION_OCCURED";
 
     public static final SimpleDateFormat sdf = new SimpleDateFormat(
             "dd-MM-yyyy HH:mm:ss", Locale.getDefault());
@@ -33,23 +24,11 @@ public class Utils {
 
     public static User user;
 
-    public static boolean isInteger(String s) {
-        boolean isValidInteger = false;
-        try {
-            Integer.parseInt(s);
-
-            isValidInteger = true;
-        } catch (NumberFormatException ignore) {}
-
-        return isValidInteger;
-    }
-
-    public static void hideKeyboard(Context context, boolean hide){
+    public static void hideKeyboard(Context context){
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        if (hide)
+
+        if (imm != null)
             imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-        else
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
     public static void saveBugReport(Exception e){
@@ -57,7 +36,7 @@ public class Utils {
         FirebaseCrash.report(e);
     }
 
-    public static int dpToPx(Context context, int dp) {
+    static int dpToPx(Context context, int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 }

@@ -26,9 +26,9 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks {
 
-    ActivityMainBinding mBinding;
+    private ActivityMainBinding mBinding;
 
-    private List<Fragment> fragments = new ArrayList<>();
+    private final List<Fragment> fragments = new ArrayList<>();
 
     private static final int INDEX_FRAGMENT_HOME = 0;
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.title_logging_out));
+        progressDialog.setMessage(getString(R.string.label_logging_out));
         progressDialog.setCancelable(false);
     }
 

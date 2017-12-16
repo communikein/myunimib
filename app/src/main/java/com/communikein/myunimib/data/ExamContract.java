@@ -3,17 +3,14 @@ package com.communikein.myunimib.data;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-/**
- * Created by eliam on 12/7/2017.
- */
 
 public class ExamContract {
 
     public static final String CONTENT_AUTHORITY = "com.communikein.myunimib";
 
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static final String PATH_EXAMS = "exams";
+    private static final String PATH_EXAMS = "exams";
     public static final String PATH_EXAMS_AVAILABLE = PATH_EXAMS + "/available";
     public static final String PATH_EXAMS_ENROLLED = PATH_EXAMS + "/enrolled";
 
@@ -21,10 +18,6 @@ public class ExamContract {
     public static final String PATH_BOOKLET_COURSES = PATH_BOOKLET + "/courses";
 
     public static class ExamEntry implements BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-                .appendPath(PATH_EXAMS)
-                .build();
-
         public static final String COLUMN_COURSE_NAME = "course_name";
         public static final String COLUMN_DATE = "date_exam";
         public static final String COLUMN_DESCRIPTION = "description";
@@ -45,6 +38,20 @@ public class ExamContract {
 
         public static final String COLUMN_BEGIN_ENROLLMENT = "begin_enrollment";
         public static final String COLUMN_END_ENROLLMENT = "end_enrollment";
+
+        /**
+         * Builds a URI that adds the booklet entry ID to the end of the booklet content URI path.
+         * This is used to query details about a single booklet entry by ID. This is what we
+         * use for the detail view query.
+         *
+         * @param adsce_id ID of the booklet entry
+         * @return Uri to query details about a single booklet entry
+         */
+        public static Uri buildExamUriWithId(int adsce_id) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(Integer.toString(adsce_id))
+                    .build();
+        }
     }
 
     public static final class EnrolledExamEntry extends ExamEntry {
@@ -61,6 +68,20 @@ public class ExamContract {
         public static final String COLUMN_RESERVED = "reserved";
         public static final String COLUMN_TEACHERS = "teachers";
         public static final String COLUMN_CERTIFICATE_FILE_NAME = "certificate_file_name";
+
+        /**
+         * Builds a URI that adds the booklet entry ID to the end of the booklet content URI path.
+         * This is used to query details about a single booklet entry by ID. This is what we
+         * use for the detail view query.
+         *
+         * @param adsce_id ID of the booklet entry
+         * @return Uri to query details about a single booklet entry
+         */
+        public static Uri buildExamUriWithId(int adsce_id) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(Integer.toString(adsce_id))
+                    .build();
+        }
     }
 
     public static final class BookletEntry implements BaseColumns {
@@ -80,16 +101,16 @@ public class ExamContract {
         public static final String COLUMN_CFU = "cfu";
 
         /**
-         * Builds a URI that adds the weather date to the end of the forecast content URI path.
-         * This is used to query details about a single weather entry by date. This is what we
-         * use for the detail view query. We assume a normalized date is passed to this method.
+         * Builds a URI that adds the booklet entry ID to the end of the booklet content URI path.
+         * This is used to query details about a single booklet entry by ID. This is what we
+         * use for the detail view query.
          *
-         * @param date Normalized date in milliseconds
-         * @return Uri to query details about a single weather entry
+         * @param adsce_id ID of the booklet entry
+         * @return Uri to query details about a single booklet entry
          */
-        public static Uri buildWeatherUriWithDate(long date) {
+        public static Uri buildBookletUriWithId(int adsce_id) {
             return CONTENT_URI.buildUpon()
-                    .appendPath(Long.toString(date))
+                    .appendPath(Integer.toString(adsce_id))
                     .build();
         }
     }

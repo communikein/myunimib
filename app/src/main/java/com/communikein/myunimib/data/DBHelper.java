@@ -8,11 +8,8 @@ import com.communikein.myunimib.data.ExamContract.AvailableExamEntry;
 import com.communikein.myunimib.data.ExamContract.EnrolledExamEntry;
 import com.communikein.myunimib.data.ExamContract.BookletEntry;
 
-/**
- * Created by eliam on 12/5/2017.
- */
 
-public class DBHelper extends SQLiteOpenHelper {
+class DBHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 15;
     private static final String DATABASE_NAME = "S3data.db";
@@ -62,12 +59,12 @@ public class DBHelper extends SQLiteOpenHelper {
                 EnrolledExamEntry.COLUMN_COURSE_NAME        + " TEXT NOT NULL," +
                 EnrolledExamEntry.COLUMN_DESCRIPTION        + " TEXT, " +
                 EnrolledExamEntry.COLUMN_DATE               + " INTEGER, " +
-                EnrolledExamEntry.COLUMN_CODE               + " STRING, " +
-                EnrolledExamEntry.COLUMN_BUILDING           + " STRING, " +
-                EnrolledExamEntry.COLUMN_ROOM               + " STRING, " +
-                EnrolledExamEntry.COLUMN_RESERVED           + " STRING, " +
-                EnrolledExamEntry.COLUMN_TEACHERS           + " STRING, " +
-                EnrolledExamEntry.COLUMN_CERTIFICATE_FILE_NAME + " STRING, " +
+                EnrolledExamEntry.COLUMN_CODE               + " TEXT, " +
+                EnrolledExamEntry.COLUMN_BUILDING           + " TEXT, " +
+                EnrolledExamEntry.COLUMN_ROOM               + " TEXT, " +
+                EnrolledExamEntry.COLUMN_RESERVED           + " TEXT, " +
+                EnrolledExamEntry.COLUMN_TEACHERS           + " TEXT, " +
+                EnrolledExamEntry.COLUMN_CERTIFICATE_FILE_NAME + " TEXT, " +
 
                 EnrolledExamEntry.COLUMN_ADSCE_ID           + " INTEGER, " +
                 EnrolledExamEntry.COLUMN_CDS_ESA_ID         + " INTEGER, " +

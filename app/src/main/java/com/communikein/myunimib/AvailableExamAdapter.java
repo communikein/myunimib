@@ -11,9 +11,6 @@ import android.widget.TextView;
 
 import com.communikein.myunimib.utilities.MyunimibDateUtils;
 
-/**
- * Created by eliam on 12/7/2017.
- */
 
 public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdapter.ExamAdapterViewHolder> {
 

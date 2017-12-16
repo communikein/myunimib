@@ -2,7 +2,6 @@ package com.communikein.myunimib.utilities;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Base64;
 
 import com.communikein.myunimib.User;
 import com.communikein.myunimib.data.type.AvailableExam;
@@ -15,19 +14,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-/**
- * Created by eliam on 12/4/2017.
- */
 
 public class UserUtils {
-
-    private static String getAuthToken(String user, String pwd) {
-        if (user.isEmpty() || pwd.isEmpty()) return null;
-
-        String authString = user + ":" + pwd;
-        byte[] authEncBytes = Base64.encode(authString.getBytes(), Base64.NO_WRAP);
-        return new String(authEncBytes);
-    }
 
     public static User updateSessionId(User user, String cookie, Context context) {
         if (cookie != null && cookie.contains("JSESSIONID")) {
@@ -92,6 +80,7 @@ public class UserUtils {
 
         Utils.user = null;
 
+        // TODO: Implement removing the account from the AccountManager
         return true;
     }
 

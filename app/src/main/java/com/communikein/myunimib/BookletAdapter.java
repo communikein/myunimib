@@ -9,9 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-/**
- * Created by eliam on 12/6/2017.
- */
 
 public class BookletAdapter extends RecyclerView.Adapter<BookletAdapter.BookletAdapterViewHolder> {
 

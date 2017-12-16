@@ -2,34 +2,26 @@ package com.communikein.myunimib.data.type;
 
 import com.communikein.myunimib.utilities.Utils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 
-/**
- * Created by eliam on 12/5/2017.
- */
 
 public class Exam {
-
-    public static final String EXAM = "EXAM";
 
     private static final String ARG_NAME = "ARG_NAME";
     private static final String ARG_DATE = "ARG_DATE";
     private static final String ARG_DESCRIPTION = "ARG_DESCRIPTION";
 
-    protected ExamID id;
+    private ExamID id;
     private String name;
     private Date date;
     private String description;
 
 
-    public Exam(ExamID id, String name, Date date, String description) {
+    Exam(ExamID id, String name, Date date, String description) {
         setId(id);
 
         this.setName(name);
@@ -37,7 +29,7 @@ public class Exam {
         this.setDescription(description);
     }
 
-    public Exam(JSONObject obj) throws JSONException, NullPointerException, ParseException {
+    Exam(JSONObject obj) throws JSONException, NullPointerException, ParseException {
         // Creating mock ExamID
         setId(new ExamID(new JSONObject()));
 
@@ -63,15 +55,15 @@ public class Exam {
         this.id = id;
     }
 
-    public void setName(String name) {
+    private void setName(String name) {
         this.name = name;
     }
 
-    public void setDate(Date date) {
+    private void setDate(Date date) {
         this.date = date;
     }
 
-    public void setDescription(String description) {
+    private void setDescription(String description) {
         this.description = description;
     }
 
@@ -89,7 +81,7 @@ public class Exam {
 
 
 
-    public JSONObject toJSON() {
+    JSONObject toJSON() {
         JSONObject obj = new JSONObject();
 
         try {

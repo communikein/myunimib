@@ -11,9 +11,6 @@ import android.os.Bundle;
 
 import com.communikein.myunimib.LoginActivity;
 
-/**
- * Created by eliam on 12/9/2017.
- */
 
 class S3Authenticator extends AbstractAccountAuthenticator {
 

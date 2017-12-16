@@ -27,9 +27,9 @@ import java.util.Map;
 
 public class ProfilePictureVolleyRequest {
 
-    private Context mContext;
+    private final Context mContext;
     private RequestQueue mRequestQueue;
-    private ImageLoader mImageLoader;
+    private final ImageLoader mImageLoader;
 
 
     public ProfilePictureVolleyRequest(Context context, User user) {
@@ -113,7 +113,7 @@ public class ProfilePictureVolleyRequest {
 
     final class ProfilePictureRequest extends ImageRequest {
 
-        private User mUser;
+        private final User mUser;
 
         ProfilePictureRequest(User user, Response.Listener<Bitmap> listener, int maxWidth,
                                 int maxHeight, ImageView.ScaleType scaleType,

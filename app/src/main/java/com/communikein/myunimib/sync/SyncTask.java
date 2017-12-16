@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.communikein.myunimib.User;
@@ -11,7 +12,6 @@ import com.communikein.myunimib.data.ExamContract;
 import com.communikein.myunimib.data.type.AvailableExam;
 import com.communikein.myunimib.data.type.BookletEntry;
 import com.communikein.myunimib.data.type.EnrolledExam;
-import com.communikein.myunimib.data.type.ExamEnrollmentInfo;
 import com.communikein.myunimib.data.type.ExamID;
 import com.communikein.myunimib.sync.availableexams.SyncUtilsAvailable;
 import com.communikein.myunimib.sync.booklet.SyncUtilsBooklet;
@@ -287,7 +287,7 @@ public class SyncTask {
                             .select("a#app-toolbarTipoAppello")
                             .first()
                             .attr("href");
-                    HashMap<String, String> extraInfo = getExtraInfoFromUrl(extraInfoString);
+                    ExamID examID = getExamIdFromUrl(extraInfoString);
 
                     String name = el.child(1).text();
                     String date_str = el.child(2).text();
@@ -300,16 +300,13 @@ public class SyncTask {
                     Date enrollment_window_end = MyunimibDateUtils.dateFormat
                             .parse(enrollment_window_str[1]);
 
-                    ExamEnrollmentInfo enrollmentInfo =
-                            new ExamEnrollmentInfo(extraInfo);
-                    AvailableExam exam =
-                            new AvailableExam(
-                                    enrollmentInfo,
-                                    name,
-                                    date,
-                                    description,
-                                    enrollment_window_begin,
-                                    enrollment_window_end);
+                    AvailableExam exam = new AvailableExam(
+                            examID,
+                            name,
+                            date,
+                            description,
+                            enrollment_window_begin,
+                            enrollment_window_end);
 
                     exams.add(exam);
                 }
@@ -488,21 +485,37 @@ public class SyncTask {
         return result;
     }
 
-    private static HashMap<String, String> getExtraInfoFromUrl(String url) {
-        HashMap<String, String> result = new HashMap<>();
-
+    private static ExamID getExamIdFromUrl(String url) {
         String tmp = url.substring(url.indexOf("?") + 1);
         String extraInfo[] = tmp.split("&");
 
+        String app_id = null, cds_esa_id = null, adsce_id = null, att_did_esa_id = null;
         for (String str : extraInfo) {
             String name = str.substring(0, str.indexOf("="));
-            String value = str.substring(str.indexOf("=") + 1);
+            switch (name){
+                case CDS_ESA_ID:
+                    cds_esa_id = str.substring(str.indexOf("=") + 1);
+                    break;
 
-            if (!value.isEmpty())
-                result.put(name, value);
+                case APP_ID:
+                    app_id = str.substring(str.indexOf("=") + 1);
+                    break;
+
+                case ADSCE_ID:
+                    adsce_id = str.substring(str.indexOf("=") + 1);
+                    break;
+
+                case ATT_DID_ESA_ID:
+                    att_did_esa_id = str.substring(str.indexOf("=") + 1);
+                    break;
+            }
         }
 
-        return result;
+        if (!TextUtils.isEmpty(app_id) && !TextUtils.isEmpty(cds_esa_id) &&
+                !TextUtils.isEmpty(att_did_esa_id) && !TextUtils.isEmpty(adsce_id))
+            return new ExamID(app_id, cds_esa_id, att_did_esa_id, adsce_id);
+        else
+            return null;
     }
 
 }

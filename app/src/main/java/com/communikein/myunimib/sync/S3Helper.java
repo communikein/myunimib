@@ -53,7 +53,7 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/Home.do;";
     private static final String URL_LOGIN =
             "https://s3w.si.unimib.it/esse3/auth/Logon.do;";
-    static final String URL_LOGOUT =
+    private static final String URL_LOGOUT =
             "https://s3w.si.unimib.it/esse3/Logout.do;";
     static final String URL_AVAILABLE_EXAMS =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/Appelli.do;";
@@ -66,15 +66,15 @@ public class S3Helper {
     public static final String URL_CORTESIA =
             "http://www.si.unimib.it/cortesias3.html";
 
-    public static final int ERROR_GENERIC = -1;
+    private static final int ERROR_GENERIC = -1;
     public static final int ERROR_S3_NOT_AVAILABLE = -2;
     public static final int ERROR_WRONG_PASSWORD = -3;
     public static final int ERROR_CONNECTION_TIMEOUT = -4;
     public static final int ERROR_FACULTY_TO_CHOOSE = -5;
-    public static final int ERROR_CAREER_OVER = -6;
+    private static final int ERROR_CAREER_OVER = -6;
 
     public static final int OK_LOGGED_IN = 1;
-    public static final int OK_LOGGED_OUT = 2;
+    private static final int OK_LOGGED_OUT = 2;
 
 
     private S3Helper() {}
@@ -85,7 +85,7 @@ public class S3Helper {
                 "JSESSIONID=" + user.getSessionID();
         if (user.isFacultyChosen())
                 url_string += "?stu_id=" + user.getSelectedFaculty();
-        URL result = null;
+        URL result;
 
         try {
             result = new URL(url_string);
@@ -155,9 +155,7 @@ public class S3Helper {
     }
 
     static HttpsURLConnection getPage(User user, String url, HashMap<String, String> headers,
-                                             Context context) throws IOException,
-            CertificateException, KeyStoreException, NoSuchAlgorithmException,
-            KeyManagementException, NoSuchProviderException {
+                                             Context context) throws IOException {
 
         String USER_AGENT = System.getProperty("http.agent");
 
@@ -205,7 +203,7 @@ public class S3Helper {
 
 
 
-    static int doLogin(User user, Context context) throws SocketTimeoutException {
+    private static int doLogin(User user, Context context) throws SocketTimeoutException {
         int ris;
 
         HashMap<String, String> headers = new HashMap<>();
@@ -216,7 +214,7 @@ public class S3Helper {
             int respCode = resp.getResponseCode();
 
             // If the server is not available
-            if (respCode == Utils.HTTP_REDIRECT) {
+            if (respCode == HttpURLConnection.HTTP_MOVED_TEMP) {
                 ris = ERROR_S3_NOT_AVAILABLE;
                 Log.e("LOGIN_PROCESS", "S3 not available.");
             }
@@ -236,7 +234,7 @@ public class S3Helper {
                 Log.d("LOGIN_PROCESS", "AUTH TOKEN = " + user.getAuthToken());
 
                 // If the user needs to authenticate
-                if (respCode == Utils.HTTP_UNAUTHORIZED) {
+                if (respCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     Log.d("LOGIN_PROCESS", "User not authenticated yet.");
                     headers = new HashMap<>();
                     headers.put("Accept", "text/html");
@@ -252,7 +250,7 @@ public class S3Helper {
                 }
 
                 // If the server recognise the user as logged-in
-                if (respCode == Utils.HTTP_OK) {
+                if (respCode == HttpURLConnection.HTTP_OK) {
                     Log.d("LOGIN_PROCESS", "User logged in.");
 
                     // If I'm sure the user only has one faculty
@@ -282,8 +280,7 @@ public class S3Helper {
 
                             // If the app doesn't know if the user has more faculties to choose from
                         } else {
-                            SparseArray<String> faculties =
-                                    hasMultiFaculty(user, html, context, true);
+                            SparseArray<String> faculties = hasMultiFaculty(user, html, context);
 
                             if (faculties == null) {
                                 Log.d("LOGIN_PROCESS", "ONLY ONE FACULTY.");
@@ -357,7 +354,7 @@ public class S3Helper {
             Document doc;
             String result = S3Helper.getHTML(response.getInputStream());
 
-            if (response.getResponseCode() == Utils.HTTP_OK){
+            if (response.getResponseCode() == HttpURLConnection.HTTP_OK){
                 doc = Jsoup.parse(result);
                 Element el2 = doc.select("#esse3old > table:has(div.titolopagina)").first();
 
@@ -403,9 +400,8 @@ public class S3Helper {
         }
     }
 
-    private static SparseArray<String> hasMultiFaculty(User user, String html, Context context,
-                                                          boolean downloadList) throws IOException,
-            CertificateException, NoSuchAlgorithmException, KeyStoreException,
+    private static SparseArray<String> hasMultiFaculty(User user, String html, Context context)
+            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
             KeyManagementException, NoSuchProviderException {
         if (html == null) {
             HashMap<String, String> headers = new HashMap<>();
@@ -420,13 +416,10 @@ public class S3Helper {
 
         boolean hasMultiFaculty = el1.text().toLowerCase().equals("registrato");
 
-        if (hasMultiFaculty) {
-            if (downloadList)
-                return downloadFacultiesList(user, context);
-            else
-                return new SparseArray<>();
-        }
-        return null;
+        if (hasMultiFaculty)
+            return downloadFacultiesList(user, context);
+        else
+            return null;
     }
 
     private static SparseArray<String> downloadFacultiesList(User user, Context context) throws IOException,
@@ -469,7 +462,7 @@ public class S3Helper {
         return courses;
     }
 
-    private static int handleFacultyChoice(User user, Context context) throws SocketTimeoutException {
+    private static int handleFacultyChoice(User user, Context context) {
         int ris;
 
         // If the user has only one faculty then is automatically logged-in
@@ -488,7 +481,7 @@ public class S3Helper {
                 if (!TextUtils.isEmpty(faculty)) {
                     // Tell the server which faculty the user wants
                     int code = getPage(user, faculty, headers, context).getResponseCode();
-                    if (code == Utils.HTTP_OK) {
+                    if (code == HttpURLConnection.HTTP_OK) {
                         if (!isCareerOver(user, context)) {
                             ris = OK_LOGGED_IN;
 
@@ -499,10 +492,10 @@ public class S3Helper {
                             ris = ERROR_CAREER_OVER;
                     }
                     else {
-                        code = getPage(user, URL_LOGIN, headers, context).getResponseCode();
+                        getPage(user, URL_LOGIN, headers, context).getResponseCode();
                         code = getPage(user, faculty, headers, context).getResponseCode();
 
-                        if (code == Utils.HTTP_OK) {
+                        if (code == HttpURLConnection.HTTP_OK) {
                             if (!isCareerOver(user, context)) {
                                 ris = OK_LOGGED_IN;
 

@@ -3,18 +3,15 @@ package com.communikein.myunimib.data.type;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by eliam on 12/5/2017.
- */
 
 public class ExamID {
 
     final public static String EXAM_ID = "EXAM_ID";
 
-    final public static String ARG_CDS_ESA_ID = "ARG_CDS_ESA_ID";
-    final public static String ARG_ATT_DID_ESA_ID = "ARG_ATT_DID_ESA_ID";
-    final public static String ARG_APP_ID = "ARG_APP_ID";
-    final public static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
+    private final static String ARG_CDS_ESA_ID = "ARG_CDS_ESA_ID";
+    private final static String ARG_ATT_DID_ESA_ID = "ARG_ATT_DID_ESA_ID";
+    private final static String ARG_APP_ID = "ARG_APP_ID";
+    private final static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
 
     private int cds_esa_id;
     private int att_did_esa_id;
@@ -47,15 +44,6 @@ public class ExamID {
         this.app_id = Integer.parseInt(app_id);
         this.att_did_esa_id = Integer.parseInt(att_did_esa_id);
         this.cds_esa_id = Integer.parseInt(cds_esa_id);
-    }
-
-    public ExamID(ExamID from) throws NullPointerException {
-        if (from == null) throw new NullPointerException();
-
-        this.adsce_id = from.getADSCE_ID();
-        this.app_id = from.getAPP_ID();
-        this.att_did_esa_id = from.getATT_DID_ESA_ID();
-        this.cds_esa_id = from.getCDS_ESA_ID();
     }
 
 

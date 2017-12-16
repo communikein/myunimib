@@ -9,9 +9,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by eliam on 12/15/2017.
- */
 
 public class EnrolledExam extends Exam {
 
@@ -35,6 +32,7 @@ public class EnrolledExam extends Exam {
                         String certificatePath) {
         super(id, name, date, description);
 
+        setCode(code);
         setBuilding(building);
         setRoom(room);
         setReserved(reserved);
@@ -64,7 +62,7 @@ public class EnrolledExam extends Exam {
 
     public String getCode() { return this.mCode; }
 
-    public void setCode(String code) {
+    private void setCode(String code) {
         this.mCode = code;
     }
 
@@ -72,7 +70,7 @@ public class EnrolledExam extends Exam {
         return this.mBuilding;
     }
 
-    public void setBuilding(String building) {
+    private void setBuilding(String building) {
         this.mBuilding = building;
     }
 
@@ -80,7 +78,7 @@ public class EnrolledExam extends Exam {
         return this.mRoom;
     }
 
-    public void setRoom(String room) {
+    private void setRoom(String room) {
         this.mRoom = room;
     }
 
@@ -88,7 +86,7 @@ public class EnrolledExam extends Exam {
         return this.mReserved;
     }
 
-    public void setReserved(String reserved) {
+    private void setReserved(String reserved) {
         this.mReserved = reserved;
     }
 
@@ -104,11 +102,11 @@ public class EnrolledExam extends Exam {
         return array;
     }
 
-    public void setTeachers(ArrayList<String> teachers) {
+    private void setTeachers(ArrayList<String> teachers) {
         this.mTeachers = teachers;
     }
 
-    public void setTeachers(JSONArray array) {
+    private void setTeachers(JSONArray array) {
         ArrayList<String> teachers = new ArrayList<>();
 
         try {
@@ -125,7 +123,7 @@ public class EnrolledExam extends Exam {
         return mCertificatePath;
     }
 
-    public void setCertificatePath(String certificatePath) {
+    private void setCertificatePath(String certificatePath) {
         this.mCertificatePath = certificatePath;
     }
 

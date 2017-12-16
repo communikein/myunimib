@@ -6,9 +6,6 @@ import android.support.v7.preference.PreferenceManager;
 
 import com.communikein.myunimib.R;
 
-/**
- * Created by eliam on 12/14/2017.
- */
 
 public class PreferenceUtils {
 

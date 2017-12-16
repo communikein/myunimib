@@ -5,13 +5,12 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.Volley;
 import com.communikein.myunimib.databinding.FragmentHomeBinding;
 import com.communikein.myunimib.sync.ProfilePictureVolleyRequest;
 import com.communikein.myunimib.sync.S3Helper;
@@ -22,13 +21,14 @@ import com.communikein.myunimib.utilities.Utils;
 /**
  * A simple {@link Fragment} subclass.
  */
+
 public class HomeFragment extends Fragment {
 
-    FragmentHomeBinding mBinding;
+    /*  */
+    private FragmentHomeBinding mBinding;
 
-    public HomeFragment() {
-        // Required empty public constructor
-    }
+    /* Required empty public constructor */
+    public HomeFragment() {}
 
 
     @Override
@@ -46,6 +46,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setTitle();
 
         mBinding.userNameTextView.setText(Utils.user.getName());
         mBinding.matricolaTextView.setText(Utils.user.getMatricola());
@@ -53,6 +54,17 @@ public class HomeFragment extends Fragment {
         mBinding.cfuTextView.setText(String.valueOf(Utils.user.getTotalCFU()));
 
         loadProfilePicture();
+    }
+
+    /**
+     * Change the Activity's ActionBar title.
+     */
+    private void setTitle() {
+        /* Get a reference to the MainActivity ActionBar */
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+        /* If there is an ActionBar, set it's title */
+        if (actionBar != null)
+            actionBar.setTitle(R.string.title_home);
     }
 
     private void loadProfilePicture(){

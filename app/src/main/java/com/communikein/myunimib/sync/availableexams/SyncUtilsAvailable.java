@@ -17,9 +17,6 @@ import com.firebase.jobdispatcher.Trigger;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by eliam on 12/7/2017.
- */
 
 public class SyncUtilsAvailable {
 

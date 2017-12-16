@@ -12,9 +12,6 @@ import org.json.JSONException;
 
 import java.text.ParseException;
 
-/**
- * Created by eliam on 12/6/2017.
- */
 
 public class S3JsonUtils {
 
@@ -38,37 +35,33 @@ public class S3JsonUtils {
         JSONArray bookletJson = new JSONArray(jsonString);
         ContentValues[] contentValues = new ContentValues[bookletJson.length()];
 
-        try {
-            for (int i = 0; i < bookletJson.length(); i++) {
-                BookletEntry entry = new BookletEntry(bookletJson.getJSONObject(i));
+        for (int i = 0; i < bookletJson.length(); i++) {
+            BookletEntry entry = new BookletEntry(bookletJson.getJSONObject(i));
 
-                ContentValues value = new ContentValues();
-                value.put(
-                        ExamContract.BookletEntry.COLUMN_COURSE_NAME,
-                        entry.getName());
-                value.put(
-                        ExamContract.BookletEntry.COLUMN_DATE,
-                        entry.getMillis());
-                value.put(
-                        ExamContract.BookletEntry.COLUMN_ADSCE_ID,
-                        entry.getADSCE_ID());
-                value.put(
-                        ExamContract.BookletEntry.COLUMN_CFU,
-                        entry.getCfu());
-                value.put(
-                        ExamContract.BookletEntry.COLUMN_CODE,
-                        entry.getCode());
-                value.put(
-                        ExamContract.BookletEntry.COLUMN_MARK,
-                        entry.getScore());
-                value.put(
-                        ExamContract.BookletEntry.COLUMN_STATE,
-                        entry.getState());
+            ContentValues value = new ContentValues();
+            value.put(
+                    ExamContract.BookletEntry.COLUMN_COURSE_NAME,
+                    entry.getName());
+            value.put(
+                    ExamContract.BookletEntry.COLUMN_DATE,
+                    entry.getMillis());
+            value.put(
+                    ExamContract.BookletEntry.COLUMN_ADSCE_ID,
+                    entry.getADSCE_ID());
+            value.put(
+                    ExamContract.BookletEntry.COLUMN_CFU,
+                    entry.getCfu());
+            value.put(
+                    ExamContract.BookletEntry.COLUMN_CODE,
+                    entry.getCode());
+            value.put(
+                    ExamContract.BookletEntry.COLUMN_MARK,
+                    entry.getScore());
+            value.put(
+                    ExamContract.BookletEntry.COLUMN_STATE,
+                    entry.getState());
 
-                contentValues[i] = value;
-            }
-        } catch (ParseException e) {
-            contentValues = new ContentValues[0];
+            contentValues[i] = value;
         }
 
         return contentValues;

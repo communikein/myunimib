@@ -13,9 +13,6 @@ import com.firebase.jobdispatcher.RetryStrategy;
 
 import java.util.Date;
 
-/**
- * Created by eliam on 12/6/2017.
- */
 
 public class BookletJobService extends JobService {
 

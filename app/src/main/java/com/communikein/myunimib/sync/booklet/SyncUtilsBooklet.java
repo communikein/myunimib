@@ -17,9 +17,6 @@ import com.firebase.jobdispatcher.Trigger;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by eliam on 12/5/2017.
- */
 
 public class SyncUtilsBooklet {
 
@@ -43,7 +40,7 @@ public class SyncUtilsBooklet {
                 .setTag(REMINDER_JOB_TAG)
                 .setLifetime(Lifetime.FOREVER)
                 .setReplaceCurrent(true)
-                .setTrigger(Trigger.executionWindow(SYNC_WINDOW_SECONDS, SYNC_WINDOW_SECONDS))
+                .setTrigger(Trigger.executionWindow(SYNC_INTERVAL_MIN_SECONDS, SYNC_WINDOW_SECONDS))
                 .setRecurring(true)
                 .build();
 
