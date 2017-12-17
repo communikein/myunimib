@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-
+@SuppressWarnings("unused")
 public class User {
 
     public static final String PREFERENCES_USER = "user_details";
@@ -55,7 +55,7 @@ public class User {
         setPassword(password);
         setAuthToken(username, password);
         setSessionID(null);
-        setFaculties(new SparseArray<String>());
+        setFaculties(new SparseArray<>());
         setSelectedFaculty(-1);
         setIsFirstLogin(true);
         setMatricola(null);
@@ -75,7 +75,7 @@ public class User {
         setTotalCFU(totalCFU);
         setAverageMark(averageMark);
         setIsFirstLogin(is_first_login);
-        setFaculties(new SparseArray<String>());
+        setFaculties(new SparseArray<>());
         setSelectedFaculty(-1);
     }
 

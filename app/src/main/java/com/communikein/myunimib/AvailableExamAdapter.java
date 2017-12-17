@@ -24,7 +24,7 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdap
      *
      * @param context Used to talk to the UI and app resources
      */
-    public AvailableExamAdapter(@NonNull Context context) {
+    AvailableExamAdapter(@NonNull Context context) {
         mContext = context;
     }
 

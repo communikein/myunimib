@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-
+@SuppressWarnings("unused")
 public class NetworkUtils {
     private static final int TYPE_CONNECTION_ERROR = -1;
 

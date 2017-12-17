@@ -38,7 +38,6 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -109,12 +108,9 @@ public class S3Helper {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
             tmf.init(keyStore);
 
-            HostnameVerifier hostnameVerifier = new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    Log.e("CipherUsed", session.getCipherSuite());
-                    return hostname.compareTo("s3w.si.unimib.it") == 0;
-                }
+            HostnameVerifier hostnameVerifier = (hostname, session) -> {
+                Log.e("CipherUsed", session.getCipherSuite());
+                return hostname.compareTo("s3w.si.unimib.it") == 0;
             };
             HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
@@ -135,7 +131,9 @@ public class S3Helper {
 
         String USER_AGENT = System.getProperty("http.agent");
 
-        HttpsURLConnection con = (HttpsURLConnection) buildUrl(user, url).openConnection();
+        URL url_target = buildUrl(user, url);
+        if (url_target == null) return null;
+        HttpsURLConnection con = (HttpsURLConnection) url_target.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "text/html");
         con.setRequestProperty("User-Agent", USER_AGENT);

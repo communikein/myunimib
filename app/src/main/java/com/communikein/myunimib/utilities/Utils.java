@@ -2,7 +2,6 @@ package com.communikein.myunimib.utilities;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.TypedValue;
 import android.view.inputmethod.InputMethodManager;
 
 import com.communikein.myunimib.User;
@@ -34,10 +33,6 @@ public class Utils {
     public static void saveBugReport(Exception e){
         e.printStackTrace();
         FirebaseCrash.report(e);
-    }
-
-    static int dpToPx(Context context, int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 }
 

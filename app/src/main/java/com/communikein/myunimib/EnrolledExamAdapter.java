@@ -24,7 +24,7 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapte
      *
      * @param context Used to talk to the UI and app resources
      */
-    public EnrolledExamAdapter(@NonNull Context context) {
+    EnrolledExamAdapter(@NonNull Context context) {
         mContext = context;
     }
 

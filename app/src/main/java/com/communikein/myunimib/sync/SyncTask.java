@@ -491,19 +491,21 @@ public class SyncTask {
         // Try to get the private page
         HttpsURLConnection response = S3Helper.getPage(user, url, context);
 
-        int s3_response = response.getResponseCode();
-        String html = null;
-        if (s3_response == HttpURLConnection.HTTP_OK) {
-            try {
-                html = getHTML(response.getInputStream());
-            } catch (FileNotFoundException e) {
-                html = null;
+        if (response != null) {
+            int s3_response = response.getResponseCode();
+            String html = null;
+            if (s3_response == HttpURLConnection.HTTP_OK) {
+                try {
+                    html = getHTML(response.getInputStream());
+                } catch (FileNotFoundException e) {
+                    html = null;
+                }
             }
-        }
 
-        if (html != null)
-            result.putString(PARAM_KEY_HTML, html);
-        result.putInt(PARAM_KEY_RESPONSE, s3_response);
+            if (html != null)
+                result.putString(PARAM_KEY_HTML, html);
+            result.putInt(PARAM_KEY_RESPONSE, s3_response);
+        }
 
         return result;
     }

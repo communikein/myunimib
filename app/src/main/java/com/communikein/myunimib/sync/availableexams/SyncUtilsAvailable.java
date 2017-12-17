@@ -86,39 +86,36 @@ public class SyncUtilsAvailable {
          * our UI to lag. Therefore, we create a thread in which we will run the query
          * to check the contents of our ContentProvider.
          */
-        Thread checkForEmpty = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        Thread checkForEmpty = new Thread(() -> {
 
-                /* URI for every row of the booklet in the table*/
-                Uri examsQueryUri = ExamContract.AvailableExamEntry.CONTENT_URI;
+            /* URI for every row of the booklet in the table*/
+            Uri examsQueryUri = ExamContract.AvailableExamEntry.CONTENT_URI;
 
-                /*
-                 * Since this query is going to be used only as a check to see if we have any
-                 * data (rather than to display data), we just need to PROJECT the ID of each
-                 * row. In our queries where we display data, we need to PROJECT more columns
-                 * to determine what weather details need to be displayed.
-                 */
-                String[] projectionColumns = {ExamContract.ExamEntry._ID};
+            /*
+             * Since this query is going to be used only as a check to see if we have any
+             * data (rather than to display data), we just need to PROJECT the ID of each
+             * row. In our queries where we display data, we need to PROJECT more columns
+             * to determine what weather details need to be displayed.
+             */
+            String[] projectionColumns = {ExamContract.ExamEntry._ID};
 
-                /* Here, we perform the query to check to see if we have any weather data */
-                Cursor cursor = context.getContentResolver().query(
-                        examsQueryUri,
-                        projectionColumns,
-                        null,
-                        null,
-                        null);
-                /*
-                 * If the Cursor was null OR if it was empty, we need to sync immediately to
-                 * be able to display data to the user.
-                 */
-                if (null == cursor || cursor.getCount() == 0) {
-                    startImmediateSync(context);
-                }
-
-                /* Make sure to close the Cursor to avoid memory leaks! */
-                if (cursor != null) cursor.close();
+            /* Here, we perform the query to check to see if we have any weather data */
+            Cursor cursor = context.getContentResolver().query(
+                    examsQueryUri,
+                    projectionColumns,
+                    null,
+                    null,
+                    null);
+            /*
+             * If the Cursor was null OR if it was empty, we need to sync immediately to
+             * be able to display data to the user.
+             */
+            if (null == cursor || cursor.getCount() == 0) {
+                startImmediateSync(context);
             }
+
+            /* Make sure to close the Cursor to avoid memory leaks! */
+            if (cursor != null) cursor.close();
         });
 
         /* Finally, once the thread is prepared, fire it off to perform our checks. */

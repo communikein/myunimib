@@ -15,7 +15,7 @@ class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "S3data.db";
 
 
-    public DBHelper(final Context context){
+    DBHelper(final Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -89,7 +89,7 @@ class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public static String encodeSQL(String in){
+    static String encodeSQL(String in){
         if (in == null) return "";
         return in.replaceAll("'", "&#39;");
     }

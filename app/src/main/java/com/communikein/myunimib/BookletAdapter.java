@@ -22,7 +22,7 @@ public class BookletAdapter extends RecyclerView.Adapter<BookletAdapter.BookletA
      *
      * @param context Used to talk to the UI and app resources
      */
-    public BookletAdapter(@NonNull Context context) {
+    BookletAdapter(@NonNull Context context) {
         mContext = context;
     }
 

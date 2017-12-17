@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <!-- MANAGE_ACCOUNTS permission required to remove the Account from the AccountManager -->
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
@@ -95,7 +96,8 @@
 
         <!-- This is the service responsible for the account manager -->
         <service
-            android:name=".accountmanager.S3AuthenticatorService">
+            android:name=".accountmanager.S3AuthenticatorService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>

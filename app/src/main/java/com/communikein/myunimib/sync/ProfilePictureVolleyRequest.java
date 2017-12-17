@@ -12,7 +12,6 @@ import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
@@ -88,20 +87,16 @@ public class ProfilePictureVolleyRequest {
         protected Request<Bitmap> makeImageRequest(String requestUrl, int maxWidth,
                                                    int maxHeight, ImageView.ScaleType scaleType,
                                                    final String cacheKey) {
-            ProfilePictureRequest request = new ProfilePictureRequest(mUser, new Response.Listener<Bitmap>() {
-                @Override
-                public void onResponse(Bitmap response) {
-                    onGetImageSuccess(cacheKey, response);
-                }
-            }, maxWidth, maxHeight, scaleType, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    onGetImageError(cacheKey, error);
+            ProfilePictureRequest request = new ProfilePictureRequest(mUser,
+                    response ->
+                        onGetImageSuccess(cacheKey, response),
+                    maxWidth, maxHeight, scaleType, Bitmap.Config.RGB_565,
+                    error -> {
+                        onGetImageError(cacheKey, error);
 
-                    String cookie = error.networkResponse.headers.get("Set-Cookie");
-                    mUser = UserUtils.updateSessionId(mUser, cookie, mContext);
-                }
-            });
+                        String cookie = error.networkResponse.headers.get("Set-Cookie");
+                        mUser = UserUtils.updateSessionId(mUser, cookie, mContext);
+                    });
             request.setRetryPolicy(new DefaultRetryPolicy(
                     0,
                     3,
