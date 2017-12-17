@@ -31,14 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -371,7 +365,7 @@ public class SyncTask {
                     Date dateStart = MyunimibDateUtils.dateTimeFormat.parse(dateTimeTmp);
 
                     // Save the exams ID
-                    ExamID examID = getExamID(exam_data);
+                    ExamID examID = getExamIdFromDocument(exam_data);
                     EnrolledExam newExam = new EnrolledExam(examID,
                             exam_name, dateStart, description, code,
                             building, room, reserved, teachers, "");
@@ -421,7 +415,7 @@ public class SyncTask {
         return teachers;
     }
 
-    private static ExamID getExamID(Element exam_data) {
+    private static ExamID getExamIdFromDocument(Element exam_data) {
         Element printForm = exam_data
                 .select("td[title='stampa promemoria della prenotazione'] form")
                 .first();
@@ -456,33 +450,6 @@ public class SyncTask {
         return null;
     }
 
-
-
-    private static Bundle tryGetUrlWithLogin(String url, User user, Context context)
-            throws CertificateException, NoSuchAlgorithmException, IOException,
-            KeyManagementException, KeyStoreException, NoSuchProviderException {
-        Bundle result = new Bundle();
-
-        // Try to get the private page
-        HttpsURLConnection response = S3Helper.getPage(user, url, context);
-
-        int s3_response = response.getResponseCode();
-        String html = null;
-        if (s3_response == HttpURLConnection.HTTP_OK) {
-            try {
-                html = getHTML(response.getInputStream());
-            } catch (FileNotFoundException e) {
-                html = null;
-            }
-        }
-
-        if (html != null)
-            result.putString(PARAM_KEY_HTML, html);
-        result.putInt(PARAM_KEY_RESPONSE, s3_response);
-
-        return result;
-    }
-
     private static ExamID getExamIdFromUrl(String url) {
         String tmp = url.substring(url.indexOf("?") + 1);
         String extraInfo[] = tmp.split("&");
@@ -514,6 +481,31 @@ public class SyncTask {
             return new ExamID(app_id, cds_esa_id, att_did_esa_id, adsce_id);
         else
             return null;
+    }
+
+
+    private static Bundle tryGetUrlWithLogin(String url, User user, Context context)
+            throws IOException {
+        Bundle result = new Bundle();
+
+        // Try to get the private page
+        HttpsURLConnection response = S3Helper.getPage(user, url, context);
+
+        int s3_response = response.getResponseCode();
+        String html = null;
+        if (s3_response == HttpURLConnection.HTTP_OK) {
+            try {
+                html = getHTML(response.getInputStream());
+            } catch (FileNotFoundException e) {
+                html = null;
+            }
+        }
+
+        if (html != null)
+            result.putString(PARAM_KEY_HTML, html);
+        result.putInt(PARAM_KEY_RESPONSE, s3_response);
+
+        return result;
     }
 
 }

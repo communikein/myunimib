@@ -103,4 +103,7 @@
     <string name="dialog_logout_message_ok">Logout completed.</string>
     <string name="label_do_fake_login">Do fake login</string>
     <string name="label_logout_failed">Something went wrong when trying to logout.\\nLogout failed.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

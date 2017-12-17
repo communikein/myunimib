@@ -30,13 +30,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -80,18 +75,15 @@ public class S3Helper {
 
 
     private static URL buildUrl(User user, String url) {
-        String url_string = url +
-                "JSESSIONID=" + user.getSessionID();
+        String url_string = url + "JSESSIONID=" + user.getSessionID();
         if (user.isFacultyChosen())
                 url_string += "?stu_id=" + user.getSelectedFaculty();
-        URL result;
 
         try {
-            result = new URL(url_string);
+            return new URL(url_string);
         } catch (MalformedURLException e) {
-            result = null;
+            return null;
         }
-        return result;
     }
 
     @Nullable
@@ -183,143 +175,6 @@ public class S3Helper {
 
 
 
-    private static int doLogin(User user, Context context) throws SocketTimeoutException {
-        int ris;
-
-        try {
-            int respCode;
-            HttpsURLConnection resp = null;
-
-            if (!user.isFake()) {
-                // Try to contact the server
-                resp = getPage(user, URL_LIBRETTO, context);
-                respCode = resp.getResponseCode();
-            } else {
-                respCode = HttpURLConnection.HTTP_OK;
-            }
-
-            // If the server is not available
-            if (respCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-                ris = ERROR_S3_NOT_AVAILABLE;
-                Log.e("LOGIN_PROCESS", "S3 not available.");
-            }
-            else {
-                Log.d("LOGIN_PROCESS", "S3 available.");
-                Document document = null;
-
-                if (!user.isFake()) {
-                    // If the server gives me a new JSESSIONID cookie value
-                    if (resp != null && resp.getHeaderField("Set-Cookie") != null) {
-                        // Save it
-                        String jsessionid = resp.getHeaderField("Set-Cookie");
-                        user = UserUtils.updateSessionId(user, jsessionid, context);
-
-                        Log.d("LOGIN_PROCESS", "Got new JSESSIONID");
-                    }
-                    Log.d("LOGIN_PROCESS", "SESSION ID = " + user.getSessionID());
-                    Log.d("LOGIN_PROCESS", "AUTH TOKEN = " + user.getAuthToken());
-                }
-
-                // If the user needs to authenticate
-                if (respCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    Log.d("LOGIN_PROCESS", "User not authenticated yet.");
-
-                    // Do login
-                    resp = getPage(user, URL_LIBRETTO, context);
-                    respCode = resp.getResponseCode();
-                }
-
-                /* Get and parse the HTML from the response */
-                if (!user.isFake() && resp != null) {
-                    try {
-                        String html = getHTML(resp.getInputStream());
-                        document = Jsoup.parse(html);
-                    } catch (IOException e) {
-                        document = null;
-                    }
-                }
-
-                /* If the server recognise the user as logged-in */
-                if (respCode == HttpURLConnection.HTTP_OK) {
-                    Log.d("LOGIN_PROCESS", "User logged in.");
-
-                    /* If I'm sure the user only has one faculty */
-                    if (!user.isFirstLogin() && user.hasOneFaculty()) {
-                        if (!isCareerOver(user, document)) {
-                            Log.d("LOGIN_PROCESS", "FINISHED - OK.");
-                            ris = OK_LOGGED_IN;
-                        } else {
-                            Log.d("LOGIN_PROCESS", "FINISHED - CAREER OVER.");
-                            ris = ERROR_CAREER_OVER;
-                        }
-                    }
-                    /* If the user may have more faculties */
-                    else {
-                        Log.d("LOGIN_PROCESS", "User might have multiple faculties.");
-
-                        /*
-                         * If the app has the list of faculty to choose, but the user
-                         * hasn't chosen one yet, notify the app that the user needs to
-                         * choose the faculty.
-                         */
-                        if (user.shouldChooseFaculty()) {
-                            Log.d("LOGIN_PROCESS", "User needs to choose the faculty.");
-                            ris = ERROR_FACULTY_TO_CHOOSE;
-                        }
-
-                        /* If the user has chosen the faculty, end the login process */
-                        else if (user.isFacultyChosen()) {
-                            Log.d("LOGIN_PROCESS", "User has chosen the faculty.");
-                            ris = OK_LOGGED_IN;
-                        }
-
-                        /*
-                         * If the app doesn't know if the user has multiple faculties,
-                         * hence the app doesn't have the list of faculties.
-                         */
-                        else {
-                            /* Try to get the user list of faculties */
-                            SparseArray<String> faculties = hasMultiFaculty(user, document);
-
-                            /* If the user has only one faculty */
-                            if (faculties == null) {
-                                Log.d("LOGIN_PROCESS", "ONLY ONE FACULTY.");
-                                ris = OK_LOGGED_IN;
-                            }
-
-                            /* If the user has multiple faculties */
-                            else {
-                                Log.d("LOGIN_PROCESS", "Multiple faculties found.");
-                                for (int i=0; i<faculties.size(); i++)
-                                    Log.d("LOGIN_PROCESS",
-                                            "Faculty: " + faculties.valueAt(i));
-
-                                /* Set the user's faculties and save it. */
-                                user.setFaculties(faculties);
-                                UserUtils.saveUser(user, context);
-
-                                ris = ERROR_FACULTY_TO_CHOOSE;
-                            }
-                        }
-                    }
-                }
-
-                /* Otherwise the the password is not valid */
-                else {
-                    Log.d("LOGIN_PROCESS", "WRONG PASSWORD.");
-                    ris = ERROR_WRONG_PASSWORD;
-                }
-            }
-        } catch (SocketTimeoutException e){
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            ris = ERROR_GENERIC;
-        }
-
-        return ris;
-    }
-
     private static boolean isCareerOver(User user, Document document) {
         if (user.isFake()) return false;
 
@@ -328,12 +183,7 @@ public class S3Helper {
         return el.text().toLowerCase().contains("cessato");
     }
 
-
-
-    private static User downloadUserData(User user, Context context) throws IOException, CertificateException,
-            NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
-            NoSuchProviderException{
-
+    private static User downloadUserData(User user, Context context) throws IOException {
         if (user.isFake()) {
             user.setMatricola("293640");
             user.setName("Pippo Pluto");
@@ -459,7 +309,10 @@ public class S3Helper {
 
             try {
                 Log.d("LOGIN", "Trying to login");
-                loggedIn = doLogin(mUser, context);
+                if (!mUser.hasFacultiesList())
+                    loggedIn = doLogin(mUser, context);
+                else
+                    loggedIn = OK_LOGGED_IN;
 
                 if (loggedIn == OK_LOGGED_IN) {
                     Log.d("LOGIN", "RESULT: LOGIN COMPLETED. (" + loggedIn + ")");
@@ -486,6 +339,144 @@ public class S3Helper {
         protected void onStopLoading() {
             cancelLoad();
         }
+
+        private static int doLogin(User user, Context context) throws SocketTimeoutException {
+            int ris;
+
+            try {
+                int respCode;
+                HttpsURLConnection resp = null;
+
+                if (!user.isFake()) {
+                    // Try to contact the server
+                    resp = getPage(user, URL_LIBRETTO, context);
+                    respCode = resp.getResponseCode();
+                } else {
+                    respCode = HttpURLConnection.HTTP_OK;
+                }
+
+                // If the server is not available
+                if (respCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                    ris = ERROR_S3_NOT_AVAILABLE;
+                    Log.e("LOGIN_PROCESS", "S3 not available.");
+                }
+                else {
+                    Log.d("LOGIN_PROCESS", "S3 available.");
+                    Document document = null;
+
+                    if (!user.isFake()) {
+                        // If the server gives me a new JSESSIONID cookie value
+                        if (resp != null && resp.getHeaderField("Set-Cookie") != null) {
+                            // Save it
+                            String jsessionid = resp.getHeaderField("Set-Cookie");
+                            user = UserUtils.updateSessionId(user, jsessionid, context);
+
+                            Log.d("LOGIN_PROCESS", "Got new JSESSIONID");
+                        }
+                        Log.d("LOGIN_PROCESS", "SESSION ID = " + user.getSessionID());
+                        Log.d("LOGIN_PROCESS", "AUTH TOKEN = " + user.getAuthToken());
+                    }
+
+                    // If the user needs to authenticate
+                    if (respCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        Log.d("LOGIN_PROCESS", "User not authenticated yet.");
+
+                        // Do login
+                        resp = getPage(user, URL_LIBRETTO, context);
+                        respCode = resp.getResponseCode();
+                    }
+
+                /* Get and parse the HTML from the response */
+                    if (!user.isFake() && resp != null) {
+                        try {
+                            String html = getHTML(resp.getInputStream());
+                            document = Jsoup.parse(html);
+                        } catch (IOException e) {
+                            document = null;
+                        }
+                    }
+
+                /* If the server recognise the user as logged-in */
+                    if (respCode == HttpURLConnection.HTTP_OK) {
+                        Log.d("LOGIN_PROCESS", "User logged in.");
+
+                    /* If I'm sure the user only has one faculty */
+                        if (!user.isFirstLogin() && user.hasOneFaculty()) {
+                            if (!isCareerOver(user, document)) {
+                                Log.d("LOGIN_PROCESS", "FINISHED - OK.");
+                                ris = OK_LOGGED_IN;
+                            } else {
+                                Log.d("LOGIN_PROCESS", "FINISHED - CAREER OVER.");
+                                ris = ERROR_CAREER_OVER;
+                            }
+                        }
+                    /* If the user may have more faculties */
+                        else {
+                            Log.d("LOGIN_PROCESS", "User might have multiple faculties.");
+
+                        /*
+                         * If the app has the list of faculty to choose, but the user
+                         * hasn't chosen one yet, notify the app that the user needs to
+                         * choose the faculty.
+                         */
+                            if (user.shouldChooseFaculty()) {
+                                Log.d("LOGIN_PROCESS", "User needs to choose the faculty.");
+                                ris = ERROR_FACULTY_TO_CHOOSE;
+                            }
+
+                        /* If the user has chosen the faculty, end the login process */
+                            else if (user.isFacultyChosen()) {
+                                Log.d("LOGIN_PROCESS", "User has chosen the faculty.");
+                                ris = OK_LOGGED_IN;
+                            }
+
+                        /*
+                         * If the app doesn't know if the user has multiple faculties,
+                         * hence the app doesn't have the list of faculties.
+                         */
+                            else {
+                            /* Try to get the user list of faculties */
+                                SparseArray<String> faculties = hasMultiFaculty(user, document);
+
+                            /* If the user has only one faculty */
+                                if (faculties == null) {
+                                    Log.d("LOGIN_PROCESS", "ONLY ONE FACULTY.");
+                                    ris = OK_LOGGED_IN;
+                                }
+
+                            /* If the user has multiple faculties */
+                                else {
+                                    Log.d("LOGIN_PROCESS", "Multiple faculties found.");
+                                    for (int i=0; i<faculties.size(); i++)
+                                        Log.d("LOGIN_PROCESS",
+                                                "Faculty: " + faculties.valueAt(i));
+
+                                /* Set the user's faculties and save it. */
+                                    user.setFaculties(faculties);
+                                    UserUtils.saveUser(user, context);
+
+                                    ris = ERROR_FACULTY_TO_CHOOSE;
+                                }
+                            }
+                        }
+                    }
+
+                /* Otherwise the the password is not valid */
+                    else {
+                        Log.d("LOGIN_PROCESS", "WRONG PASSWORD.");
+                        ris = ERROR_WRONG_PASSWORD;
+                    }
+                }
+            } catch (SocketTimeoutException e){
+                throw e;
+            } catch (Exception e) {
+                e.printStackTrace();
+                ris = ERROR_GENERIC;
+            }
+
+            return ris;
+        }
+
     }
 
     public static class LogoutLoader extends AsyncTaskLoader<User> {

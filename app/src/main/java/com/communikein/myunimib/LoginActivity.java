@@ -17,9 +17,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -77,12 +75,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
             Account[] S3_accounts = mAccountManager.getAccountsByType(AccountUtils.ACCOUNT_TYPE);
 
             if (S3_accounts.length == 0)
-                mBinding.buttonLogin.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        attemptLogin();
-                    }
-                });
+                mBinding.buttonLogin.setOnClickListener(v -> attemptLogin());
             else
                 startActivity(new Intent(this, MainActivity.class));
         }
@@ -99,23 +92,15 @@ public class LoginActivity extends AuthAppCompatActivity implements
     private void initUI() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
-        mBinding.editTextPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
+        mBinding.editTextPassword.setOnEditorActionListener((textView, id, keyEvent) -> {
+            if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
+                attemptLogin();
+                return true;
             }
+            return false;
         });
 
-        mBinding.buttonLogin.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
+        mBinding.buttonLogin.setOnClickListener(view -> attemptLogin());
 
         mBinding.coursesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -140,6 +125,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
             actionBar.setTitle(R.string.title_login);
     }
 
+    @SuppressWarnings("unchecked")
     private void handleLoginResults(final Context context, final User user){
         showProgress(false);
 
@@ -164,21 +150,18 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 Log.d("LOGIN_CHOOSE_FACULTY", "Faculties shown to user. Waiting for user input.");
 
                 // Quando l'utente seleziona il corso di studio e da conferma
-                mBinding.dialogButtonOK.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        /* Save the chosen faculty */
-                        selectedFaculty = user.getFaculties().keyAt(selected);
-                        Log.d("LOGIN_CHOOSE_FACULTY", "Faculty chosen: " + selected);
+                mBinding.dialogButtonOK.setOnClickListener(v -> {
+                    /* Save the chosen faculty */
+                    selectedFaculty = user.getFaculties().keyAt(selected);
+                    Log.d("LOGIN_CHOOSE_FACULTY", "Faculty chosen: " + selected);
 
-                        // Now that the user has selected the faculty, do the login again
-                        Log.d("LOGIN_CHOOSE_FACULTY", "Trying to tell the server.");
-                        getLoaderManager().initLoader(LOADER_CONFIRM_FACULTY_ID,
-                                null, LoginActivity.this)
-                                .forceLoad();
+                    // Now that the user has selected the faculty, do the login again
+                    Log.d("LOGIN_CHOOSE_FACULTY", "Trying to tell the server.");
+                    getLoaderManager().initLoader(LOADER_CONFIRM_FACULTY_ID,
+                            null, LoginActivity.this)
+                            .forceLoad();
 
-                        showProgress(true);
-                    }
+                    showProgress(true);
                 });
                 break;
             // Se il login ha avuto successo
@@ -238,6 +221,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
         startActivity(intent);
     }
 
+    @SuppressWarnings("unchecked")
     private void attemptLogin() {
         if (mBinding.fakeLoginCheck.isChecked()) {
             getLoaderManager()
@@ -398,12 +382,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
         if (EasyPermissions.hasPermissions(this, android.Manifest.permission.GET_ACCOUNTS)) {
             if (!TextUtils.isEmpty(mBinding.editTextPassword.getText())){
                 Snackbar.make(mBinding.loginView, R.string.permissions_granted, Snackbar.LENGTH_LONG)
-                        .setAction(R.string.retry, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        attemptLogin();
-                    }
-                }).show();
+                        .setAction(R.string.retry, v -> attemptLogin()).show();
             }
             else {
                 Snackbar.make(
