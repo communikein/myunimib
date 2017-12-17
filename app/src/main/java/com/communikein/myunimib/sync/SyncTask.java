@@ -464,9 +464,7 @@ public class SyncTask {
         Bundle result = new Bundle();
 
         // Try to get the private page
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Accept", "text/html");
-        HttpsURLConnection response = S3Helper.getPage(user, url, headers, context);
+        HttpsURLConnection response = S3Helper.getPage(user, url, context);
 
         int s3_response = response.getResponseCode();
         String html = null;

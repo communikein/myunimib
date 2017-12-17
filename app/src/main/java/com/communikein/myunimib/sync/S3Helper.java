@@ -6,7 +6,7 @@ import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.Build;
-import android.text.TextUtils;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -39,7 +39,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -51,14 +50,10 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class S3Helper {
 
-    static final String URL_LIBRETTO =
-            "https://s3w.si.unimib.it/esse3/auth/studente/Libretto/LibrettoHome.do;";
     private static final String URL_HOME =
             "https://s3w.si.unimib.it/esse3/Home.do;";
-    private static final String URL_LOGIN =
-            "https://s3w.si.unimib.it/esse3/auth/Logon.do;";
-    private static final String URL_LOGOUT =
-            "https://s3w.si.unimib.it/esse3/Logout.do;";
+    static final String URL_LIBRETTO =
+            "https://s3w.si.unimib.it/esse3/auth/studente/Libretto/LibrettoHome.do;";
     static final String URL_AVAILABLE_EXAMS =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/Appelli.do;";
     static final String URL_ENROLLED_EXAMS =
@@ -67,8 +62,8 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/auth/AddressBook/DownloadFoto.do;";
     public static final String URL_CAREER_BASE =
             "https://s3w.si.unimib.it/esse3/auth/studente/SceltaCarrieraStudente.do;";
-    public static final String URL_CORTESIA =
-            "http://www.si.unimib.it/cortesias3.html";
+    private static final String URL_LOGOUT =
+            "https://s3w.si.unimib.it/esse3/Logout.do;";
 
     private static final int ERROR_GENERIC = -1;
     public static final int ERROR_S3_NOT_AVAILABLE = -2;
@@ -99,6 +94,7 @@ public class S3Helper {
         return result;
     }
 
+    @Nullable
     static SSLSocketFactory getSocketFactory(Context context) {
 
         try {
@@ -136,54 +132,34 @@ public class S3Helper {
 
             return sslContext.getSocketFactory();
 
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return  null;
     }
 
-    private static HttpsURLConnection secureConnection(HttpsURLConnection con, Context context) {
-        // Tell the URLConnection to use a SocketFactory from our SSLContext
-        con.setSSLSocketFactory(getSocketFactory(context));
-
-        return con;
-    }
-
-    static HttpsURLConnection getPage(User user, String url, HashMap<String, String> headers,
-                                             Context context) throws IOException {
+    static HttpsURLConnection getPage(User user, String url, Context context) throws IOException {
 
         String USER_AGENT = System.getProperty("http.agent");
 
         HttpsURLConnection con = (HttpsURLConnection) buildUrl(user, url).openConnection();
         con.setRequestMethod("GET");
+        con.setRequestProperty("Accept", "text/html");
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Host", "s3w.si.unimib.it");
         con.setRequestProperty("Connection", "keep-alive");
-        con.setRequestProperty("Upgrade-Insecure-Request", "1");
         if (user.getAuthToken() != null)
             con.setRequestProperty("Authorization", "Basic " + user.getAuthToken());
         if (user.getSessionID() != null)
             con.setRequestProperty("Cookie", "JSESSIONID=" + user.getSessionID());
-
-        if (headers != null) for (String key : headers.keySet())
-            con.setRequestProperty(key, headers.get(key));
         con.setConnectTimeout(5000);
-
-        con = secureConnection(con, context);
+        con.setSSLSocketFactory(getSocketFactory(context));
 
         String cookie = con.getHeaderField("Set-Cookie");
         if (cookie != null && !cookie.isEmpty()) {
             user = UserUtils.updateSessionId(user, cookie, context);
-            con = getPage(user, url, headers, context);
+            con = getPage(user, url, context);
         }
 
         return con;
@@ -210,15 +186,13 @@ public class S3Helper {
     private static int doLogin(User user, Context context) throws SocketTimeoutException {
         int ris;
 
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Accept", "text/html");
         try {
             int respCode;
             HttpsURLConnection resp = null;
 
             if (!user.isFake()) {
                 // Try to contact the server
-                resp = getPage(user, URL_LIBRETTO, headers, context);
+                resp = getPage(user, URL_LIBRETTO, context);
                 respCode = resp.getResponseCode();
             } else {
                 respCode = HttpURLConnection.HTTP_OK;
@@ -231,7 +205,7 @@ public class S3Helper {
             }
             else {
                 Log.d("LOGIN_PROCESS", "S3 available.");
-                String html = null;
+                Document document = null;
 
                 if (!user.isFake()) {
                     // If the server gives me a new JSESSIONID cookie value
@@ -249,30 +223,29 @@ public class S3Helper {
                 // If the user needs to authenticate
                 if (respCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     Log.d("LOGIN_PROCESS", "User not authenticated yet.");
-                    headers = new HashMap<>();
-                    headers.put("Accept", "text/html");
 
                     // Do login
-                    resp = getPage(user, URL_LIBRETTO, headers, context);
+                    resp = getPage(user, URL_LIBRETTO, context);
                     respCode = resp.getResponseCode();
                 }
 
-                /* Get the HTML of the response */
+                /* Get and parse the HTML from the response */
                 if (!user.isFake() && resp != null) {
                     try {
-                        html = getHTML(resp.getInputStream());
+                        String html = getHTML(resp.getInputStream());
+                        document = Jsoup.parse(html);
                     } catch (IOException e) {
-                        html = null;
+                        document = null;
                     }
                 }
 
-                // If the server recognise the user as logged-in
+                /* If the server recognise the user as logged-in */
                 if (respCode == HttpURLConnection.HTTP_OK) {
                     Log.d("LOGIN_PROCESS", "User logged in.");
 
-                    // If I'm sure the user only has one faculty
+                    /* If I'm sure the user only has one faculty */
                     if (!user.isFirstLogin() && user.hasOneFaculty()) {
-                        if (!isCareerOver(user, context)) {
+                        if (!isCareerOver(user, document)) {
                             Log.d("LOGIN_PROCESS", "FINISHED - OK.");
                             ris = OK_LOGGED_IN;
                         } else {
@@ -280,41 +253,48 @@ public class S3Helper {
                             ris = ERROR_CAREER_OVER;
                         }
                     }
-                    // If the user may have more faculties
+                    /* If the user may have more faculties */
                     else {
                         Log.d("LOGIN_PROCESS", "User might have multiple faculties.");
 
-                        // If the app has the list of faculty to choose
-                        // but the user hasn't chosen one yet
+                        /*
+                         * If the app has the list of faculty to choose, but the user
+                         * hasn't chosen one yet, notify the app that the user needs to
+                         * choose the faculty.
+                         */
                         if (user.shouldChooseFaculty()) {
                             Log.d("LOGIN_PROCESS", "User needs to choose the faculty.");
                             ris = ERROR_FACULTY_TO_CHOOSE;
                         }
 
-                        // If the user has chosen the faculty
+                        /* If the user has chosen the faculty, end the login process */
                         else if (user.isFacultyChosen()) {
                             Log.d("LOGIN_PROCESS", "User has chosen the faculty.");
-                            ris = handleFacultyChoice(user, context);
+                            ris = OK_LOGGED_IN;
                         }
 
-                        // If the app doesn't know if the user has multiple faculties,
-                        // hence the app doesn't have the list of faculties
+                        /*
+                         * If the app doesn't know if the user has multiple faculties,
+                         * hence the app doesn't have the list of faculties.
+                         */
                         else {
-                            SparseArray<String> faculties = hasMultiFaculty(user, html);
+                            /* Try to get the user list of faculties */
+                            SparseArray<String> faculties = hasMultiFaculty(user, document);
 
-                            // If the user has only one faculty
+                            /* If the user has only one faculty */
                             if (faculties == null) {
                                 Log.d("LOGIN_PROCESS", "ONLY ONE FACULTY.");
                                 ris = OK_LOGGED_IN;
                             }
 
-                            // If the user has multiple faculties
+                            /* If the user has multiple faculties */
                             else {
                                 Log.d("LOGIN_PROCESS", "Multiple faculties found.");
                                 for (int i=0; i<faculties.size(); i++)
                                     Log.d("LOGIN_PROCESS",
                                             "Faculty: " + faculties.valueAt(i));
 
+                                /* Set the user's faculties and save it. */
                                 user.setFaculties(faculties);
                                 UserUtils.saveUser(user, context);
 
@@ -324,12 +304,11 @@ public class S3Helper {
                     }
                 }
 
-                // Otherwise the the password is not valid
+                /* Otherwise the the password is not valid */
                 else {
                     Log.d("LOGIN_PROCESS", "WRONG PASSWORD.");
                     ris = ERROR_WRONG_PASSWORD;
                 }
-
             }
         } catch (SocketTimeoutException e){
             throw e;
@@ -341,30 +320,12 @@ public class S3Helper {
         return ris;
     }
 
-    private static boolean isCareerOver(User user, Context context) throws IOException, CertificateException,
-            NoSuchAlgorithmException, KeyStoreException, KeyManagementException,
-            NoSuchProviderException {
-        boolean ris = false;
+    private static boolean isCareerOver(User user, Document document) {
         if (user.isFake()) return false;
 
-        try {
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Accept", "text/html");
+        Element el = document.getElementById("gu-textStatusStudente");
 
-            HttpURLConnection response = S3Helper.getPage(user, S3Helper.URL_HOME, headers, context);
-            String result = S3Helper.getHTML(response.getInputStream());
-
-            Document doc = Jsoup.parse(result);
-            Element el = doc.getElementById("gu-textStatusStudente");
-
-            if (el.text().toLowerCase().contains("cessato"))
-                ris = true;
-        } catch (IOException e){
-            Utils.saveBugReport(e);
-            throw e;
-        }
-
-        return ris;
+        return el.text().toLowerCase().contains("cessato");
     }
 
 
@@ -382,11 +343,8 @@ public class S3Helper {
             return user;
         }
 
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Accept", "text/html");
-
         try {
-            HttpURLConnection response = S3Helper.getPage(user, S3Helper.URL_LIBRETTO, headers, context);
+            HttpURLConnection response = S3Helper.getPage(user, S3Helper.URL_LIBRETTO, context);
             Document doc;
             String result = S3Helper.getHTML(response.getInputStream());
 
@@ -404,7 +362,7 @@ public class S3Helper {
                 }
             }
 
-            response = S3Helper.getPage(user, S3Helper.URL_HOME, headers, context);
+            response = S3Helper.getPage(user, S3Helper.URL_HOME, context);
             result = S3Helper.getHTML(response.getInputStream());
             doc = Jsoup.parse(result);
             Element el = doc.select("div#sottotitolo-menu-principale").first();
@@ -436,21 +394,19 @@ public class S3Helper {
         }
     }
 
-    private static SparseArray<String> hasMultiFaculty(User user, String html) {
+    private static SparseArray<String> hasMultiFaculty(User user, Document document) {
         if (user.isFake()) return downloadFacultiesList(user, null);
 
-        Document doc = Jsoup.parse(html);
-        Element el1 = doc.select("#titolo-menu-principale").first();
-
+        Element el1 = document.select("#titolo-menu-principale").first();
         boolean hasMultiFaculty = el1.text().toLowerCase().equals("registrato");
 
         if (hasMultiFaculty)
-            return downloadFacultiesList(user, html);
+            return downloadFacultiesList(user, document);
         else
             return null;
     }
 
-    private static SparseArray<String> downloadFacultiesList(User user, String html) {
+    private static SparseArray<String> downloadFacultiesList(User user, Document document) {
         SparseArray<String> courses = new SparseArray<>();
 
         if (user.isFake()) {
@@ -461,8 +417,7 @@ public class S3Helper {
             return courses;
         }
 
-        Document doc = Jsoup.parse(html);
-        Elements els = doc.select("table#gu_table_sceltacarriera tbody tr");
+        Elements els = document.select("table#gu_table_sceltacarriera tbody tr");
         if (!els.isEmpty()) {
             for (Element el : els) {
                 String name = el.child(1).text() + " in " + el.child(2).text();
@@ -476,58 +431,6 @@ public class S3Helper {
         }
 
         return courses;
-    }
-
-    private static int handleFacultyChoice(User user, Context context) {
-        int ris;
-
-        // If the user has only one faculty then is automatically logged-in
-        if (user.hasOneFaculty())
-            ris = OK_LOGGED_IN;
-            // Otherwise tell the server which faculty the user wants
-        else {
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Accept", "text/html");
-
-            try {
-                if (user.isFake()) return OK_LOGGED_IN;
-
-                // Load the chosen faculty
-                String faculty = user.getSelectedFacultyUrl();
-
-                // If there is one
-                if (!TextUtils.isEmpty(faculty)) {
-                    // Tell the server which faculty the user wants
-                    int code = getPage(user, faculty, headers, context).getResponseCode();
-                    if (code == HttpURLConnection.HTTP_OK) {
-                        if (!isCareerOver(user, context))
-                            ris = OK_LOGGED_IN;
-                        else
-                            ris = ERROR_CAREER_OVER;
-                    }
-                    else {
-                        getPage(user, URL_LOGIN, headers, context).getResponseCode();
-                        code = getPage(user, faculty, headers, context).getResponseCode();
-
-                        if (code == HttpURLConnection.HTTP_OK) {
-                            if (!isCareerOver(user, context))
-                                ris = OK_LOGGED_IN;
-                            else
-                                ris = ERROR_CAREER_OVER;
-                        }
-                        else
-                            ris = ERROR_GENERIC;
-                    }
-                }
-                else
-                    ris = ERROR_FACULTY_TO_CHOOSE;
-            } catch (Exception e) {
-                e.printStackTrace();
-                ris = ERROR_GENERIC;
-            }
-        }
-
-        return ris;
     }
 
 
@@ -601,13 +504,12 @@ public class S3Helper {
         @Override
         public User loadInBackground() {
             Context context = mActivity.get();
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Accept", "text/html");
+            if (context == null) return null;
 
             try {
                 String username = mUser.getUsername();
                 if (!mUser.isFake())
-                    getPage(mUser, URL_LOGOUT, headers, context);
+                    getPage(mUser, URL_LOGOUT, context);
                 boolean loggedOut = UserUtils.removeUser(context);
 
                 if (loggedOut) {
