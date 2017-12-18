@@ -1,9 +1,0 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.communikein.myunimib",
-    "sha256_cert_fingerprints":
-    ["6E:E6:E4:0F:8D:1F:20:F1:72:49:B5:A3:7A:12:EE:3E:E5:4C:D0:67:DA:BD:13:04:B1:B1:73:1E:5E:74:E9:6D"]
-  }
-}]
