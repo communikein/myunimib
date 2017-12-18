@@ -1,10 +1,15 @@
 package com.communikein.myunimib;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.Loader;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -12,16 +17,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.communikein.myunimib.accountmanager.AccountUtils;
 import com.communikein.myunimib.databinding.ActivityMainBinding;
 import com.communikein.myunimib.sync.S3Helper;
 import com.communikein.myunimib.utilities.UserUtils;
 import com.communikein.myunimib.utilities.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks {
+
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     private ActivityMainBinding mBinding;
 
@@ -146,24 +155,10 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (loader_id) {
             case LOADER_LOGOUT_ID:
-                showProgress(false);
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(getString(R.string.dialog_logout));
-                if (data != null) {
-                    builder.setMessage(getString(R.string.dialog_logout_message_ok));
-
-                    String positiveText = getString(android.R.string.ok);
-                    builder.setPositiveButton(positiveText, (dialog, which) -> finish());
-                }
-                else {
-                    builder.setMessage(getString(R.string.label_logout_failed));
-
-                    String positiveText = getString(android.R.string.ok);
-                    builder.setPositiveButton(positiveText, null);
-                }
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                if (data != null)
+                    finishLogout();
+                else
+                    showLogoutErrorDialog(null);
 
                 break;
 
@@ -175,6 +170,103 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader loader) {
 
+    }
+
+
+    private void finishLogout() {
+        final AccountManager accountManager = AccountManager.get(this);
+        final Account account = accountManager
+                .getAccountsByType(AccountUtils.ACCOUNT_TYPE)[0];
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            /*
+             * Trying to call this on an older Android version results in a
+             * NoSuchMethodError exception. There is no AppCompat version of the
+             * AccountManager API to avoid the need for this version check at runtime.
+             */
+            accountManager.removeAccount(account, MainActivity.this,
+                    accountManagerFuture -> {
+                        showProgress(false);
+
+                        boolean isRemoved = false;
+                        try {
+                            Bundle data = accountManagerFuture.getResult();
+                            isRemoved = data.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
+                        } catch (IOException e) {
+                            Utils.saveBugReport(e, TAG);
+                            showLogoutErrorDialog(null);
+                        } catch (OperationCanceledException e) {
+                            Utils.saveBugReport(e, TAG);
+
+                            String error = getString(R.string.error_logout_cancelled);
+                            showLogoutErrorDialog(error);
+                        } catch (AuthenticatorException e) {
+                            Utils.saveBugReport(e, TAG);
+                            showLogoutErrorDialog(null);
+                        }
+
+                        if (isRemoved) {
+                            showLogoutCompletedDialog();
+                        }
+                        else {
+                            String error = getString(R.string.error_logout_user_not_removed);
+                            showLogoutErrorDialog(error);
+                        }
+                    }, null);
+        } else {
+            /* Note that this needs the MANAGE_ACCOUNT permission on SDK <= 22. */
+            accountManager.removeAccount(account, accountManagerFuture -> {
+                showProgress(false);
+
+                boolean isRemoved = false;
+                try {
+                    isRemoved = accountManagerFuture.getResult();
+                } catch (IOException e) {
+                    Utils.saveBugReport(e, TAG);
+                    showLogoutErrorDialog(null);
+                } catch (OperationCanceledException e) {
+                    Utils.saveBugReport(e, TAG);
+
+                    String error = getString(R.string.error_logout_cancelled);
+                    showLogoutErrorDialog(error);
+                } catch (AuthenticatorException e) {
+                    Utils.saveBugReport(e, TAG);
+                    showLogoutErrorDialog(null);
+                }
+
+                if (isRemoved) {
+                    showLogoutCompletedDialog();
+                }
+                else {
+                    String error = getString(R.string.error_logout_user_not_removed);
+                    showLogoutErrorDialog(error);
+                }
+            }, null);
+        }
+    }
+
+    private void showLogoutCompletedDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.dialog_logout));
+        builder.setMessage(getString(R.string.dialog_logout_message_ok));
+        String positiveText = getString(android.R.string.ok);
+        builder.setPositiveButton(positiveText, (dialog, which) -> finish());
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showLogoutErrorDialog(String error) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.dialog_logout));
+
+        if (error == null) error = getString(R.string.error_logout_failed);
+        builder.setMessage(error);
+
+        String positiveText = getString(android.R.string.ok);
+        builder.setPositiveButton(positiveText, null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void showProgress(final boolean show) {

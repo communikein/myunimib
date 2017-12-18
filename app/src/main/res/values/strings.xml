@@ -1,9 +1,10 @@
 <resources>
     <!-- Strings related to general APP info -->
-    <string name="app_name">MyUNIMIB</string>
-    <string name="account_name">UNIMIB</string>
+    <string name="app_name" translatable="false">MyUNIMIB</string>
+    <string name="account_name" translatable="false">UNIMIB</string>
 
-    <string name="content_authority">com.communikein.myunimib</string>
+    <string name="content_authority" translatable="false">com.communikein.myunimib</string>
+    <string name="asset_statements" translatable="false">[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"web\",\n    \"site\": \"https://communikein.github.io\",\n  }\n}]</string>
     <!-- END -->
 
     <!-- Strings related to navigation  -->
@@ -26,6 +27,7 @@
     <string name="prompt_university_email">Enter university e-mail address</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
+    <string name="label_do_fake_login">Do fake login</string>
     <string name="terms_and_conditions">I accept this service\'s Terms and Conditions.</string>
 
     <string name="error_user_invalid">Username not valid</string>
@@ -48,7 +50,17 @@
     <string name="error_generic_exception">Error generic.</string>
 
     <string name="terms_not_checked">Please, accept the terms before using this service</string>
-    <!-- END -->
+    <!-- END login -->
+
+    <!-- Strings related to logout -->
+    <string name="label_logging_out">Log out in progress..</string>
+    <string name="dialog_logout">Logout</string>
+    <string name="dialog_logout_message_ok">Logout completed.</string>
+
+    <string name="error_logout_failed">Something went wrong when trying to logout.\nLogout failed.</string>
+    <string name="error_logout_cancelled">The logout process has been cancelled.</string>
+    <string name="error_logout_user_not_removed">The user has not been removed.</string>
+    <!-- END logout -->
 
     <!-- Strings related to Settings -->
     <string name="pref_header_data_sync">Data &amp; sync</string>
@@ -83,10 +95,12 @@
     <string name="pref_network_type_cellular" translatable="false">cellular</string>
     <string name="pref_network_type_wifi" translatable="false">wifi</string>
     <string name="pref_network_type_both" translatable="false">both</string>
-    <!-- END -->
+    <!-- END Settings -->
 
+    <!-- Strings related to home fragment -->
     <string name="score_out_of_label">/ 30</string>
     <string name="cfu_label">CFU</string>
+    <!-- END home fragment -->
 
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
@@ -98,12 +112,4 @@
 
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
-    <string name="label_logging_out">Log out in progress..</string>
-    <string name="dialog_logout">Logout</string>
-    <string name="dialog_logout_message_ok">Logout completed.</string>
-    <string name="label_do_fake_login">Do fake login</string>
-    <string name="label_logout_failed">Something went wrong when trying to logout.\\nLogout failed.</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

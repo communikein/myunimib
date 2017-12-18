@@ -40,6 +40,8 @@ import static com.communikein.myunimib.sync.S3Helper.getHTML;
 
 public class SyncTask {
 
+    private final static String TAG = SyncTask.class.getSimpleName();
+
     final private static String CDS_ESA_ID = "CDS_ESA_ID";
     final private static String ATT_DID_ESA_ID = "ATT_DID_ESA_ID";
     final private static String APP_ID = "APP_ID";
@@ -249,7 +251,7 @@ public class SyncTask {
             Log.i(SyncUtilsBooklet.REMINDER_JOB_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(SyncUtilsBooklet.REMINDER_JOB_TAG, e.getMessage());
-            Utils.saveBugReport(e);
+            Utils.saveBugReport(e, TAG);
         }
 
         return null;
@@ -318,7 +320,7 @@ public class SyncTask {
             Log.i(SyncUtilsAvailable.REMINDER_JOB_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(SyncUtilsAvailable.REMINDER_JOB_TAG, e.getMessage());
-            Utils.saveBugReport(e);
+            Utils.saveBugReport(e, TAG);
         }
 
         return null;
@@ -386,7 +388,7 @@ public class SyncTask {
             Log.i(SyncUtilsEnrolled.REMINDER_JOB_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(SyncUtilsEnrolled.REMINDER_JOB_TAG, e.getMessage());
-            Utils.saveBugReport(e);
+            Utils.saveBugReport(e, TAG);
         }
 
         return null;

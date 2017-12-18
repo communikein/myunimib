@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "564609355956",
+    "firebase_url": "https://myunimib-v2-12658.firebaseio.com",
+    "project_id": "myunimib-v2-12658",
+    "storage_bucket": "myunimib-v2-12658.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564609355956:android:1413f21d3c10824b",
+        "android_client_info": {
+          "package_name": "com.communikein.myunimib"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "564609355956-mutcfmnebn2q5pj2tqb5kobi5u5f2ck0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.communikein.myunimib",
+            "certificate_hash": "96037b0e8a499833ff0b14181448aaa1938236e0"
+          }
+        },
+        {
+          "client_id": "564609355956-2dbqg808idrplc76kuqj96lre7pe2o7v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2tvlKz6JX4f31Mnl3yTXYfJP4AITHiuE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "564609355956-2dbqg808idrplc76kuqj96lre7pe2o7v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

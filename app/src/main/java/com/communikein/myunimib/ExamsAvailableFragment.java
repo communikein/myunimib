@@ -88,7 +88,8 @@ public class ExamsAvailableFragment extends Fragment implements
         mBinding.rvList.setHasFixedSize(true);
 
         /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
-        mExamsAdapter = new AvailableExamAdapter(getActivity());
+        if (getActivity() != null)
+            mExamsAdapter = new AvailableExamAdapter(getActivity());
 
         return mBinding.getRoot();
     }
@@ -106,9 +107,10 @@ public class ExamsAvailableFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (!UserUtils.getUser(getActivity()).isFake()) {
+        if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
             toggleLoading(true);
-            getActivity().getSupportLoaderManager().initLoader(ID_EXAMS_AVAILABLE_LOADER, null, this);
+            getActivity().getSupportLoaderManager()
+                    .initLoader(ID_EXAMS_AVAILABLE_LOADER, null, this);
 
             SyncUtilsAvailable.initialize(getActivity());
         }
@@ -118,11 +120,13 @@ public class ExamsAvailableFragment extends Fragment implements
      * Change the Activity's ActionBar title.
      */
     private void setTitle() {
+        if (getActivity() != null) {
         /* Get a reference to the MainActivity ActionBar */
-        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+            ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
         /* If there is an ActionBar, set it's title */
-        if (actionBar != null)
-            actionBar.setTitle(R.string.title_exams_available);
+            if (actionBar != null)
+                actionBar.setTitle(R.string.title_exams_available);
+        }
     }
 
 
@@ -139,12 +143,13 @@ public class ExamsAvailableFragment extends Fragment implements
                  * Create a new CursorLoader and pass in the URI for the data and the list
                  * of parameters that we are interested in.
                  */
-                return new CursorLoader(getActivity(),
-                        examsQueryUri,
-                        EXAM_PROJECTION,
-                        null,
-                        null,
-                        null);
+                if (getActivity() != null)
+                    return new CursorLoader(getActivity(),
+                            examsQueryUri,
+                            EXAM_PROJECTION,
+                            null,
+                            null,
+                            null);
 
             default:
                 /* If any other Loader is required, fail.  */

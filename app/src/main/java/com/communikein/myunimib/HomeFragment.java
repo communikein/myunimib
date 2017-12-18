@@ -61,11 +61,13 @@ public class HomeFragment extends Fragment {
      * Change the Activity's ActionBar title.
      */
     private void setTitle() {
-        /* Get a reference to the MainActivity ActionBar */
-        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
-        /* If there is an ActionBar, set it's title */
-        if (actionBar != null)
-            actionBar.setTitle(R.string.title_home);
+        if (getActivity() != null) {
+            /* Get a reference to the MainActivity ActionBar */
+            ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+            /* If there is an ActionBar, set it's title */
+            if (actionBar != null)
+                actionBar.setTitle(R.string.title_home);
+        }
     }
 
     private void loadProfilePicture(){

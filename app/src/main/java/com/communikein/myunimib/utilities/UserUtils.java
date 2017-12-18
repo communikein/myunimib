@@ -53,13 +53,12 @@ public class UserUtils {
             editor.remove(User.PREF_FACULTIES);
         }
 
-        editor.putBoolean(User.PREF_IS_FIRST_LOGIN, user.isFirstLogin());
         editor.putBoolean(User.PREF_FAKE, user.isFake());
 
         editor.apply();
     }
 
-    public static boolean removeUser(Context context){
+    public static void removeUser(Context context){
         SharedPreferences sharedPref = context.getSharedPreferences(User.PREFERENCES_USER,
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
@@ -76,14 +75,10 @@ public class UserUtils {
         editor.remove(User.PREF_FACULTIES_KEYS);
         editor.remove(User.PREF_FACULTIES_VALUES);
         editor.remove(User.PREF_SELECTED_FACULTY);
-        editor.remove(User.PREF_IS_FIRST_LOGIN);
         editor.remove(User.PREF_FAKE);
         editor.apply();
 
         Utils.user = null;
-
-        // TODO: Implement removing the account from the AccountManager
-        return true;
     }
 
     public static User getUser(Context context){
@@ -92,7 +87,7 @@ public class UserUtils {
 
         if (Utils.user == null && pref.contains(User.PREF_USERNAME)){
             String username, password, name, matricola, session_id;
-            boolean isFirstLogin, isFake;
+            boolean isFake;
             int total_cfu;
             float average_mark;
 
@@ -106,11 +101,9 @@ public class UserUtils {
             total_cfu = pref.getInt(User.PREF_TOTAL_CFU, User.ERROR_TOTAL_CFU);
             average_mark = pref.getFloat(User.PREF_AVERAGE_MARK, User.ERROR_AVERAGE_MARK);
 
-            isFirstLogin = pref.getBoolean(User.PREF_IS_FIRST_LOGIN, true);
             isFake = pref.getBoolean(User.PREF_FAKE, false);
 
-            Utils.user = new User(username, password, name, average_mark, total_cfu, matricola,
-                    isFirstLogin);
+            Utils.user = new User(username, password, name, average_mark, total_cfu, matricola);
             Utils.user.setSessionID(session_id);
             Utils.user.setFake(isFake);
 

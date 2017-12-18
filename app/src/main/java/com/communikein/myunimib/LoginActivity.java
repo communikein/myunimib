@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 
@@ -43,6 +44,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
     private ActivityLoginBinding mBinding;
 
     private AccountManager mAccountManager;
+    private String username;
     private static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1001;
 
     private static final int LOADER_LOGIN_ID = 2100;
@@ -60,6 +62,13 @@ public class LoginActivity extends AuthAppCompatActivity implements
         super.onCreate(savedInstanceState);
 
         initUI();
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
     }
 
     @Override
@@ -125,6 +134,22 @@ public class LoginActivity extends AuthAppCompatActivity implements
             actionBar.setTitle(R.string.title_login);
     }
 
+    private void handleIntent(Intent intent) {
+        String appLinkAction = intent.getAction();
+        Uri appLinkData = intent.getData();
+
+        if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
+            username = appLinkData.getLastPathSegment();
+            mBinding.editTextUniversityMail.setText(username);
+        }
+    }
+
+    private void showProgress(final boolean show) {
+        if (show) progress.show();
+        else if(progress != null && progress.isShowing()) progress.dismiss();
+    }
+
+
     @SuppressWarnings("unchecked")
     private void handleLoginResults(final Context context, final User user){
         showProgress(false);
@@ -166,6 +191,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 break;
             // Se il login ha avuto successo
             case S3Helper.OK_LOGGED_IN:
+            case S3Helper.OK_UPDATED:
                 // Finalize login process
                 finishLogin(user);
                 break;
@@ -249,7 +275,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 }
 
                 // Check for a valid username.
-                if (validateUsername(mBinding.editTextUniversityMail) == null) {
+                username = validateUsername(mBinding.editTextUniversityMail);
+                if (username == null) {
                     focusView = mBinding.editTextUniversityMail;
                     cancel = true;
                 }
@@ -316,10 +343,6 @@ public class LoginActivity extends AuthAppCompatActivity implements
         return valid;
     }
 
-    private void showProgress(final boolean show) {
-        if (show) progress.show();
-        else if(progress != null && progress.isShowing()) progress.dismiss();
-    }
 
 
     @Override
@@ -330,7 +353,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
                  * Get the username and password inserted by the user, create an
                  * authentic user, then start the login process.
                  */
-                String username = mBinding.editTextUniversityMail.getText().toString();
+                username = mBinding.editTextUniversityMail.getText().toString();
                 String password = mBinding.editTextPassword.getText().toString();
                 User temp_user = new User(username, password);
                 temp_user.setFake(false);
@@ -349,7 +372,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 Utils.user = UserUtils.getUser(this);
                 Utils.user.setSelectedFaculty(selectedFaculty);
 
-                return new S3Helper.LoginLoader(this, Utils.user);
+                return new S3Helper.UserDataLoader(this, Utils.user);
 
             default:
                 return null;

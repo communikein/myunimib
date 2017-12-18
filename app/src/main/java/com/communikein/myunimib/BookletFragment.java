@@ -88,7 +88,8 @@ public class BookletFragment extends Fragment implements
         mBinding.rvList.setHasFixedSize(true);
 
         /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
-        mBookletAdapter = new BookletAdapter(getActivity());
+        if (getActivity() != null)
+            mBookletAdapter = new BookletAdapter(getActivity());
 
         return mBinding.getRoot();
     }
@@ -108,7 +109,9 @@ public class BookletFragment extends Fragment implements
          */
         if (!UserUtils.getUser(getActivity()).isFake()) {
             toggleLoading(true);
-            getActivity().getSupportLoaderManager().initLoader(ID_BOOKLET_LOADER, null, this);
+            if (getActivity() != null)
+                getActivity().getSupportLoaderManager()
+                        .initLoader(ID_BOOKLET_LOADER, null, this);
 
             SyncUtilsBooklet.initialize(getActivity());
         }
@@ -118,11 +121,13 @@ public class BookletFragment extends Fragment implements
      * Change the Activity's ActionBar title.
      */
     private void setTitle() {
-        /* Get a reference to the MainActivity ActionBar */
-        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
-        /* If there is an ActionBar, set it's title */
-        if (actionBar != null)
-            actionBar.setTitle(R.string.title_booklet);
+        if (getActivity() != null) {
+            /* Get a reference to the MainActivity ActionBar */
+            ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+            /* If there is an ActionBar, set it's title */
+            if (actionBar != null)
+                actionBar.setTitle(R.string.title_booklet);
+        }
     }
 
 
@@ -137,12 +142,13 @@ public class BookletFragment extends Fragment implements
                  * Create a new CursorLoader and pass in the URI for the data and the list
                  * of parameters that we are interested in.
                  */
-                return new CursorLoader(getActivity(),
-                        bookletQueryUri,
-                        BOOKLET_PROJECTION,
-                        null,
-                        null,
-                        null);
+                if (getActivity() != null)
+                    return new CursorLoader(getActivity(),
+                            bookletQueryUri,
+                            BOOKLET_PROJECTION,
+                            null,
+                            null,
+                            null);
 
             default:
                 /* If any other Loader is required, fail.  */

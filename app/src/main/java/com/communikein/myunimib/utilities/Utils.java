@@ -2,6 +2,7 @@ package com.communikein.myunimib.utilities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
 import com.communikein.myunimib.User;
@@ -30,8 +31,9 @@ public class Utils {
             imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
     }
 
-    public static void saveBugReport(Exception e){
+    public static void saveBugReport(Exception e, String TAG){
         e.printStackTrace();
+        FirebaseCrash.logcat(Log.ERROR, TAG, e.getMessage());
         FirebaseCrash.report(e);
     }
 }

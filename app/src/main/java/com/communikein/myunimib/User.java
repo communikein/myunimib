@@ -25,7 +25,6 @@ public class User {
     public static final String PREF_FACULTIES_KEYS = "user_faculties_keys";
     public static final String PREF_FACULTIES_VALUES = "user_faculties_values";
     public static final String PREF_SELECTED_FACULTY = "selected_faculty";
-    public static final String PREF_IS_FIRST_LOGIN = "is_first_login";
     public static final String PREF_MATRICOLA = "user_matricola";
     public static final String PREF_NAME = "user_name";
     public static final String PREF_AVERAGE_MARK = "user_average_mark";
@@ -36,13 +35,14 @@ public class User {
     public static final float ERROR_AVERAGE_MARK = -1;
     public static final int ERROR_TOTAL_CFU = -1;
 
+    public static final int FACULTY_NOT_CHOSEN = -1;
+
     private String mUsername;
     private String mPassword;
     private String mAuthToken;
     private String mSessionId;
     private SparseArray<String> mFaculties;
     private int mSelectedFaculty;
-    private boolean mIsFirstLogin;
     private String mName;
     private String mMatricola;
     private float mAverageMark;
@@ -55,9 +55,8 @@ public class User {
         setPassword(password);
         setAuthToken(username, password);
         setSessionID(null);
-        setFaculties(new SparseArray<>());
+        setFaculties((SparseArray<String>) null);
         setSelectedFaculty(-1);
-        setIsFirstLogin(true);
         setMatricola(null);
         setName(null);
         setAverageMark(ERROR_AVERAGE_MARK);
@@ -65,7 +64,7 @@ public class User {
     }
 
     public User(String username, String password, String name, float averageMark, int totalCFU,
-                    String matricola, boolean is_first_login) {
+                    String matricola) {
         setName(name);
         setMatricola(matricola);
         setPassword(password);
@@ -74,8 +73,7 @@ public class User {
         setSessionID(null);
         setTotalCFU(totalCFU);
         setAverageMark(averageMark);
-        setIsFirstLogin(is_first_login);
-        setFaculties(new SparseArray<>());
+        setFaculties((SparseArray<String>) null);
         setSelectedFaculty(-1);
     }
 
@@ -134,14 +132,6 @@ public class User {
 
     public String getUniversityMail(){
         return mUsername + "@campus.unimib.it";
-    }
-
-    public boolean isFirstLogin() {
-        return mIsFirstLogin;
-    }
-
-    public void setIsFirstLogin(boolean isFirstLogin) {
-        this.mIsFirstLogin = isFirstLogin;
     }
 
     public void setFake(boolean fake) {
@@ -242,11 +232,11 @@ public class User {
     }
 
     public boolean hasOneFaculty() {
-        return !hasMultiFaculty();
+        return getFaculties() != null && getFaculties().size() == 0;
     }
 
     public boolean isFacultyChosen() {
-        return mSelectedFaculty != -1;
+        return mSelectedFaculty != FACULTY_NOT_CHOSEN;
     }
 
 

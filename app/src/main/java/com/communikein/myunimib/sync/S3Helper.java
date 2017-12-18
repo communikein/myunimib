@@ -1,17 +1,13 @@
 package com.communikein.myunimib.sync;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.communikein.myunimib.R;
-import com.communikein.myunimib.accountmanager.AccountUtils;
 import com.communikein.myunimib.utilities.UserUtils;
 import com.communikein.myunimib.utilities.Utils;
 import com.communikein.myunimib.User;
@@ -44,6 +40,8 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class S3Helper {
 
+    private static final String TAG = S3Helper.class.getSimpleName();
+
     private static final String URL_HOME =
             "https://s3w.si.unimib.it/esse3/Home.do;";
     static final String URL_LIBRETTO =
@@ -65,9 +63,11 @@ public class S3Helper {
     public static final int ERROR_CONNECTION_TIMEOUT = -4;
     public static final int ERROR_FACULTY_TO_CHOOSE = -5;
     private static final int ERROR_CAREER_OVER = -6;
+    private static final int ERROR_RESPONSE_NULL = -7;
 
     public static final int OK_LOGGED_IN = 1;
     private static final int OK_LOGGED_OUT = 2;
+    public static final int OK_UPDATED = 3;
 
 
     private S3Helper() {}
@@ -90,13 +90,10 @@ public class S3Helper {
 
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            InputStream caInput = context.getResources().openRawResource(R.raw.terenasslca3);
             Certificate ca;
-            try {
+            try (InputStream caInput = context.getResources().openRawResource(R.raw.terenasslca3)) {
                 ca = cf.generateCertificate(caInput);
                 Log.e("CERT", "ca=" + ((X509Certificate) ca).getSubjectDN());
-            } finally {
-                caInput.close();
             }
 
             String keyStoreType = KeyStore.getDefaultType();
@@ -236,7 +233,7 @@ public class S3Helper {
         } catch (SocketTimeoutException e) {
             throw e;
         } catch (IOException e){
-            Utils.saveBugReport(e);
+            Utils.saveBugReport(e, TAG);
 
             throw e;
         }
@@ -285,6 +282,8 @@ public class S3Helper {
 
     public static class LoginLoader extends AsyncTaskLoader<User> {
 
+        public static final String TAG = LoginLoader.class.getSimpleName();
+
         // Weak references will still allow the Context to be garbage-collected
         private final WeakReference<Activity> mActivity;
 
@@ -299,33 +298,33 @@ public class S3Helper {
 
         @Override
         public User loadInBackground() {
-            Log.d("LOADER_LOGIN", "STARTED");
+            Log.d(TAG, "STARTED");
 
-            int loggedIn;
+            /* Get the context from the activity, if null end the login process */
             Context context = mActivity.get();
             if (context == null) return null;
 
+            int loggedIn;
             try {
-                Log.d("LOGIN", "Trying to login");
-                if (!mUser.hasFacultiesList())
-                    loggedIn = doLogin(mUser, context);
-                else
-                    loggedIn = OK_LOGGED_IN;
+                /* Try logging in the user */
+                loggedIn = doLogin(mUser, context);
 
+                /*
+                 * If the server recognise the user as logged in, download the user's data and
+                 * notify the user that the login process is completed successfully.
+                 */
                 if (loggedIn == OK_LOGGED_IN) {
-                    Log.d("LOGIN", "RESULT: LOGIN COMPLETED. (" + loggedIn + ")");
+                    Log.d(TAG, "RESULT: LOGIN COMPLETED. (" + loggedIn + ")");
 
-                    Log.d("LOGIN", "Downloading user data");
+                    Log.d(TAG, "Downloading user data");
                     mUser = downloadUserData(mUser, context);
-                    mUser.setIsFirstLogin(false);
-
                     UserUtils.saveUser(mUser, context);
                 }
             } catch (SocketTimeoutException e){
                 loggedIn = ERROR_CONNECTION_TIMEOUT;
             } catch (Exception e) {
                 loggedIn = ERROR_GENERIC;
-                Utils.saveBugReport(e);
+                Utils.saveBugReport(e, TAG);
             }
 
             mUser.setTag(loggedIn);
@@ -345,111 +344,127 @@ public class S3Helper {
                 int respCode;
                 HttpsURLConnection resp = null;
 
+                /* If this is a real login, try to contact the server and save its response */
                 if (!user.isFake()) {
-                    // Try to contact the server
                     resp = getPage(user, URL_LIBRETTO, context);
-                    respCode = resp.getResponseCode();
-                } else {
+                    if (resp != null)
+                        respCode = resp.getResponseCode();
+                    else
+                        respCode = ERROR_RESPONSE_NULL;
+                }
+                /* Else, pretend the connection was OK */
+                else {
                     respCode = HttpURLConnection.HTTP_OK;
                 }
 
-                // If the server is not available
+                /* Now process the server response, and act accordingly. */
+                /* 1. The server is not available. End the process and notify the user. */
                 if (respCode == HttpURLConnection.HTTP_MOVED_TEMP) {
                     ris = ERROR_S3_NOT_AVAILABLE;
-                    Log.e("LOGIN_PROCESS", "S3 not available.");
+                    Log.e(TAG, "S3 not available.");
                 }
+                /* 2. The server is available. Proceed with the login process. */
                 else {
-                    Log.d("LOGIN_PROCESS", "S3 available.");
+                    Log.d(TAG, "S3 available.");
                     Document document = null;
 
+                    /*
+                     * If this is a real login, check for a new JSESSIONID from the server, if
+                     * I have one, it means that the server did not authenticate the user yet.
+                     * Hence, update the user's session ID and ask for the same page again.
+                     * Finally, get the server's response HTML and parse it.
+                     */
                     if (!user.isFake()) {
-                        // If the server gives me a new JSESSIONID cookie value
+                        /* Check for a new session ID from the server */
                         if (resp != null && resp.getHeaderField("Set-Cookie") != null) {
-                            // Save it
+                            /* Update the user's session ID */
                             String jsessionid = resp.getHeaderField("Set-Cookie");
                             user = UserUtils.updateSessionId(user, jsessionid, context);
 
-                            Log.d("LOGIN_PROCESS", "Got new JSESSIONID");
+                            Log.d(TAG, "Got new JSESSIONID");
+
+                            /* Try to get the page with the new session ID */
+                            resp = getPage(user, URL_LIBRETTO, context);
+                            if (resp != null)
+                                respCode = resp.getResponseCode();
+                            else
+                                respCode = ERROR_RESPONSE_NULL;
                         }
-                        Log.d("LOGIN_PROCESS", "SESSION ID = " + user.getSessionID());
-                        Log.d("LOGIN_PROCESS", "AUTH TOKEN = " + user.getAuthToken());
-                    }
+                        Log.d(TAG, "SESSION ID = " + user.getSessionID());
+                        Log.d(TAG, "AUTH TOKEN = " + user.getAuthToken());
 
-                    // If the user needs to authenticate
-                    if (respCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        Log.d("LOGIN_PROCESS", "User not authenticated yet.");
-
-                        // Do login
-                        resp = getPage(user, URL_LIBRETTO, context);
-                        respCode = resp.getResponseCode();
-                    }
-
-                /* Get and parse the HTML from the response */
-                    if (!user.isFake() && resp != null) {
-                        try {
-                            String html = getHTML(resp.getInputStream());
-                            document = Jsoup.parse(html);
-                        } catch (IOException e) {
-                            document = null;
+                        /* Get and parse the HTML from the response */
+                        if (resp != null) {
+                            try {
+                                String html = getHTML(resp.getInputStream());
+                                document = Jsoup.parse(html);
+                            } catch (IOException e) {
+                                document = null;
+                            }
                         }
                     }
 
-                /* If the server recognise the user as logged-in */
+                    /* If the server recognise the user as logged-in */
                     if (respCode == HttpURLConnection.HTTP_OK) {
-                        Log.d("LOGIN_PROCESS", "User logged in.");
+                        Log.d(TAG, "User logged in.");
 
-                    /* If I'm sure the user only has one faculty */
-                        if (!user.isFirstLogin() && user.hasOneFaculty()) {
+                        /*
+                         * If the user only has one faculty, check the user's career status
+                         * and end the login process with either one of the following outcomes:
+                         * - The career is over. The user has not successfully logged in;
+                         * - The career is not over. The user has successfully logged in.
+                         */
+                        if (user.hasOneFaculty()) {
                             if (!isCareerOver(user, document)) {
-                                Log.d("LOGIN_PROCESS", "FINISHED - OK.");
+                                Log.d(TAG, "FINISHED - OK.");
                                 ris = OK_LOGGED_IN;
                             } else {
-                                Log.d("LOGIN_PROCESS", "FINISHED - CAREER OVER.");
+                                Log.d(TAG, "FINISHED - CAREER OVER.");
                                 ris = ERROR_CAREER_OVER;
                             }
                         }
-                    /* If the user may have more faculties */
-                        else {
-                            Log.d("LOGIN_PROCESS", "User might have multiple faculties.");
 
-                        /*
-                         * If the app has the list of faculty to choose, but the user
-                         * hasn't chosen one yet, notify the app that the user needs to
-                         * choose the faculty.
-                         */
+                        /* If the user may have more faculties. */
+                        else {
+                            Log.d(TAG, "User might have multiple faculties.");
+
+                            /*
+                             * If the app has the list of faculty to choose, but the user
+                             * hasn't chosen one yet, notify the app that the user needs to
+                             * choose the faculty.
+                             */
                             if (user.shouldChooseFaculty()) {
-                                Log.d("LOGIN_PROCESS", "User needs to choose the faculty.");
+                                Log.d(TAG, "User needs to choose the faculty.");
                                 ris = ERROR_FACULTY_TO_CHOOSE;
                             }
 
-                        /* If the user has chosen the faculty, end the login process */
+                            /* If the user has chosen the faculty, end the login process */
                             else if (user.isFacultyChosen()) {
-                                Log.d("LOGIN_PROCESS", "User has chosen the faculty.");
+                                Log.d(TAG, "User has chosen the faculty.");
                                 ris = OK_LOGGED_IN;
                             }
 
-                        /*
-                         * If the app doesn't know if the user has multiple faculties,
-                         * hence the app doesn't have the list of faculties.
-                         */
+                            /*
+                             * If the app doesn't know if the user has multiple faculties,
+                             * hence the app doesn't have the list of faculties.
+                             */
                             else {
-                            /* Try to get the user list of faculties */
+                                /* Try to get the user list of faculties */
                                 SparseArray<String> faculties = hasMultiFaculty(user, document);
 
-                            /* If the user has only one faculty */
+                                /* If the user has only one faculty */
                                 if (faculties == null) {
-                                    Log.d("LOGIN_PROCESS", "ONLY ONE FACULTY.");
+                                    Log.d(TAG, "ONLY ONE FACULTY.");
                                     ris = OK_LOGGED_IN;
                                 }
 
-                            /* If the user has multiple faculties */
+                                /* If the user has multiple faculties */
                                 else {
-                                    Log.d("LOGIN_PROCESS", "Multiple faculties found.");
+                                    Log.d(TAG, "Multiple faculties found.");
                                     for (int i=0; i<faculties.size(); i++)
-                                        Log.d("LOGIN_PROCESS",
-                                                "Faculty: " + faculties.valueAt(i));
+                                        Log.d(TAG, "Faculty: " + faculties.valueAt(i));
 
-                                /* Set the user's faculties and save it. */
+                                    /* Set the user's faculties and save it. */
                                     user.setFaculties(faculties);
                                     UserUtils.saveUser(user, context);
 
@@ -459,9 +474,9 @@ public class S3Helper {
                         }
                     }
 
-                /* Otherwise the the password is not valid */
+                    /* Otherwise the the password is not valid */
                     else {
-                        Log.d("LOGIN_PROCESS", "WRONG PASSWORD.");
+                        Log.d(TAG, "WRONG PASSWORD.");
                         ris = ERROR_WRONG_PASSWORD;
                     }
                 }
@@ -475,6 +490,55 @@ public class S3Helper {
             return ris;
         }
 
+    }
+
+    public static class UserDataLoader extends AsyncTaskLoader<User> {
+
+        public static final String TAG = UserDataLoader.class.getSimpleName();
+
+        // Weak references will still allow the Context to be garbage-collected
+        private final WeakReference<Activity> mActivity;
+
+        private User mUser;
+
+        public UserDataLoader(Activity activity, User user) {
+            super(activity);
+
+            this.mActivity = new WeakReference<>(activity);
+            this.mUser = user;
+        }
+
+        @Override
+        public User loadInBackground() {
+            Log.d(TAG, "STARTED");
+
+            /* Get the context from the activity, if null end the login process */
+            Context context = mActivity.get();
+            if (context == null) return null;
+
+            int loggedIn;
+            try {
+                Log.d(TAG, "Downloading user data");
+
+                mUser = downloadUserData(mUser, context);
+                UserUtils.saveUser(mUser, context);
+                loggedIn = OK_UPDATED;
+            } catch (SocketTimeoutException e){
+                loggedIn = ERROR_CONNECTION_TIMEOUT;
+            } catch (IOException e) {
+                loggedIn = ERROR_GENERIC;
+                Utils.saveBugReport(e, TAG);
+            }
+
+            mUser.setTag(loggedIn);
+
+            return mUser;
+        }
+
+        @Override
+        protected void onStopLoading() {
+            cancelLoad();
+        }
     }
 
     public static class LogoutLoader extends AsyncTaskLoader<User> {
@@ -492,44 +556,20 @@ public class S3Helper {
 
         @Override
         public User loadInBackground() {
-            Context context = mActivity.get();
+            Activity context = mActivity.get();
             if (context == null) return null;
 
             try {
-                String username = mUser.getUsername();
                 if (!mUser.isFake())
                     getPage(mUser, URL_LOGOUT, context);
-                boolean loggedOut = UserUtils.removeUser(context);
+                UserUtils.removeUser(context);
 
-                if (loggedOut) {
-                    mUser.setTag(OK_LOGGED_OUT);
-
-                    removeAccount(context, username);
-                }
-                else
-                    return null;
+                mUser.setTag(OK_LOGGED_OUT);
             } catch (Exception e) {
                 return null;
             }
 
             return mUser;
-        }
-
-        void removeAccount(final Context context, final String accountName) {
-            final AccountManager accountManager = AccountManager.get(context);
-            final Account account = new Account(accountName, AccountUtils.ACCOUNT_TYPE);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                /*
-                 * Trying to call this on an older Android version results in a
-                 * NoSuchMethodError exception. There is no AppCompat version of the
-                 * AccountManager API to avoid the need for this version check at runtime.
-                 */
-                accountManager.removeAccount(account, null, null, null);
-            } else {
-                /* Note that this needs the MANAGE_ACCOUNT permission on SDK <= 22. */
-                accountManager.removeAccount(account, null, null);
-            }
         }
     }
     
