@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.communikein.myunimib">
+    package="it.communikein.myunimib">
 
     <!-- Required to save profile picture locally. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -18,6 +17,19 @@
     <!-- Required to access the internet. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality. 
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -25,12 +37,26 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="asset_statements"
             android:resource="@string/asset_statements" />
         <meta-data
             android:name="firebase_performance_logcat_enabled"
             android:value="true" />
+        <!--
+             The API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key
+             that is used to sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and
+             src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
 
         <activity
             android:name=".LoginActivity"
@@ -50,9 +76,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
                     android:host="communikein.github.io"
-                    android:pathPrefix="/myunimib/login/" />
+                    android:pathPrefix="/myunimib/login/"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
         <activity
@@ -63,16 +89,29 @@
             android:name=".SettingsActivity"
             android:label="@string/title_settings"
             android:parentActivityName=".MainActivity">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity
+            android:name=".AvailableExamDetailsActivity" />
+        <activity
+            android:name=".EnrolledExamDetailsActivity" />
 
         <provider
             android:name=".data.MyUnimibProvider"
             android:authorities="@string/content_authority"
             android:exported="false" />
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="@string/file_provider_authority"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
 
         <!-- This is required for immediate syncs -->
         <service
@@ -93,7 +132,6 @@
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
-
         <service
             android:name=".sync.availableexams.ExamAvailableSyncJobService"
             android:exported="false">
@@ -101,7 +139,6 @@
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
-
         <service
             android:name=".sync.enrolledexams.ExamEnrolledSyncJobService"
             android:exported="false">
