@@ -83,8 +83,7 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
     private EnrolledExam exam;
 
     //* Might be null if Google Play services APK is not available. */
-    private SupportMapFragment mMap;
-    private GoogleMap googleMap = null;
+    private GoogleMap mMap = null;
     private ProgressDialog progress;
 
     Thread.UncaughtExceptionHandler handler = (thread, throwable) -> {
@@ -103,6 +102,11 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
     }
 
     private void initUI() {
+        // Try to obtain the map from the SupportMapFragment.
+        SupportMapFragment mMap = ((SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.exam_map));
+        mMap.getMapAsync(this);
+
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
 
@@ -111,7 +115,6 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
 
         initFab();
-        setUpMapIfNeeded();
     }
 
     private void updateUI() {
@@ -130,13 +133,11 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
     }
 
     private void updateMap() {
-        if (googleMap != null) {
+        if (mMap != null) {
             LatLng coords = new LatLng(0, 0);
 
-            MarkerOptions markerOptions;
             String building = getString(R.string.error_exam_missing_room);
             int zoom = 0;
-
             try {
                 if (exam != null) {
                     building = exam.getBuilding().substring(0, exam.getBuilding().indexOf("-")).trim();
@@ -150,15 +151,14 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
                 zoom = 0;
             }
 
-            markerOptions = new MarkerOptions()
+            MarkerOptions markerOptions = new MarkerOptions()
                     .position(coords)
                     .title(building.toUpperCase());
 
             CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(), zoom);
 
-            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            googleMap.addMarker(markerOptions);
-            googleMap.moveCamera(cu);
+            mMap.addMarker(markerOptions);
+            mMap.moveCamera(cu);
         }
     }
 
@@ -187,13 +187,6 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        setUpMapIfNeeded();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home)
@@ -202,18 +195,9 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.exam_map));
-            mMap.getMapAsync(this);
-        }
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        this.googleMap = googleMap;
+        this.mMap = googleMap;
 
         updateMap();
     }
