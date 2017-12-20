@@ -108,24 +108,7 @@ public class MyUnimibProvider extends ContentProvider {
     @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-        String TABLE_NAME;
-        switch (sUriMatcher.match(uri)) {
-            case CODE_BOOKLET_ALL:
-                TABLE_NAME = ExamContract.BookletEntry.TABLE_NAME;
-                break;
-
-            case CODE_AVAILABLE_EXAMS_ALL:
-                TABLE_NAME = ExamContract.AvailableExamEntry.TABLE_NAME;
-                break;
-
-            case CODE_ENROLLED_EXAMS_ALL:
-                TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
-                break;
-
-            default:
-                return super.bulkInsert(uri, values);
-        }
+        String TABLE_NAME = matchTableName(uri);
 
         db.beginTransaction();
         int rowsInserted = 0;
@@ -314,24 +297,7 @@ public class MyUnimibProvider extends ContentProvider {
          */
         if (null == selection) selection = "1";
 
-        String TABLE_NAME;
-        switch (sUriMatcher.match(uri)) {
-            case CODE_BOOKLET_ALL:
-                TABLE_NAME = ExamContract.BookletEntry.TABLE_NAME;
-                break;
-
-            case CODE_AVAILABLE_EXAMS_ALL:
-                TABLE_NAME = ExamContract.AvailableExamEntry.TABLE_NAME;
-                break;
-
-            case CODE_ENROLLED_EXAMS_ALL:
-                TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
-        }
-
+        String TABLE_NAME = matchTableName(uri);
         numRowsDeleted = mOpenHelper.getWritableDatabase().delete(
                 TABLE_NAME,
                 selection,
@@ -352,26 +318,8 @@ public class MyUnimibProvider extends ContentProvider {
 
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
-
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-        String TABLE_NAME;
-        switch (sUriMatcher.match(uri)) {
-            case CODE_BOOKLET_ALL:
-                TABLE_NAME = ExamContract.BookletEntry.TABLE_NAME;
-                break;
-
-            case CODE_AVAILABLE_EXAMS_ALL:
-                TABLE_NAME = ExamContract.AvailableExamEntry.TABLE_NAME;
-                break;
-
-            case CODE_ENROLLED_EXAMS_ALL:
-                TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
-                break;
-
-            default:
-                return null;
-        }
+        String TABLE_NAME = matchTableName(uri);
 
         db.beginTransaction();
         int rowsInserted = 0;
@@ -397,7 +345,26 @@ public class MyUnimibProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        throw new RuntimeException("We are not implementing update in MyUNIMIB");
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        String TABLE_NAME = matchTableName(uri);
+
+        db.beginTransaction();
+        int rowsUpdated = 0;
+        try {
+            long _id = db.update(TABLE_NAME, values, selection, selectionArgs);
+            if (_id != -1) {
+                rowsUpdated++;
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+
+        if (rowsUpdated > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsUpdated;
     }
 
     /**
@@ -412,4 +379,29 @@ public class MyUnimibProvider extends ContentProvider {
         super.shutdown();
     }
 
+
+    private String matchTableName(Uri uri) {
+        String TABLE_NAME;
+        switch (sUriMatcher.match(uri)) {
+            case CODE_BOOKLET_WITH_ID:
+            case CODE_BOOKLET_ALL:
+                TABLE_NAME = ExamContract.BookletEntry.TABLE_NAME;
+                break;
+
+            case CODE_AVAILABLE_EXAMS_ALL:
+            case CODE_AVAILABLE_EXAMS_WITH_ID:
+                TABLE_NAME = ExamContract.AvailableExamEntry.TABLE_NAME;
+                break;
+
+            case CODE_ENROLLED_EXAMS_ALL:
+            case CODE_ENROLLED_EXAMS_WITH_ID:
+                TABLE_NAME = ExamContract.EnrolledExamEntry.TABLE_NAME;
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        return TABLE_NAME;
+    }
 }

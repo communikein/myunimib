@@ -1,5 +1,7 @@
 package it.communikein.myunimib.data.type;
 
+import android.content.Context;
+
 import it.communikein.myunimib.utilities.MyunimibDateUtils;
 import it.communikein.myunimib.utilities.Utils;
 
@@ -76,8 +78,8 @@ public class Exam {
         return date;
     }
 
-    public String printDateTime() {
-        return MyunimibDateUtils.dateTime.format(getDate());
+    public String printDateTime(Context context) {
+        return MyunimibDateUtils.getFriendlyDateString(context, getDate().getTime(), true);
     }
 
     public String getDescription() {

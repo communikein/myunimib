@@ -60,7 +60,7 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdap
         examAdapterViewHolder.corseNameTextView.setText(name);
         examAdapterViewHolder.descriptionTextView.setText(description);
         examAdapterViewHolder.dateTextView.setText(MyunimibDateUtils
-                .getFriendlyDateString(mContext, date, true));
+                .getFriendlyDateString(mContext, date,false));
     }
 
     /**

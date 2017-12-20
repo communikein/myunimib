@@ -10,11 +10,13 @@ import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 
 import it.communikein.myunimib.data.ExamContract;
@@ -104,6 +106,10 @@ public class EnrolledExamDetailsActivity extends AppCompatActivity
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
+
         initFab();
         setUpMapIfNeeded();
     }
@@ -113,7 +119,7 @@ public class EnrolledExamDetailsActivity extends AppCompatActivity
             mBinding.examCertificateFab.setVisibility(View.VISIBLE);
 
             mBinding.examLocationTextview.setText(exam.printLocation());
-            mBinding.examDateTextview.setText(exam.printDateTime());
+            mBinding.examDateTextview.setText(exam.printDateTime(this));
             mBinding.examDescriptionTextview.setText(exam.getDescription());
             mBinding.examTeachersTextview.setText(exam.printTeachers());
 
@@ -185,12 +191,15 @@ public class EnrolledExamDetailsActivity extends AppCompatActivity
         super.onResume();
 
         setUpMapIfNeeded();
+    }
 
-        if (exam != null){
-            mBinding.examDateTextview.setText(exam.printDateTime());
-            mBinding.examLocationTextview.setText(exam.printLocation());
-            mBinding.examDescriptionTextview.setText(exam.getDescription());
-        }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home)
+            NavUtils.navigateUpFromSameTask(this);
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void setUpMapIfNeeded() {
