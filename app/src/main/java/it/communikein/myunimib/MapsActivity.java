@@ -1,8 +1,13 @@
 package it.communikein.myunimib;
 
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,5 +47,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        boolean ok = false;
+        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+        if (available == ConnectionResult.SUCCESS)
+            ok = true;
+        else
+            ok = false;
+
+        Log.i("RESULT", String.valueOf(available));
     }
 }
