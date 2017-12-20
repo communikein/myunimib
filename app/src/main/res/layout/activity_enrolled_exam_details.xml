@@ -19,7 +19,8 @@
             android:layout_height="180dp"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             map:uiZoomControls="false"
-            map:mapType="normal"/>
+            map:mapType="normal"
+            tools:context=".EnrolledExamDetailsActivity"/>
 
         <ScrollView
             android:id="@+id/container"

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:map="http://schemas.android.com/apk/res-auto">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <fragment
+                android:id="@+id/exam_map"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                map:uiZoomControls="false"
+                map:mapType="normal"
+                tools:context=".MapsActivity"/>
+
+            <ScrollView
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin">
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:context=".EnrolledExamDetailsActivity">
+
+                    <android.support.constraint.Guideline
+                        android:id="@+id/horizontal_middle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintGuide_percent="0.5"
+                        tools:layout_editor_absoluteX="192dp"
+                        tools:layout_editor_absoluteY="0dp"/>
+
+                    <TextView
+                        android:id="@+id/exam_location_label"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_exam_location"
+                        style="@style/TextLabel"/>
+
+                    <TextView
+                        android:id="@+id/exam_location_textview"
+                        app:layout_constraintEnd_toStartOf="@id/horizontal_middle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/exam_location_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        tools:text="@string/holder_exam_location"
+                        style="@style/TextContent"/>
+
+                    <TextView
+                        android:id="@+id/exam_date_label"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_exam_date"
+                        style="@style/TextLabel"/>
+
+                    <TextView
+                        android:id="@+id/exam_date_textview"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/exam_date_label"
+                        app:layout_constraintStart_toEndOf="@id/horizontal_middle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:text="@string/holder_exam_date"
+                        android:gravity="end"
+                        style="@style/TextContent"/>
+
+                    <TextView
+                        android:id="@+id/exam_description_label"
+                        app:layout_constraintTop_toBottomOf="@id/exam_location_textview"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/label_exam_description"
+                        style="@style/TextLabel"/>
+
+                    <TextView
+                        android:id="@+id/exam_description_textview"
+                        app:layout_constraintTop_toBottomOf="@id/exam_description_label"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        tools:text="@string/holder_exam_description"
+                        style="@style/TextContent"/>
+
+                    <TextView
+                        android:id="@+id/exam_teachers_label"
+                        app:layout_constraintTop_toBottomOf="@id/exam_description_textview"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/label_exam_teachers"
+                        style="@style/TextLabel"/>
+
+                    <TextView
+                        android:id="@+id/exam_teachers_textview"
+                        app:layout_constraintTop_toBottomOf="@id/exam_teachers_label"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        tools:text="@string/holder_exam_teachers"
+                        style="@style/TextContent"/>
+
+                </android.support.constraint.ConstraintLayout>
+
+            </ScrollView>
+
+        </LinearLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/exam_certificate_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginEnd="@dimen/activity_vertical_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            app:fabSize="normal"
+            app:srcCompat="@drawable/ic_attachment"
+            app:rippleColor="@color/colorPrimaryDark"/>
+
+    </FrameLayout>
+
+</layout>

@@ -12,20 +12,13 @@ import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
+import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
-import it.communikein.myunimib.data.ExamContract;
-import it.communikein.myunimib.data.type.EnrolledExam;
-import it.communikein.myunimib.data.type.ExamID;
-import it.communikein.myunimib.databinding.ActivityEnrolledExamDetailsBinding;
-import it.communikein.myunimib.sync.S3Helper;
-import it.communikein.myunimib.utilities.UniversityUtils;
-import it.communikein.myunimib.utilities.Utils;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,9 +34,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
+import it.communikein.myunimib.data.ExamContract;
+import it.communikein.myunimib.data.type.EnrolledExam;
+import it.communikein.myunimib.data.type.ExamID;
+import it.communikein.myunimib.databinding.ActivityEnrolledExamDetailsBinding;
+import it.communikein.myunimib.databinding.ActivityMapsBinding;
+import it.communikein.myunimib.sync.S3Helper;
+import it.communikein.myunimib.utilities.UniversityUtils;
+
 @SuppressWarnings("unchecked")
-public class EnrolledExamDetailsActivity extends FragmentActivity
-        implements OnMapReadyCallback, LoaderManager.LoaderCallbacks {
+public class MapsActivity extends FragmentActivity implements
+        OnMapReadyCallback, LoaderManager.LoaderCallbacks {
 
     final public static int LOADER_CERTIFICATE_ID = 3000;
     final public static int LOADER_DETAILS_ID = 3001;
@@ -77,30 +78,28 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
     public static final int INDEX_TEACHERS = 10;
     public static final int INDEX_RESERVED = 11;
 
-    ActivityEnrolledExamDetailsBinding mBinding;
+    ActivityMapsBinding mBinding;
 
     private Uri mUri;
     private EnrolledExam exam;
 
-    //* Might be null if Google Play services APK is not available. */
-    private SupportMapFragment mMap;
-    private GoogleMap googleMap = null;
+    private GoogleMap mMap = null;
     private ProgressDialog progress;
-
-    Thread.UncaughtExceptionHandler handler = (thread, throwable) -> {
-        throwable.printStackTrace();
-        Utils.saveBugReport((Exception) throwable, "ENROLLED DETAILS");
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Thread.setDefaultUncaughtExceptionHandler(handler);
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_enrolled_exam_details);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_maps);
 
         initUI();
         loadExamData();
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.exam_map);
+        mapFragment.getMapAsync(this);
     }
+
 
     private void initUI() {
         progress = new ProgressDialog(this);
@@ -111,7 +110,6 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
 
         initFab();
-        setUpMapIfNeeded();
     }
 
     private void updateUI() {
@@ -130,7 +128,7 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
     }
 
     private void updateMap() {
-        if (googleMap != null) {
+        if (mMap != null) {
             LatLng coords = new LatLng(0, 0);
 
             MarkerOptions markerOptions;
@@ -156,9 +154,9 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
 
             CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(), zoom);
 
-            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            googleMap.addMarker(markerOptions);
-            googleMap.moveCamera(cu);
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            mMap.addMarker(markerOptions);
+            mMap.moveCamera(cu);
         }
     }
 
@@ -187,13 +185,6 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        setUpMapIfNeeded();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home)
@@ -202,22 +193,22 @@ public class EnrolledExamDetailsActivity extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.exam_map));
-            mMap.getMapAsync(this);
-        }
-    }
 
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        this.googleMap = googleMap;
+        this.mMap = googleMap;
 
         updateMap();
     }
-
 
 
     @Override

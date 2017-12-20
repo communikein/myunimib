@@ -134,7 +134,7 @@ public class EnrolledExamsFragment extends Fragment implements
 
     @Override
     public void onListItemClick(int exam_adsce_id) {
-        Intent intent = new Intent(getActivity(), EnrolledExamDetailsActivity.class);
+        Intent intent = new Intent(getActivity(), MapsActivity.class);
         Uri uriForExamClicked = ExamContract.EnrolledExamEntry.buildExamUriWithId(exam_adsce_id);
         intent.setData(uriForExamClicked);
         startActivity(intent);
