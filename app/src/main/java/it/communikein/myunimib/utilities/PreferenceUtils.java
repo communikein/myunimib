@@ -7,7 +7,7 @@ import android.support.v7.preference.PreferenceManager;
 import it.communikein.myunimib.R;
 
 
-public class PreferenceUtils {
+class PreferenceUtils {
 
     public static int getPreferredSyncFrequency(Context context) {
         SharedPreferences sharedPreferences =

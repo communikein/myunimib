@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import it.communikein.myunimib.LoginActivity;
+import it.communikein.myunimib.ui.LoginActivity;
 
 
 class S3Authenticator extends AbstractAccountAuthenticator {

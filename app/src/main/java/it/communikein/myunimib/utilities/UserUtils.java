@@ -3,16 +3,10 @@ package it.communikein.myunimib.utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
-import it.communikein.myunimib.User;
-import it.communikein.myunimib.data.type.AvailableExam;
-import it.communikein.myunimib.data.type.BookletEntry;
-import it.communikein.myunimib.data.type.EnrolledExam;
+import it.communikein.myunimib.data.User;
 
 
 public class UserUtils {
@@ -128,34 +122,6 @@ public class UserUtils {
         }
 
         return Utils.user;
-    }
-
-
-    public static JSONArray bookletToJson(ArrayList<BookletEntry> booklet) {
-        JSONArray array = new JSONArray();
-
-        for (BookletEntry entry : booklet)
-            array.put(entry.toJSON());
-
-        return array;
-    }
-
-    public static JSONArray availableExamsToJson(ArrayList<AvailableExam> exams) {
-        JSONArray array = new JSONArray();
-
-        for (AvailableExam entry : exams)
-            array.put(entry.toJSON());
-
-        return array;
-    }
-
-    public static JSONArray enrolledExamsToJson(ArrayList<EnrolledExam> exams) {
-        JSONArray array = new JSONArray();
-
-        for (EnrolledExam entry : exams)
-            array.put(entry.toJSON());
-
-        return array;
     }
 
 }

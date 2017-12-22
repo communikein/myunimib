@@ -16,7 +16,7 @@
             android:id="@+id/loginView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:context=".MainActivity">
+            tools:context=".ui.MainActivity">
 
             <EditText
                 android:id="@+id/editTextUniversityMail"

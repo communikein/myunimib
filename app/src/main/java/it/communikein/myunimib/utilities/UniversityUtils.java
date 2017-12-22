@@ -1,6 +1,6 @@
 package it.communikein.myunimib.utilities;
 
-import it.communikein.myunimib.data.type.Building;
+import it.communikein.myunimib.data.Building;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.HashMap;

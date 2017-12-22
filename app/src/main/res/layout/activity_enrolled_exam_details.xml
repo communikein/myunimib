@@ -20,7 +20,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             map:uiZoomControls="false"
             map:mapType="normal"
-            tools:context=".EnrolledExamDetailsActivity"/>
+            tools:context=".ui.EnrolledExamDetailsActivity"/>
 
         <ScrollView
             android:id="@+id/container"
@@ -34,7 +34,7 @@
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:context=".EnrolledExamDetailsActivity">
+                tools:context=".ui.EnrolledExamDetailsActivity">
 
                 <android.support.constraint.Guideline
                     android:id="@+id/horizontal_middle"

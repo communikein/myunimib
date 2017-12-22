@@ -16,6 +16,8 @@
 
     <!-- Required to access the internet. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -49,7 +51,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.LoginActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -72,36 +74,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:label="@string/title_home"
             android:launchMode="singleTop" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".ui.SettingsActivity"
             android:label="@string/title_settings"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".AvailableExamDetailsActivity"
-            android:parentActivityName=".MainActivity">
+            android:name=".ui.AvailableExamDetailsActivity"
+            android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".EnrolledExamDetailsActivity"
-            android:parentActivityName=".MainActivity">
+            android:name=".ui.EnrolledExamDetailsActivity"
+            android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".ui.MainActivity" />
         </activity>
 
-        <provider
-            android:name=".data.MyUnimibProvider"
-            android:authorities="@string/content_authority"
-            android:exported="false" />
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="@string/file_provider_authority"
@@ -114,32 +112,32 @@
 
         <!-- This is required for immediate syncs -->
         <service
-            android:name=".sync.booklet.BookletSyncIntentService"
+            android:name=".data.network.BookletSyncIntentService"
             android:exported="false" />
         <service
-            android:name=".sync.availableexams.ExamAvailableSyncIntentService"
+            android:name=".data.network.ExamAvailableSyncIntentService"
             android:exported="false" />
         <service
-            android:name=".sync.enrolledexams.ExamEnrolledSyncIntentService"
+            android:name=".data.network.ExamEnrolledSyncIntentService"
             android:exported="false" />
 
         <!-- This is the Service declaration used in conjunction with FirebaseJobDispatcher -->
         <service
-            android:name=".sync.booklet.BookletJobService"
+            android:name=".data.network.BookletSyncJobService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
         <service
-            android:name=".sync.availableexams.ExamAvailableSyncJobService"
+            android:name=".data.network.ExamAvailableSyncJobService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
         <service
-            android:name=".sync.enrolledexams.ExamEnrolledSyncJobService"
+            android:name=".data.network.ExamEnrolledSyncJobService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
