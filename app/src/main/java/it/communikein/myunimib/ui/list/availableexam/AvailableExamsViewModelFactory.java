@@ -1,4 +1,4 @@
-package it.communikein.myunimib.ui.availableexam;
+package it.communikein.myunimib.ui.list.availableexam;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;

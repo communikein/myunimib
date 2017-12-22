@@ -1,7 +1,8 @@
-package it.communikein.myunimib.ui.availableexam;
+package it.communikein.myunimib.ui.list.enrolledexam;
 
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,35 +10,36 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
+import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamDetailsActivity;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.UserUtils;
 
 
 /**
- * The {@link Fragment} responsible for showing the user's Available Exams.
+ * The {@link Fragment} responsible for showing the user's Enrolled Exams.
  */
-public class AvailableExamsFragment extends Fragment {
+public class EnrolledExamsFragment extends Fragment implements
+        EnrolledExamAdapter.ListItemClickListener {
 
     /*  */
-    private AvailableExamAdapter mExamsAdapter;
-    private int mPosition = RecyclerView.NO_POSITION;
+    private EnrolledExamAdapter mExamsAdapter;
 
     /*  */
     private FragmentExamsBinding mBinding;
 
     /* */
-    private AvailableExamsFragmentViewModel mViewModel;
+    private EnrolledExamsFragmentViewModel mViewModel;
 
     /* Required empty public constructor */
-    public AvailableExamsFragment() {}
+    public EnrolledExamsFragment() {}
 
 
     @Override
@@ -67,9 +69,9 @@ public class AvailableExamsFragment extends Fragment {
          */
         mBinding.rvList.setHasFixedSize(true);
 
-        /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
+        /* Create a new EnrolledExamAdapter. It will be responsible for displaying the list's items */
         if (getActivity() != null)
-            mExamsAdapter = new AvailableExamAdapter(getActivity());
+            mExamsAdapter = new EnrolledExamAdapter(getActivity(), this);
 
         return mBinding.getRoot();
     }
@@ -79,31 +81,22 @@ public class AvailableExamsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
-        /* Setting the adapter attaches it to the RecyclerView in our layout. */
-        mBinding.rvList.setAdapter(mExamsAdapter);
-
         /*
          * Ensures a loader is initialized and active and shows the loading view.
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
         if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
-            AvailableExamsViewModelFactory factory = InjectorUtils
-                    .provideAvailableExamsViewModelFactory(this.getContext());
+            EnrolledExamsViewModelFactory factory = InjectorUtils
+                    .provideEnrolledExamsViewModelFactory(this.getContext());
             mViewModel = ViewModelProviders.of(this, factory)
-                    .get(AvailableExamsFragmentViewModel.class);
+                    .get(EnrolledExamsFragmentViewModel.class);
 
-            mViewModel.getAvailableExams().observe(this, newData -> {
-                mExamsAdapter.swapData(newData);
-                if (mPosition == RecyclerView.NO_POSITION)
-                    mPosition = 0;
+            mViewModel.getEnrolledExams().observe(this,
+                    pagedList -> mExamsAdapter.setList(pagedList));
 
-                mBinding.rvList.smoothScrollToPosition(mPosition);
-                /*
-                if (newData != null && newData.size() != 0) showWeatherDataView();
-                else showLoading();
-                */
-            });
+            /* Setting the adapter attaches it to the RecyclerView in our layout. */
+            mBinding.rvList.setAdapter(mExamsAdapter);
         }
     }
 
@@ -112,12 +105,19 @@ public class AvailableExamsFragment extends Fragment {
      */
     private void setTitle() {
         if (getActivity() != null) {
-        /* Get a reference to the MainActivity ActionBar */
+            /* Get a reference to the MainActivity ActionBar */
             ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
-        /* If there is an ActionBar, set it's title */
+            /* If there is an ActionBar, set it's title */
             if (actionBar != null)
-                actionBar.setTitle(R.string.title_exams_available);
+                actionBar.setTitle(R.string.title_exams_enrolled);
         }
     }
 
+
+    @Override
+    public void onListItemClick(int exam_adsce_id) {
+        Intent intent = new Intent(getActivity(), EnrolledExamDetailsActivity.class);
+        intent.putExtra(UnimibNetworkDataSource.ADSCE_ID, exam_adsce_id);
+        startActivity(intent);
+    }
 }

@@ -1,6 +1,7 @@
 package it.communikein.myunimib.data;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.paging.DataSource;
 import android.util.Log;
 
 import java.util.List;
@@ -105,19 +106,19 @@ public class UnimibRepository {
     }
 
 
-    public LiveData<List<ListBookletEntry>> getCurrentBooklet() {
+    public DataSource.Factory<Integer, ListBookletEntry> getCurrentBooklet() {
         initializeData();
 
         return mUnimibDao.getBooklet();
     }
 
-    public LiveData<List<ListAvailableExam>> getCurrentAvailableExams() {
+    public DataSource.Factory<Integer, ListAvailableExam> getCurrentAvailableExams() {
         initializeData();
 
         return mUnimibDao.getAvailableExams();
     }
 
-    public LiveData<List<ListEnrolledExam>> getCurrentEnrolledExams() {
+    public DataSource.Factory<Integer, ListEnrolledExam> getCurrentEnrolledExams() {
         initializeData();
 
         return mUnimibDao.getEnrolledExams();

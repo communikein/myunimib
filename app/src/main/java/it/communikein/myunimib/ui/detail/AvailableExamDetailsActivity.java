@@ -1,4 +1,4 @@
-package it.communikein.myunimib.ui;
+package it.communikein.myunimib.ui.detail;
 
 import android.app.ProgressDialog;
 import android.support.design.widget.FloatingActionButton;

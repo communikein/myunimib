@@ -21,9 +21,10 @@ import it.communikein.myunimib.R;
 import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
 import it.communikein.myunimib.data.network.S3Helper;
-import it.communikein.myunimib.ui.availableexam.AvailableExamsFragment;
-import it.communikein.myunimib.ui.booklet.BookletFragment;
-import it.communikein.myunimib.ui.enrolledexam.EnrolledExamsFragment;
+import it.communikein.myunimib.ui.detail.HomeFragment;
+import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
+import it.communikein.myunimib.ui.list.booklet.BookletFragment;
+import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
 import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.utilities.Utils;
 

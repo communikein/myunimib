@@ -1,4 +1,4 @@
-package it.communikein.myunimib.ui.enrolledexam;
+package it.communikein.myunimib.ui.list.enrolledexam;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;

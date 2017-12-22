@@ -6,9 +6,10 @@ import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.database.UnimibDatabase;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
-import it.communikein.myunimib.ui.availableexam.AvailableExamsViewModelFactory;
-import it.communikein.myunimib.ui.booklet.BookletViewModelFactory;
-import it.communikein.myunimib.ui.enrolledexam.EnrolledExamsViewModelFactory;
+import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamViewModelFactory;
+import it.communikein.myunimib.ui.list.availableexam.AvailableExamsViewModelFactory;
+import it.communikein.myunimib.ui.list.booklet.BookletViewModelFactory;
+import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsViewModelFactory;
 
 public class InjectorUtils {
 
@@ -42,6 +43,11 @@ public class InjectorUtils {
     public static AvailableExamsViewModelFactory provideAvailableExamsViewModelFactory(Context context) {
         UnimibRepository repository = provideRepository(context.getApplicationContext());
         return new AvailableExamsViewModelFactory(repository);
+    }
+
+    public static EnrolledExamViewModelFactory provideEnrolledExamViewModelFactory(Context context, int adsceId) {
+        UnimibRepository repository = provideRepository(context.getApplicationContext());
+        return new EnrolledExamViewModelFactory(repository, adsceId);
     }
 
 }

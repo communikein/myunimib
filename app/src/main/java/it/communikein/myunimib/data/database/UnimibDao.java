@@ -1,6 +1,7 @@
 package it.communikein.myunimib.data.database;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.paging.DataSource;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -34,13 +35,13 @@ public interface UnimibDao {
 
 
     @Query("SELECT adsceId, name, score, state FROM booklet")
-    LiveData<List<ListBookletEntry>> getBooklet();
+    DataSource.Factory<Integer, ListBookletEntry> getBooklet();
 
     @Query("SELECT adsceId, name, date, description FROM available_exams")
-    LiveData<List<ListAvailableExam>> getAvailableExams();
+    DataSource.Factory<Integer, ListAvailableExam> getAvailableExams();
 
     @Query("SELECT adsceId, name, date, description FROM enrolled_exams")
-    LiveData<List<ListEnrolledExam>> getEnrolledExams();
+    DataSource.Factory<Integer, ListEnrolledExam> getEnrolledExams();
 
 
     @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")

@@ -86,14 +86,14 @@
                 android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.AvailableExamDetailsActivity"
+            android:name=".ui.detail.AvailableExamDetailsActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.EnrolledExamDetailsActivity"
+            android:name=".ui.detail.enrolledexam.EnrolledExamDetailsActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

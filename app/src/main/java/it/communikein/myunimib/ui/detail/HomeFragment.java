@@ -1,4 +1,4 @@
-package it.communikein.myunimib.ui;
+package it.communikein.myunimib.ui.detail;
 
 
 import android.databinding.DataBindingUtil;
@@ -17,6 +17,7 @@ import it.communikein.myunimib.R;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
 import it.communikein.myunimib.data.network.S3Helper;
+import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.utilities.Utils;
 

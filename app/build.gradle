@@ -8,7 +8,7 @@ android {
         applicationId "it.communikein.myunimib"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 104
+        versionCode 105
         versionName "2.0-alpha2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -57,12 +57,15 @@ dependencies {
 
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
-    compile "android.arch.persistence.room:runtime:1.0.0"
+    /* For room */
+    implementation "android.arch.persistence.room:runtime:1.0.0"
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
-
-    compile "android.arch.lifecycle:runtime:1.0.3"
-    compile "android.arch.lifecycle:extensions:1.0.0"
+    /* For lifecycle */
+    implementation "android.arch.lifecycle:runtime:1.0.3"
+    implementation "android.arch.lifecycle:extensions:1.0.0"
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0"
+    /* For paging */
+    implementation "android.arch.paging:runtime:1.0.0-alpha4-1"
 
     implementation 'pub.devrel:easypermissions:1.0.1'
     implementation 'org.jsoup:jsoup:1.11.2'

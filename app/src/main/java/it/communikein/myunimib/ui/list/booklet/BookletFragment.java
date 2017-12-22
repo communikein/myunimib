@@ -1,4 +1,4 @@
-package it.communikein.myunimib.ui.booklet;
+package it.communikein.myunimib.ui.list.booklet;
 
 
 import android.arch.lifecycle.ViewModelProviders;
@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +26,7 @@ import it.communikein.myunimib.utilities.UserUtils;
 public class BookletFragment extends Fragment {
 
     /*  */
-    private BookletAdapter mBookletAdapter;
-    private int mPosition = RecyclerView.NO_POSITION;
+    private BookletAdapter mAdapter;
 
     /*  */
     private FragmentBookletBinding mBinding;
@@ -69,7 +67,7 @@ public class BookletFragment extends Fragment {
 
         /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
         if (getActivity() != null)
-            mBookletAdapter = new BookletAdapter(getActivity());
+            mAdapter = new BookletAdapter(getActivity(), null);
 
         return mBinding.getRoot();
     }
@@ -78,9 +76,6 @@ public class BookletFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setTitle();
-
-        /* Setting the adapter attaches it to the RecyclerView in our layout. */
-        mBinding.rvList.setAdapter(mBookletAdapter);
 
         /*
          * Ensures a loader is initialized and active and shows the loading view.
@@ -93,17 +88,11 @@ public class BookletFragment extends Fragment {
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(BookletFragmentViewModel.class);
 
-            mViewModel.getBooklet().observe(this, newData -> {
-                mBookletAdapter.swapData(newData);
-                if (mPosition == RecyclerView.NO_POSITION)
-                    mPosition = 0;
+            mViewModel.getBooklet().observe(this,
+                    pagedList -> mAdapter.setList(pagedList));
 
-                mBinding.rvList.smoothScrollToPosition(mPosition);
-                /*
-                if (newData != null && newData.size() != 0) showWeatherDataView();
-                else showLoading();
-                */
-            });
+            /* Setting the adapter attaches it to the RecyclerView in our layout. */
+            mBinding.rvList.setAdapter(mAdapter);
         }
     }
 
