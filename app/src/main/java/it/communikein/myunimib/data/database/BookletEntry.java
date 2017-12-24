@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
-@Entity(tableName = "booklet", indices = {@Index(value = {"adsceId"}, unique = true)})
+@Entity(tableName = "booklet")
 public class BookletEntry {
 
     private final static String ARG_NAME = "ARG_NAME";
@@ -22,31 +22,17 @@ public class BookletEntry {
     private final static String ARG_CODE = "ARG_CODE";
     private final static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
+    @PrimaryKey
+    private int adsceId;
     private String name;
     private Date date;
     private String state;
     private String code;
-    private int adsceId;
     private int cfu;
     private String score;
 
-    @Ignore
-    public BookletEntry(int adsce_id, String name, Date date, int cfu, String state, String mark,
-                        String code) {
-        setCfu(cfu);
-        setScore(mark);
-        setName(name);
-        setAdsceId(adsce_id);
-        setDate(date);
-        setState(state);
-        setCode(code);
-    }
-
-    public BookletEntry(int id, int adsceId, String name, Date date, int cfu, String state,
+    public BookletEntry(int adsceId, String name, Date date, int cfu, String state,
                         String score, String code) {
-        setId(id);
         setCfu(cfu);
         setScore(score);
         setName(name);
@@ -73,19 +59,8 @@ public class BookletEntry {
         if (json.has(ARG_ADSCE_ID))
             setAdsceId(json.getInt(ARG_ADSCE_ID));
         if (json.has(ARG_DATE)) {
-            long millis = json.getLong(ARG_DATE);
-
-            if (millis == 0)
-                setDate(null);
-            else
-                setDate(new Date(json.getLong(ARG_DATE)));
+            setDate(json.getLong(ARG_DATE));
         }
-    }
-
-    public int getId() { return this.id; }
-
-    private void setId(int id) {
-        this.id = id;
     }
 
     public int getAdsceId() {
@@ -109,7 +84,8 @@ public class BookletEntry {
     }
 
     private void setName(String name) {
-        this.name = name;
+        if (name == null) this.name = "";
+        else this.name = name;
     }
 
     public Date getDate() {
@@ -119,7 +95,7 @@ public class BookletEntry {
     @Ignore
     private long getMillis() {
         if (getDate() == null)
-            return 0;
+            return -1;
         else
             return getDate().getTime();
     }
@@ -128,12 +104,18 @@ public class BookletEntry {
         this.date = date;
     }
 
+    private void setDate(long millis) {
+        if (millis < 0) setDate(null);
+        else setDate(new Date(millis));
+    }
+
     public String getCode() {
         return code;
     }
 
     private void setCode(String code) {
-        this.code = code;
+        if (code == null) this.code = "";
+        else this.code = code;
     }
 
     public String getState() {
@@ -141,7 +123,8 @@ public class BookletEntry {
     }
 
     private void setState(String state) {
-        this.state = state;
+        if (state == null) this.state = "";
+        else this.state = state;
     }
 
     public String getScore() {
@@ -149,7 +132,8 @@ public class BookletEntry {
     }
 
     private void setScore(String score) {
-        this.score = score;
+        if (score == null) this.score = "";
+        else this.score = score;
     }
 
     @Ignore
@@ -177,7 +161,31 @@ public class BookletEntry {
     @Ignore
     @Override
     public String toString() {
-        return toJSON().toString();
+        JSONObject obj = toJSON();
+        if (obj != null)
+            return obj.toString();
+        else
+            return null;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (! (obj instanceof BookletEntry)) return false;
+        BookletEntry entry = (BookletEntry) obj;
+
+        return getAdsceId() == entry.getAdsceId();
+    }
+
+    public boolean isIdentic(Object obj) {
+        if (! (obj instanceof BookletEntry)) return false;
+        BookletEntry entry = (BookletEntry) obj;
+
+        return getAdsceId() == entry.getAdsceId() &&
+                getState().equals(entry.getState()) &&
+                getCfu() == entry.getCfu() &&
+                getCode().equals(entry.getCode()) &&
+                getMillis() == entry.getMillis() &&
+                getName().equals(entry.getName()) &&
+                getScore().equals(entry.getScore());
+    }
 }

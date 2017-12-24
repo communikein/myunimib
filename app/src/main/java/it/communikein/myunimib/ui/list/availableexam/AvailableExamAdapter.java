@@ -3,16 +3,19 @@ package it.communikein.myunimib.ui.list.availableexam;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapterHelper;
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.recyclerview.extensions.DiffCallback;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.ListAvailableExam;
+import it.communikein.myunimib.data.database.AvailableExam;
+import it.communikein.myunimib.databinding.AvailableExamListItemBinding;
 import it.communikein.myunimib.utilities.MyunimibDateUtils;
 
 
@@ -23,22 +26,23 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdap
 
     private final ListItemClickListener mOnClickListener;
 
-    private final PagedListAdapterHelper<ListAvailableExam> mHelper;
+    private final PagedListAdapterHelper<AvailableExam> mHelper;
 
     public interface ListItemClickListener {
-        void onListItemClick(int adsce_id);
+        void onListItemClick(AvailableExam exam);
+        void onEnrollmentClicked(AvailableExam exam);
     }
 
-    private static final DiffCallback<ListAvailableExam> DIFF_CALLBACK = new DiffCallback<ListAvailableExam>() {
+    private static final DiffCallback<AvailableExam> DIFF_CALLBACK = new DiffCallback<AvailableExam>() {
         @Override
-        public boolean areItemsTheSame(@NonNull ListAvailableExam oldItem, @NonNull ListAvailableExam newItem) {
+        public boolean areItemsTheSame(@NonNull AvailableExam oldItem, @NonNull AvailableExam newItem) {
             return newItem.equals(oldItem);
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull ListAvailableExam oldItem, @NonNull ListAvailableExam newItem) {
-            return newItem.getDescription().equals(oldItem.getDescription()) &&
-                    newItem.getDate().equals(oldItem.getDate()) &&
+        public boolean areContentsTheSame(@NonNull AvailableExam oldItem, @NonNull AvailableExam newItem) {
+            return newItem.getBeginEnrollment().getTime() == oldItem.getBeginEnrollment().getTime() &&
+                    newItem.getEndEnrollment().getTime() == oldItem.getEndEnrollment().getTime() &&
                     newItem.getName().equals(oldItem.getName());
         }
     };
@@ -77,7 +81,7 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdap
      */
     @Override
     public void onBindViewHolder(ExamAdapterViewHolder holder, int position) {
-        ListAvailableExam exam = mHelper.getItem(position);
+        AvailableExam exam = mHelper.getItem(position);
         if (exam != null)
             holder.bindTo(exam);
         else
@@ -95,7 +99,7 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdap
         return mHelper.getItemCount();
     }
 
-    public void setList(PagedList<ListAvailableExam> pagedList) {
+    public void setList(PagedList<AvailableExam> pagedList) {
         mHelper.setList(pagedList);
     }
 
@@ -107,34 +111,54 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<AvailableExamAdap
     class ExamAdapterViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
-        int exam_adsce_id;
+        private AvailableExam mExam;
 
-        final TextView corseNameTextView;
-        final TextView descriptionTextView;
-        final TextView dateTextView;
+        private final TextView nameTextview;
+        private final TextView examDescriptionTextview;
+        private final TextView beginEnrollmentTextview;
+        private final TextView endEnrollmentTextview;
+        private final Button enrollButton;
 
         ExamAdapterViewHolder(View view) {
             super(view);
 
-            corseNameTextView = view.findViewById(R.id.tv_name);
-            descriptionTextView = view.findViewById(R.id.tv_description);
-            dateTextView = view.findViewById(R.id.tv_date);
+            nameTextview = view.findViewById(R.id.name_textview);
+            examDescriptionTextview = view.findViewById(R.id.exam_description_textview);
+            beginEnrollmentTextview = view.findViewById(R.id.begin_enrollment_textview);
+            endEnrollmentTextview = view.findViewById(R.id.end_enrollment_textview);
+            enrollButton = view.findViewById(R.id.enroll_button);
+
+            view.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            if (mOnClickListener != null)
-                mOnClickListener.onListItemClick(exam_adsce_id);
+            if (mOnClickListener != null && mExam!= null)
+                mOnClickListener.onListItemClick(mExam);
         }
 
-        void bindTo(ListAvailableExam entry) {
-            String friendly_date = MyunimibDateUtils
-                    .getFriendlyDateString(mContext, entry.getDate().getTime(),false);
+        void bindTo(final AvailableExam entry) {
+            String friendly_date_begin = MyunimibDateUtils.getFriendlyDateString(
+                    mContext,
+                    entry.getBeginEnrollment().getTime(),
+                    false,
+                    false);
+            String friendly_date_end = MyunimibDateUtils.getFriendlyDateString(
+                    mContext,
+                    entry.getEndEnrollment().getTime(),
+                    false,
+                    false);
 
-            exam_adsce_id = entry.getAdsceId();
-            corseNameTextView.setText(entry.getName());
-            descriptionTextView.setText(entry.getDescription());
-            dateTextView.setText(friendly_date);
+            this.mExam = entry;
+            nameTextview.setText(entry.getName());
+            examDescriptionTextview.setText(entry.getDescription());
+            beginEnrollmentTextview.setText(friendly_date_begin);
+            endEnrollmentTextview.setText(friendly_date_end);
+
+            enrollButton.setOnClickListener(v -> {
+                if (mOnClickListener != null)
+                    mOnClickListener.onEnrollmentClicked(entry);
+            });
         }
 
         void clear() {

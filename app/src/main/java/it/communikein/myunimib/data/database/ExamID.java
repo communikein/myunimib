@@ -24,7 +24,6 @@ public class ExamID {
     private int cdsEsaId;
     private int attDidEsaId;
     private int appId;
-    @PrimaryKey
     private int adsceId;
 
 
@@ -43,7 +42,7 @@ public class ExamID {
             setAdsceId(obj.getInt(ARG_ADSCE_ID));
     }
 
-    ExamID(int cdsEsaId, int attDidEsaId, int appId, int adsceId) {
+    public ExamID(int cdsEsaId, int attDidEsaId, int appId, int adsceId) {
         this.cdsEsaId = cdsEsaId;
         this.attDidEsaId = attDidEsaId;
         this.appId = appId;
@@ -135,15 +134,19 @@ public class ExamID {
     @Ignore
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ExamID) {
-            ExamID examID = (ExamID) obj;
+        if (! (obj instanceof  ExamID)) return false;
 
-            return examID.getAdsceId() == this.getAdsceId() &&
-                    examID.getAppId() == this.getAppId() &&
-                    examID.getAttDidEsaId() == this.getAttDidEsaId() &&
-                    examID.getCdsEsaId() == this.getCdsEsaId();
-        }
+        ExamID examID = (ExamID) obj;
+        return examID.getAdsceId() == this.getAdsceId();
+    }
 
-        return false;
+    public boolean isIdentic(Object obj) {
+        if (! (obj instanceof ExamID)) return false;
+
+        ExamID examID = (ExamID) obj;
+        return equals(obj) &&
+                examID.getAppId() == this.getAppId() &&
+                examID.getAttDidEsaId() == this.getAttDidEsaId() &&
+                examID.getCdsEsaId() == this.getCdsEsaId();
     }
 }

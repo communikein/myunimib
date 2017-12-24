@@ -4,8 +4,11 @@ import android.content.Context;
 
 import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.database.ExamID;
+import it.communikein.myunimib.data.database.UnimibDao;
 import it.communikein.myunimib.data.database.UnimibDatabase;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
+import it.communikein.myunimib.ui.detail.availableexam.AvailableExamViewModelFactory;
 import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamViewModelFactory;
 import it.communikein.myunimib.ui.list.availableexam.AvailableExamsViewModelFactory;
 import it.communikein.myunimib.ui.list.booklet.BookletViewModelFactory;
@@ -30,6 +33,13 @@ public class InjectorUtils {
         return UnimibNetworkDataSource.getInstance(context.getApplicationContext(), executors);
     }
 
+    public static UnimibDao provideUnimibDao(Context context) {
+        UnimibDatabase database = UnimibDatabase
+                .getInstance(context.getApplicationContext());
+
+        return database.unimibDao();
+    }
+
     public static BookletViewModelFactory provideBookletViewModelFactory(Context context) {
         UnimibRepository repository = provideRepository(context.getApplicationContext());
         return new BookletViewModelFactory(repository);
@@ -45,9 +55,13 @@ public class InjectorUtils {
         return new AvailableExamsViewModelFactory(repository);
     }
 
-    public static EnrolledExamViewModelFactory provideEnrolledExamViewModelFactory(Context context, int adsceId) {
+    public static EnrolledExamViewModelFactory provideEnrolledExamViewModelFactory(Context context, ExamID examID) {
         UnimibRepository repository = provideRepository(context.getApplicationContext());
-        return new EnrolledExamViewModelFactory(repository, adsceId);
+        return new EnrolledExamViewModelFactory(repository, examID);
     }
 
+    public static AvailableExamViewModelFactory provideAvailableExamViewModelFactory(Context context, ExamID examID) {
+        UnimibRepository repository = provideRepository(context.getApplicationContext());
+        return new AvailableExamViewModelFactory(repository, examID);
+    }
 }

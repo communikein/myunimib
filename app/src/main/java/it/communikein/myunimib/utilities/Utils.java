@@ -36,5 +36,13 @@ public class Utils {
         FirebaseCrash.logcat(Log.ERROR, TAG, e.getMessage());
         FirebaseCrash.report(e);
     }
+
+    public static void saveBugReport(Exception e, String TAG, String html) {
+        e.printStackTrace();
+        FirebaseCrash.logcat(Log.ERROR, TAG, e.getMessage());
+        if (html != null)
+            FirebaseCrash.logcat(Log.ERROR, TAG, html);
+        FirebaseCrash.report(e);
+    }
 }
 

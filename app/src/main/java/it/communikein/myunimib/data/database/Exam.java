@@ -2,6 +2,7 @@ package it.communikein.myunimib.data.database;
 
 import android.arch.persistence.room.Ignore;
 import android.content.Context;
+import android.os.Environment;
 
 import it.communikein.myunimib.utilities.MyunimibDateUtils;
 import it.communikein.myunimib.utilities.Utils;
@@ -9,6 +10,7 @@ import it.communikein.myunimib.utilities.Utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -27,22 +29,22 @@ public class Exam extends ExamID {
          String description) {
         super(cdsEsaId, attDidEsaId, appId, adsceId);
 
-        this.name = name;
-        this.date = date;
-        this.description = description;
+        setName(name);
+        setDate(date);
+        setDescription(description);
     }
 
     @Ignore
     Exam(ExamID id, String name, Date date, String description) {
-        super(id.getAppId(), id.getCdsEsaId(), id.getAttDidEsaId(), id.getAdsceId());
+        super(id.getCdsEsaId(), id.getAttDidEsaId(), id.getAppId(), id.getAdsceId());
 
-        this.setName(name);
-        this.setDate(date);
-        this.setDescription(description);
+        setName(name);
+        setDate(date);
+        setDescription(description);
     }
 
     @Ignore
-    Exam(JSONObject obj) throws JSONException, NullPointerException, ParseException {
+    Exam(JSONObject obj) throws JSONException, NullPointerException {
         super(obj);
 
         if (obj.has(ARG_DESCRIPTION))
@@ -50,20 +52,28 @@ public class Exam extends ExamID {
         if (obj.has(ARG_NAME))
             setName(obj.getString(ARG_NAME));
         if (obj.has(ARG_DATE))
-            setDate(Utils.sdf.parse(obj.getString(ARG_DATE)));
+            setDate(obj.getLong(ARG_DATE));
     }
 
 
     private void setName(String name) {
-        this.name = name;
+        if (name == null) this.name = "";
+        else this.name = name;
     }
 
     private void setDate(Date date) {
         this.date = date;
     }
 
+    @Ignore
+    private void setDate(long millis) {
+        if (millis < 0) setDate(null);
+        else setDate(new Date(millis));
+    }
+
     private void setDescription(String description) {
-        this.description = description;
+        if (description == null) this.description = "";
+        else this.description = description;
     }
 
     public String getName() {
@@ -74,9 +84,14 @@ public class Exam extends ExamID {
         return date;
     }
 
+    public long getMillis() {
+        if (getDate() == null) return -1;
+        else return getDate().getTime();
+    }
+
     @Ignore
     public String printDateTime(Context context) {
-        return MyunimibDateUtils.getFriendlyDateString(context, getDate().getTime(), true);
+        return MyunimibDateUtils.getFriendlyDateString(context, getDate().getTime(), true, true);
     }
 
     public String getDescription() {
@@ -93,7 +108,7 @@ public class Exam extends ExamID {
             obj.put(ExamID.EXAM_ID, super.toJSON());
 
             obj.put(ARG_NAME, getName());
-            obj.put(ARG_DATE, Utils.sdf.format(getDate()));
+            obj.put(ARG_DATE, getMillis());
             obj.put(ARG_DESCRIPTION, getDescription());
         } catch (JSONException e){
             obj = new JSONObject();
@@ -106,5 +121,28 @@ public class Exam extends ExamID {
     @Override
     public String toString() {
         return toJSON().toString();
+    }
+
+    @Override
+    public boolean isIdentic(Object obj) {
+        if (! (obj instanceof Exam)) return false;
+
+        Exam exam = (Exam) obj;
+        return super.isIdentic(exam) &&
+                exam.getName().equals(getName()) &&
+                exam.getDescription().equals(getDescription()) &&
+                exam.getMillis() == getMillis();
+    }
+
+
+    @Ignore
+    public String getCertificateName(){
+        return getName() + " - " + MyunimibDateUtils.dateFile.format(getDate()) + ".pdf";
+    }
+
+    @Ignore
+    public File getCertificatePath() {
+        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                getCertificateName());
     }
 }

@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.database.ExamID;
 
 /**
  * Created by eliam on 12/22/2017.
@@ -13,18 +14,19 @@ import it.communikein.myunimib.data.UnimibRepository;
 public class EnrolledExamViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
     private final UnimibRepository mRepository;
-    private final int adsceId;
+    private final ExamID mExamId;
 
-    public EnrolledExamViewModelFactory(UnimibRepository repository, int adsceId) {
+    public EnrolledExamViewModelFactory(UnimibRepository repository, ExamID examID) {
         this.mRepository = repository;
-        this.adsceId = adsceId;
+
+        this.mExamId = examID;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new EnrolledExamDetailActivityViewModel(mRepository, adsceId);
+        return (T) new EnrolledExamDetailActivityViewModel(mRepository, mExamId);
     }
 
 }

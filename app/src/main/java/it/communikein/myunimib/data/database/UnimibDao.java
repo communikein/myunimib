@@ -14,13 +14,23 @@ import java.util.List;
 @Dao
 public interface UnimibDao {
 
-    @Insert(onConflict = OnConflictStrategy.FAIL)
+    @Insert
+    void addBookletEntry(BookletEntry entry);
+
+    @Insert
+    void addAvailableExam(AvailableExam entry);
+
+    @Insert
+    void addEnrolledExam(EnrolledExam entry);
+
+
+    @Insert
     void bulkInsertBooklet(List<BookletEntry> entry);
 
-    @Insert(onConflict = OnConflictStrategy.FAIL)
+    @Insert
     void bulkInsertAvailableExams(List<AvailableExam> entry);
 
-    @Insert(onConflict = OnConflictStrategy.FAIL)
+    @Insert
     void bulkInsertEnrolledExams(List<EnrolledExam> entry);
 
 
@@ -34,24 +44,45 @@ public interface UnimibDao {
     void deleteEnrolledExams();
 
 
-    @Query("SELECT adsceId, name, score, state FROM booklet")
-    DataSource.Factory<Integer, ListBookletEntry> getBooklet();
+    @Query("DELETE FROM available_exams WHERE adsceId = :adsceId AND appId = :appId " +
+            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
+    void deleteAvailableExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
-    @Query("SELECT adsceId, name, date, description FROM available_exams")
-    DataSource.Factory<Integer, ListAvailableExam> getAvailableExams();
+    @Query("DELETE FROM enrolled_exams WHERE adsceId = :adsceId AND appId = :appId " +
+            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
+    void deleteEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
-    @Query("SELECT adsceId, name, date, description FROM enrolled_exams")
-    DataSource.Factory<Integer, ListEnrolledExam> getEnrolledExams();
+
+    @Query("SELECT * FROM booklet")
+    DataSource.Factory<Integer, BookletEntry> getBooklet();
+
+    @Query("SELECT * FROM available_exams")
+    DataSource.Factory<Integer, AvailableExam> getAvailableExams();
+
+    @Query("SELECT * FROM enrolled_exams")
+    DataSource.Factory<Integer, EnrolledExam> getEnrolledExams();
 
 
     @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")
     BookletEntry getBookletEntry(int adsceId);
 
-    @Query("SELECT * FROM available_exams WHERE adsceId = :adsceId")
-    AvailableExam getAvailableExam(int adsceId);
+    @Query("SELECT * FROM available_exams WHERE adsceId = :adsceId AND appId = :appId " +
+            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
+    AvailableExam getAvailableExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
-    @Query("SELECT * FROM enrolled_exams WHERE adsceId = :adsceId")
-    LiveData<EnrolledExam> getEnrolledExam(int adsceId);
+    @Query("SELECT * FROM enrolled_exams WHERE adsceId = :adsceId AND appId = :appId " +
+            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
+    EnrolledExam getEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
+
+
+    @Query("SELECT COUNT(adsceId) FROM booklet")
+    int getBookletSize();
+
+    @Query("SELECT COUNT(adsceId) FROM available_exams")
+    int getAvailableExamsSize();
+
+    @Query("SELECT COUNT(adsceId) FROM enrolled_exams")
+    int getEnrolledExamsSize();
 
 
     @Query("SELECT UPPER(name) FROM booklet WHERE UPPER(name) LIKE UPPER(:name)")
@@ -59,11 +90,11 @@ public interface UnimibDao {
 
 
     @Update
-    void updateBookletEntry(BookletEntry entry);
+    int updateBookletEntry(BookletEntry entry);
 
     @Update
-    void updateAvailableExam(AvailableExam entry);
+    int updateAvailableExam(AvailableExam entry);
 
     @Update
-    void updateEnrolledExam(EnrolledExam entry);
+    int updateEnrolledExam(EnrolledExam entry);
 }

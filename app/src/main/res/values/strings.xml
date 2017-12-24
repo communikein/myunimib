@@ -6,6 +6,18 @@
     <string name="content_authority" translatable="false">it.communikein.myunimib</string>
     <string name="file_provider_authority" translatable="false">it.communikein.myunimib.fileprovider</string>
     <string name="asset_statements" translatable="false">[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"web\",\n    \"site\": \"https://communikein.github.io\",\n  }\n}]</string>
+    
+    <string name="channel_booklet_id">it.communikein.myunimib.booklet</string>
+    <string name="channel_booklet_name">Booklet</string>
+    <string name="channel_booklet_content_changes">Changes in the booklet detected.</string>
+
+    <string name="channel_available_exams_id">it.communikein.myunimib.available</string>
+    <string name="channel_available_exams_name">Available Exams</string>
+    <string name="channel_available_exams_content_changes">Changes in the available exams detected.</string>
+
+    <string name="channel_enrolled_exams_id">it.communikein.myunimib.enrolled</string>
+    <string name="channel_enrolled_exams_name">Enrolled Exams</string>
+    <string name="channel_enrolled_exams_content_changes">Changes in the enrolled exams detected.</string>
     <!-- END -->
 
     <!-- Strings related to navigation  -->
@@ -103,8 +115,46 @@
     <string name="cfu_label">CFU</string>
     <!-- END home fragment -->
 
+    <!-- Strings related to exam detail activity -->
+    <string name="label_exam_location">WHERE</string>
+    <string name="holder_exam_location">Milano, U14-T04</string>
+
+    <string name="label_exam_description">WHAT</string>
+    <string name="holder_exam_description">Prova orale</string>
+
+    <string name="label_exam_date">WHEN</string>
+    <string name="holder_exam_date">Wed, 14 November</string>
+
+    <string name="label_exam_teachers">WHO</string>
+    <string name="holder_exam_teachers">Docente primo,\nDocente secondo</string>
+
+    <string name="label_exam_begin_enrollment">ENROLLMENT BEGINS</string>
+    <string name="holder_exam_begin_enrollment">Mon, 12 November</string>
+
+    <string name="label_exam_end_enrollment">ENROLLMENT ENDS</string>
+    <string name="holder_exam_end_enrollment">Fri, 16 November</string>
+    <!-- END exam detail activity -->
+
+    <!-- Strings related to misc. -->
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="attention_title">Attention</string>
+    <string name="action_go">Go</string>
+    <string name="action_ok">OK</string>
+    <string name="open">Open</string>
+    <!-- END misc. -->
+
+    <!-- Strings related to enrollment -->
+    <string name="title_questionnaire">Questionnaire</string>
+    <string name="error_questionnaire_to_fill">Attention, you need to fill the questionnaire before enrolling in this exam.</string>
+    <string name="action_show_questionnaire">Fill it</string>
+
+    <string name="title_enrollment_completed">Enrollment Completed</string>
+    <string name="enrollment_completed_info">You are enrolled in this exam. To be sure, I\'ve downloaded a certificate of your enrollment, do you want to see it?</string>
+    <string name="enrollment_not_completed">Enrollment not completed.</string>
+    <string name="enrolled_exam_certificate_downloaded">Certificate downloaded</string>
+    <!-- END enrollment -->
 
     <string name="permissions_granted">Thanks for the trust ;)</string>
     <string name="retry">Retry</string>
@@ -113,18 +163,7 @@
 
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
-    <string name="holder_exam_location">Milano, U14-T04</string>
-    <string name="holder_exam_date">Wed. 14 November 2017</string>
-    <string name="holder_exam_description">Prova orale</string>
-    <string name="holder_exam_teachers">Docente primo,\nDocente secondo</string>
-    <string name="label_exam_description">WHAT</string>
-    <string name="label_exam_location">WHERE</string>
-    <string name="label_exam_date">WHEN</string>
-    <string name="label_exam_teachers">WHO</string>
     <string name="error_exam_missing_room">No room info available</string>
     <string name="error_enrolled_exam_missing">Enrolled exam\'s info missing</string>
-    <string name="open">Open</string>
-    <string name="enrolled_exam_certificate_downloaded">Certificate downloaded</string>
     <string name="title_activity_maps">Map</string>
-    <string name="yesterday">Yesterday</string>
 </resources>

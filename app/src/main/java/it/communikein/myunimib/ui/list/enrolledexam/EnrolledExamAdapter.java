@@ -12,7 +12,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.ListEnrolledExam;
+import it.communikein.myunimib.data.database.EnrolledExam;
+import it.communikein.myunimib.data.database.ExamID;
 import it.communikein.myunimib.utilities.MyunimibDateUtils;
 
 
@@ -23,20 +24,20 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapte
 
     private final ListItemClickListener mOnClickListener;
 
-    private final PagedListAdapterHelper<ListEnrolledExam> mHelper;
+    private final PagedListAdapterHelper<EnrolledExam> mHelper;
 
     public interface ListItemClickListener {
-        void onListItemClick(int exam_id);
+        void onListItemClick(ExamID examID);
     }
 
-    private static final DiffCallback<ListEnrolledExam> DIFF_CALLBACK = new DiffCallback<ListEnrolledExam>() {
+    private static final DiffCallback<EnrolledExam> DIFF_CALLBACK = new DiffCallback<EnrolledExam>() {
         @Override
-        public boolean areItemsTheSame(@NonNull ListEnrolledExam oldItem, @NonNull ListEnrolledExam newItem) {
+        public boolean areItemsTheSame(@NonNull EnrolledExam oldItem, @NonNull EnrolledExam newItem) {
             return oldItem.equals(newItem);
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull ListEnrolledExam oldItem, @NonNull ListEnrolledExam newItem) {
+        public boolean areContentsTheSame(@NonNull EnrolledExam oldItem, @NonNull EnrolledExam newItem) {
             return newItem.getAdsceId() == oldItem.getAdsceId() &&
                     newItem.getDate().equals(oldItem.getDate()) &&
                     newItem.getDescription().equals(oldItem.getDescription()) &&
@@ -77,7 +78,7 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapte
      */
     @Override
     public void onBindViewHolder(ExamAdapterViewHolder holder, int position) {
-        ListEnrolledExam exam = mHelper.getItem(position);
+        EnrolledExam exam = mHelper.getItem(position);
         if (exam != null)
             holder.bindTo(exam);
         else
@@ -95,7 +96,7 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapte
         return mHelper.getItemCount();
     }
 
-    public void setList(PagedList<ListEnrolledExam> pagedList) {
+    public void setList(PagedList<EnrolledExam> pagedList) {
         mHelper.setList(pagedList);
     }
 
@@ -107,7 +108,7 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapte
      */
     class ExamAdapterViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
-        int exam_adsce_id;
+        ExamID examID;
 
         final TextView corseNameTextView;
         final TextView descriptionTextView;
@@ -126,14 +127,17 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<EnrolledExamAdapte
         @Override
         public void onClick(View view) {
             if (mOnClickListener != null)
-                mOnClickListener.onListItemClick(exam_adsce_id);
+                mOnClickListener.onListItemClick(examID);
         }
 
-        void bindTo(ListEnrolledExam entry) {
-            String friendly_date = MyunimibDateUtils
-                    .getFriendlyDateString(mContext, entry.getDate().getTime(), false);
+        void bindTo(EnrolledExam entry) {
+            String friendly_date = MyunimibDateUtils.getFriendlyDateString(
+                    mContext,
+                    entry.getDate().getTime(),
+                    false,
+                    false);
 
-            exam_adsce_id = entry.getAdsceId();
+            examID = entry;
             corseNameTextView.setText(entry.getName());
             descriptionTextView.setText(entry.getDescription());
             dateTextView.setText(friendly_date);

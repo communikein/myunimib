@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 
-@Entity(tableName = "enrolled_exams", indices = {@Index(value = {"adsceId"}, unique = true)})
+@Entity(tableName = "enrolled_exams", primaryKeys = {"adsceId", "appId", "appId", "cdsEsaId"})
 public class EnrolledExam extends Exam {
 
     private static final String ARG_CODE = "ARG_CODE";
@@ -38,11 +38,11 @@ public class EnrolledExam extends Exam {
                         String reserved, ArrayList<String> teachers) {
         super(cdsEsaId, attDidEsaId, appId, adsceId, name, date, description);
 
-        this.code = code;
-        this.building = building;
-        this.room = room;
-        this.reserved = reserved;
-        this.teachers = teachers;
+        setCode(code);
+        setBuilding(building);
+        setRoom(room);
+        setReserved(reserved);
+        setTeachers(teachers);
     }
 
     @Ignore
@@ -77,7 +77,8 @@ public class EnrolledExam extends Exam {
     public String getCode() { return this.code; }
 
     private void setCode(String code) {
-        this.code = code;
+        if (code == null) this.code = "";
+        else this.code = code;
     }
 
     public String getBuilding() {
@@ -85,7 +86,8 @@ public class EnrolledExam extends Exam {
     }
 
     private void setBuilding(String building) {
-        this.building = building;
+        if (building == null) this.building = "";
+        else this.building = building;
     }
 
     public String getRoom() {
@@ -93,7 +95,8 @@ public class EnrolledExam extends Exam {
     }
 
     private void setRoom(String room) {
-        this.room = room;
+        if (room == null) this.room = "";
+        else this.room = room;
     }
 
     public String getReserved() {
@@ -101,7 +104,8 @@ public class EnrolledExam extends Exam {
     }
 
     private void setReserved(String reserved) {
-        this.reserved = reserved;
+        if (reserved == null) this.reserved = "";
+        else this.reserved = reserved;
     }
 
     public ArrayList<String> getTeachers() {
@@ -126,7 +130,8 @@ public class EnrolledExam extends Exam {
     }
 
     private void setTeachers(ArrayList<String> teachers) {
-        this.teachers = teachers;
+        if (teachers == null) this.teachers = new ArrayList<>();
+        else this.teachers = teachers;
     }
 
     private void setTeachers(JSONArray array) {
@@ -142,11 +147,6 @@ public class EnrolledExam extends Exam {
         setTeachers(teachers);
     }
 
-
-    @Ignore
-    private String getCertificateName(){
-        return getName() + " - " + MyunimibDateUtils.dateFile.format(getDate()) + ".pdf";
-    }
 
     @Ignore
     public String printLocation(){
@@ -192,10 +192,15 @@ public class EnrolledExam extends Exam {
         return toJSON().toString();
     }
 
+    @Override
+    public boolean isIdentic(Object obj) {
+        if (! (obj instanceof EnrolledExam)) return false;
 
-    @Ignore
-    public static File getCertificatePath(EnrolledExam exam) {
-        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                exam.getCertificateName());
+        EnrolledExam exam = (EnrolledExam) obj;
+        return super.isIdentic(exam) &&
+                exam.getBuilding().equals(getBuilding()) &&
+                exam.getCode().equals(getCode()) &&
+                exam.getReserved().equals(getReserved()) &&
+                exam.getTeachersJson().toString().equals(getTeachersJson().toString());
     }
 }

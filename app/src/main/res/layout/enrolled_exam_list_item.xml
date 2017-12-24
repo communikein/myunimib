@@ -8,6 +8,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <android.support.constraint.Guideline
+            android:id="@+id/horizontal_middle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.6"/>
+
         <TextView
             android:id="@+id/tv_name"
             style="@style/TextAppearance.AppCompat.Subhead"
@@ -27,27 +34,26 @@
             android:id="@+id/tv_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             app:layout_constraintTop_toBottomOf="@id/tv_name"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/tv_date"
-            app:layout_constraintVertical_bias="0.8"
-            android:paddingStart="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="0dp"
-            android:paddingEnd="0dp"
-            tools:text="Descrizione dell'esame in corso"/>
+            app:layout_constraintRight_toLeftOf="@id/horizontal_middle"
+            tools:text="Descrizione dell'esame in corso"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/tv_date"
-            style="@style/TextAppearance.AppCompat.Caption"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            app:layout_constraintVertical_bias="0.2"
+            android:gravity="end"
             app:layout_constraintTop_toBottomOf="@id/tv_name"
-            app:layout_constraintLeft_toRightOf="@id/tv_description"
+            app:layout_constraintLeft_toRightOf="@id/horizontal_middle"
             app:layout_constraintRight_toRightOf="parent"
-            tools:text="12/09/2017" />
+            tools:text="12/09/2017"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:textSize="16sp"/>
 
     </android.support.constraint.ConstraintLayout>
 

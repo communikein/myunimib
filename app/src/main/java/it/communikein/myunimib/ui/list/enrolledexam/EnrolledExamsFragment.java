@@ -2,6 +2,7 @@ package it.communikein.myunimib.ui.list.enrolledexam;
 
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -15,11 +16,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.database.ExamID;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
 import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamDetailsActivity;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
+import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.utilities.UserUtils;
 
 
@@ -95,6 +98,13 @@ public class EnrolledExamsFragment extends Fragment implements
             mViewModel.getEnrolledExams().observe(this,
                     pagedList -> mExamsAdapter.setList(pagedList));
 
+            mViewModel.getModifiedEnrolledExamsCount().observe(this, count -> {
+                if (getActivity() != null && count != null && count > 0) {
+                    createEntriesModifiedNotification(getActivity(), count);
+                    mViewModel.clearChanges();
+                }
+            });
+
             /* Setting the adapter attaches it to the RecyclerView in our layout. */
             mBinding.rvList.setAdapter(mExamsAdapter);
         }
@@ -114,10 +124,24 @@ public class EnrolledExamsFragment extends Fragment implements
     }
 
 
+    private void createEntriesModifiedNotification(@NonNull Context context, int count) {
+        String title = context.getString(R.string.channel_enrolled_exams_name);
+        String content = context.getString(R.string.channel_enrolled_exams_content_changes);
+        int notificationId = 2;
+
+        NotificationHelper notificationHelper = new NotificationHelper(getActivity());
+        notificationHelper.notify(notificationId,
+                notificationHelper.getNotificationEnrolled(title, content));
+    }
+
+
     @Override
-    public void onListItemClick(int exam_adsce_id) {
+    public void onListItemClick(ExamID examID) {
         Intent intent = new Intent(getActivity(), EnrolledExamDetailsActivity.class);
-        intent.putExtra(UnimibNetworkDataSource.ADSCE_ID, exam_adsce_id);
+        intent.putExtra(UnimibNetworkDataSource.ADSCE_ID, examID.getAdsceId());
+        intent.putExtra(UnimibNetworkDataSource.APP_ID, examID.getAppId());
+        intent.putExtra(UnimibNetworkDataSource.ATT_DID_ESA_ID, examID.getAttDidEsaId());
+        intent.putExtra(UnimibNetworkDataSource.CDS_ESA_ID, examID.getCdsEsaId());
         startActivity(intent);
     }
 }

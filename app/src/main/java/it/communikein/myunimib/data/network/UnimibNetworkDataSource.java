@@ -61,8 +61,8 @@ public class UnimibNetworkDataSource {
     private static final String UNIMIB_AVAILABLE_SYNC_TAG = "unimib-available-sync";
     private static final String UNIMIB_ENROLLED_SYNC_TAG = "unimib-enrolled-sync";
 
-    private static final String PARAM_KEY_HTML = "param-key-html";
-    private static final String PARAM_KEY_RESPONSE = "param-key-response";
+    public static final String PARAM_KEY_HTML = "param-key-html";
+    public static final String PARAM_KEY_RESPONSE = "param-key-response";
 
     public static final String CDS_ESA_ID = "CDS_ESA_ID";
     public static final String ATT_DID_ESA_ID = "ATT_DID_ESA_ID";
@@ -195,7 +195,7 @@ public class UnimibNetworkDataSource {
         // Create the Job to periodically sync Sunshine
         Job syncSunshineJob = dispatcher.newJobBuilder()
                 /* The Service that will be used to sync Sunshine's data */
-                .setService(ExamEnrolledSyncJobService.class)
+                .setService(ExamAvailableSyncJobService.class)
                 /* Set the UNIQUE tag used to identify this Job */
                 .setTag(UNIMIB_AVAILABLE_SYNC_TAG)
                 /*
@@ -361,12 +361,13 @@ public class UnimibNetworkDataSource {
             return null;
 
         User user = UserUtils.getUser(context);
-
+        String html = null;
         try {
             // Try to get the private page
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, context);
+            Bundle result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
+                    false, context);
 
-            String html = result.getString(PARAM_KEY_HTML);
+            html = result.getString(PARAM_KEY_HTML);
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
 
             if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
@@ -428,7 +429,7 @@ public class UnimibNetworkDataSource {
             Log.i(LOG_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG);
+            Utils.saveBugReport(e, LOG_TAG, html);
         }
 
         return null;
@@ -439,16 +440,17 @@ public class UnimibNetworkDataSource {
             return null;
 
         User user = UserUtils.getUser(context);
-
+        String html = null;
         try {
             // Try to get the private page
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, context);
+            Bundle result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
+                    false, context);
 
-            String html = result.getString(PARAM_KEY_HTML);
+            html = result.getString(PARAM_KEY_HTML);
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
 
             // Se l'utente è autenticato
-            if (html != null && s3_response == S3Helper.OK_LOGGED_IN) {
+            if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
                 Document doc = Jsoup.parse(html);
                 Elements rows = doc.select("table#app-tabella_appelli tbody tr");
 
@@ -490,7 +492,7 @@ public class UnimibNetworkDataSource {
             Log.i(LOG_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG);
+            Utils.saveBugReport(e, LOG_TAG, html);
         }
 
         return null;
@@ -501,12 +503,13 @@ public class UnimibNetworkDataSource {
             return null;
 
         User user = UserUtils.getUser(context);
-
+        String html = null;
         try {
             // Try to get the private page
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, context);
+            Bundle result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, null,
+                    false, context);
 
-            String html = result.getString(PARAM_KEY_HTML);
+            html = result.getString(PARAM_KEY_HTML);
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
 
             // Se l'utente è autenticato
@@ -551,7 +554,7 @@ public class UnimibNetworkDataSource {
             Log.i(LOG_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG);
+            Utils.saveBugReport(e, LOG_TAG, html);
         }
 
         return null;
@@ -649,12 +652,12 @@ public class UnimibNetworkDataSource {
     }
 
 
-    private static Bundle tryGetUrlWithLogin(String url, User user, Context context)
-            throws IOException {
+    public static Bundle tryGetUrlWithLogin(String url, User user, String params,
+                                            boolean queryOperator, Context context) throws IOException {
         Bundle result = new Bundle();
 
         // Try to get the private page
-        HttpsURLConnection response = S3Helper.getPage(user, url, null, context);
+        HttpsURLConnection response = S3Helper.getPage(user, url, params, queryOperator, context);
 
         if (response != null) {
             int s3_response = response.getResponseCode();

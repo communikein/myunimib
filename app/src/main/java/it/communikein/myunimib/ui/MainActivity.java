@@ -4,14 +4,14 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
-import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.Loader;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_logout:
                 showProgress(true);
 
-                getLoaderManager()
+                getSupportLoaderManager()
                         .initLoader(LOADER_LOGOUT_ID, null, this)
                         .forceLoad();
                 return true;

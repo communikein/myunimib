@@ -119,7 +119,8 @@ public class MyunimibDateUtils {
      * @return A user-friendly representation of the date such as "Today, June 8", "Tomorrow",
      * or "Friday"
      */
-    public static String getFriendlyDateString(Context context, long normalizedUtcMidnight, boolean showFullDate) {
+    public static String getFriendlyDateString(Context context, long normalizedUtcMidnight,
+                                               boolean showFullDate, boolean showTime) {
 
         /*
          * NOTE: localDate should be localDateMidnightMillis and should be straight from the
@@ -150,7 +151,7 @@ public class MyunimibDateUtils {
              * is "Today, June 24"
              */
             String dayName = getDayName(context, localDate);
-            String readableDate = getReadableDateString(context, localDate, true);
+            String readableDate = getReadableDateString(context, localDate, showTime);
             if (daysFromEpochToProvidedDate - daysFromEpochToToday < 2) {
                 /*
                  * Since there is no localized format that returns "Today" or "Tomorrow" in the API
@@ -172,7 +173,7 @@ public class MyunimibDateUtils {
             return getDayName(context, localDate);
         } else {
             /* If the input date is more than a week in the future, return the full date */
-            return getReadableDateString(context, localDate, false);
+            return getReadableDateString(context, localDate, showTime);
         }
     }
 

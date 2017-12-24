@@ -2,6 +2,7 @@ package it.communikein.myunimib.ui.list.booklet;
 
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,6 +18,7 @@ import it.communikein.myunimib.R;
 import it.communikein.myunimib.databinding.FragmentBookletBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
+import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.utilities.UserUtils;
 
 
@@ -91,9 +93,26 @@ public class BookletFragment extends Fragment {
             mViewModel.getBooklet().observe(this,
                     pagedList -> mAdapter.setList(pagedList));
 
+            mViewModel.getModifiedBookletEntriesCount().observe(this, count -> {
+                if (getActivity() != null && count != null && count > 0) {
+                    createEntriesModifiedNotification(getActivity(), count);
+                    mViewModel.clearChanges();
+                }
+            });
+
             /* Setting the adapter attaches it to the RecyclerView in our layout. */
             mBinding.rvList.setAdapter(mAdapter);
         }
+    }
+
+    private void createEntriesModifiedNotification(@NonNull Context context, int count) {
+        String title = context.getString(R.string.channel_booklet_name);
+        String content = context.getString(R.string.channel_booklet_content_changes);
+        int notificationId = 1;
+
+        NotificationHelper notificationHelper = new NotificationHelper(getActivity());
+        notificationHelper.notify(notificationId,
+                notificationHelper.getNotificationBooklet(title, content));
     }
 
     /**

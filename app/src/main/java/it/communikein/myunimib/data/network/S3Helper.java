@@ -1,15 +1,21 @@
 package it.communikein.myunimib.data.network;
 
 import android.app.Activity;
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.AsyncTaskLoader;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.widget.TextView;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.database.AvailableExam;
 import it.communikein.myunimib.data.database.EnrolledExam;
+import it.communikein.myunimib.data.database.Exam;
+import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.data.User;
@@ -52,15 +58,19 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/auth/studente/Libretto/LibrettoHome.do;";
     static final String URL_AVAILABLE_EXAMS =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/Appelli.do;";
-    public static final String URL_ENROLLED_EXAMS =
+    static final String URL_ENROLLED_EXAMS =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/BachecaPrenotazioni.do;";
     private static final String URL_ENROLLED_EXAM_CERTIFICATE =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/StampaStatinoPDF.do?";
+    static final String URL_ENROLL_TO =
+            "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/EffettuaPrenotazioneAppello.do;";
+    static final String URL_UNENROLL_FROM =
+            "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/CancellaAppello.do;";
     public static final String URL_PROFILE_PICTURE =
             "https://s3w.si.unimib.it/esse3/auth/AddressBook/DownloadFoto.do;";
     public static final String URL_CAREER_BASE =
             "https://s3w.si.unimib.it/esse3/auth/studente/SceltaCarrieraStudente.do;";
-    private static final String URL_LOGOUT =
+    static final String URL_LOGOUT =
             "https://s3w.si.unimib.it/esse3/Logout.do;";
 
     private static final int ERROR_GENERIC = -1;
@@ -76,15 +86,15 @@ public class S3Helper {
     public static final int OK_UPDATED = 3;
 
 
-    private S3Helper() {}
-
-
-    private static URL buildUrl(User user, String url, String query) {
+    private static URL buildUrl(User user, String url, String query, boolean queryOperator) {
         String url_string = url + "JSESSIONID=" + user.getSessionID();
         if (user.isFacultyChosen())
             url_string += "?stu_id=" + user.getSelectedFaculty();
-        if (query != null)
-            url_string += "&" + query;
+        if (query != null) {
+            if (queryOperator) url_string += "?";
+            else url_string += "&";
+            url_string += query;
+        }
 
         try {
             return new URL(url_string);
@@ -94,7 +104,7 @@ public class S3Helper {
     }
 
     @Nullable
-    public static SSLSocketFactory getSocketFactory(Context context) {
+    static SSLSocketFactory getSocketFactory(Context context) {
 
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -132,11 +142,11 @@ public class S3Helper {
         return  null;
     }
 
-    static HttpsURLConnection getPage(User user, String url, String query, Context context)
-            throws IOException {
+    static HttpsURLConnection getPage(User user, String url, String query, boolean queryOperator,
+                                      Context context) throws IOException {
         String USER_AGENT = System.getProperty("http.agent");
 
-        URL url_target = buildUrl(user, url, query);
+        URL url_target = buildUrl(user, url, query, queryOperator);
         if (url_target == null) return null;
         HttpsURLConnection con = (HttpsURLConnection) url_target.openConnection();
         con.setRequestMethod("GET");
@@ -154,7 +164,7 @@ public class S3Helper {
         String cookie = con.getHeaderField("Set-Cookie");
         if (cookie != null && !cookie.isEmpty()) {
             user = UserUtils.updateSessionId(user, cookie, context);
-            con = getPage(user, url, query, context);
+            con = getPage(user, url, query, queryOperator, context);
         }
 
         return con;
@@ -197,7 +207,8 @@ public class S3Helper {
         }
 
         try {
-            HttpURLConnection response = S3Helper.getPage(user, S3Helper.URL_LIBRETTO, null, context);
+            HttpURLConnection response = S3Helper.getPage(user, S3Helper.URL_LIBRETTO, null,
+                    false, context);
             Document doc;
             String result = S3Helper.getHTML(response.getInputStream());
 
@@ -215,7 +226,8 @@ public class S3Helper {
                 }
             }
 
-            response = S3Helper.getPage(user, S3Helper.URL_HOME, null, context);
+            response = S3Helper.getPage(user, S3Helper.URL_HOME, null,
+                    false, context);
             result = S3Helper.getHTML(response.getInputStream());
             doc = Jsoup.parse(result);
             Element el = doc.select("div#sottotitolo-menu-principale").first();
@@ -286,11 +298,41 @@ public class S3Helper {
         return courses;
     }
 
+    private static boolean downloadCertificate(User user, Exam exam, Context context) throws IOException {
+        String urlParameters = exam.examIdToUrl();
+        HttpsURLConnection connection = getPage(user,
+                URL_ENROLLED_EXAM_CERTIFICATE, urlParameters, false, context);
+        InputStream ris = null;
+
+        if (connection != null)
+            ris = connection.getInputStream();
+
+        if (ris != null) {
+            try {
+                File file = exam.getCertificatePath();
+                FileOutputStream f = new FileOutputStream(file);
+
+                byte[] buffer = new byte[1024];
+                int len;
+
+                while ((len = ris.read(buffer)) > 0)
+                    f.write(buffer, 0, len);
+                f.close();
+
+                return true;
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
 
 
     public static class LoginLoader extends AsyncTaskLoader<User> {
 
-        public static final String TAG = LoginLoader.class.getSimpleName();
+        static final String TAG = LoginLoader.class.getSimpleName();
 
         // Weak references will still allow the Context to be garbage-collected
         private final WeakReference<Activity> mActivity;
@@ -354,7 +396,7 @@ public class S3Helper {
 
                 /* If this is a real login, try to contact the server and save its response */
                 if (!user.isFake()) {
-                    resp = getPage(user, URL_LIBRETTO, null, context);
+                    resp = getPage(user, URL_LIBRETTO, null, false, context);
                     if (resp != null)
                         respCode = resp.getResponseCode();
                     else
@@ -392,7 +434,7 @@ public class S3Helper {
                             Log.d(TAG, "Got new JSESSIONID");
 
                             /* Try to get the page with the new session ID */
-                            resp = getPage(user, URL_LIBRETTO, null, context);
+                            resp = getPage(user, URL_LIBRETTO, null, false, context);
                             if (resp != null)
                                 respCode = resp.getResponseCode();
                             else
@@ -502,7 +544,7 @@ public class S3Helper {
 
     public static class UserDataLoader extends AsyncTaskLoader<User> {
 
-        public static final String TAG = UserDataLoader.class.getSimpleName();
+        static final String TAG = UserDataLoader.class.getSimpleName();
 
         // Weak references will still allow the Context to be garbage-collected
         private final WeakReference<Activity> mActivity;
@@ -569,7 +611,7 @@ public class S3Helper {
 
             try {
                 if (!mUser.isFake())
-                    getPage(mUser, URL_LOGOUT, null, context);
+                    getPage(mUser, URL_LOGOUT, null, false, context);
                 UserUtils.removeUser(context);
 
                 mUser.setTag(OK_LOGGED_OUT);
@@ -601,46 +643,10 @@ public class S3Helper {
             if (context == null) return null;
 
             mUser = UserUtils.getUser(context);
-            InputStream ris = null;
 
             try {
-                String urlParameters = mExam.examIdToUrl();
-
-                HttpsURLConnection connection = getPage(mUser,
-                        URL_ENROLLED_EXAM_CERTIFICATE, urlParameters, context);
-                if (connection != null)
-                    ris = connection.getInputStream();
-
-                if (ris != null) {
-                    File file = EnrolledExam.getCertificatePath(mExam);
-                    FileOutputStream f = new FileOutputStream(file);
-
-                    byte[] buffer = new byte[1024];
-                    int len;
-
-                    while ((len = ris.read(buffer)) > 0)
-                        f.write(buffer, 0, len);
-                    f.close();
-
-//                        /*  */
-//                        ContentValues updateValues = new ContentValues();
-//                        updateValues.put(
-//                                ExamContract.EnrolledExamEntry.COLUMN_CERTIFICATE_FILE_NAME,
-//                                filename);
-//
-//                        /* Get a handle on the ContentResolver to update the exam's data */
-//                        ContentResolver myunimibContentResolver = context.getContentResolver();
-//
-//                        /* Update the exam's data */
-//                        String adsce_id = String.valueOf(mExam.getId().getADSCE_ID());
-//                        int rows = myunimibContentResolver.update(
-//                                ExamContract.EnrolledExamEntry.CONTENT_URI,
-//                                updateValues,
-//                                ExamContract.EnrolledExamEntry.COLUMN_ADSCE_ID + "=?",
-//                                new String[]{adsce_id});
-
-                    return null;
-                }
+                downloadCertificate(mUser, mExam, context);
+                return null;
             } catch (SocketTimeoutException e) {
                 return null;
             } catch (IOException e) {
@@ -649,6 +655,96 @@ public class S3Helper {
 
             return null;
         }
+    }
+
+    public static class EnrollLoader extends AsyncTaskLoader<Boolean> {
+
+        public static final int STATUS_ERROR_QUESTIONNAIRE_TO_FILL = -1;
+        public static final int STATUS_ERROR_CERTIFICATE = -2;
+        public static final int STATUS_ERROR_GENERAL = -3;
+
+        public static final int STATUS_STARTED = 1;
+        public static final int STATUS_ENROLLMENT_OK = 2;
+        public static final int STATUS_CERTIFICATE_DOWNLOADED = 3;
+
+        // Weak references will still allow the Context to be garbage-collected
+        private final WeakReference<Activity> mActivity;
+        private User mUser;
+        private final AvailableExam mExam;
+        private final EnrollUpdatesListener mEnrollUpdatesListener;
+
+        public interface EnrollUpdatesListener {
+            void onEnrollmentUpdate(int status);
+        }
+
+        public EnrollLoader(Activity activity, AvailableExam exam, EnrollUpdatesListener listener) {
+            super(activity);
+
+            this.mActivity = new WeakReference<>(activity);
+            this.mExam = exam;
+            this.mEnrollUpdatesListener = listener;
+        }
+
+        @Override
+        public Boolean loadInBackground() {
+            Activity context = mActivity.get();
+            if (context == null) return null;
+
+            mUser = UserUtils.getUser(context);
+            String urlParameters = mExam.examIdToUrl();
+
+            try {
+                mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_STARTED);
+
+                Bundle result = UnimibNetworkDataSource
+                        .tryGetUrlWithLogin(URL_ENROLL_TO, mUser, urlParameters, true, context);
+                int s3_response = result.getInt(UnimibNetworkDataSource.PARAM_KEY_RESPONSE);
+                String html = result.getString(UnimibNetworkDataSource.PARAM_KEY_HTML);
+
+                Document doc = Jsoup.parse(html);
+                Element element = doc.select("#app-text_esito_pren_msg").first();
+                String responseText = element.text().toLowerCase();
+
+                if (!TextUtils.isEmpty(responseText) &&
+                        responseText.contains("non risulta compilato il questionario")) {
+                    mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_QUESTIONNAIRE_TO_FILL);
+                }
+                else if (responseText.equals("") && s3_response == HttpURLConnection.HTTP_OK){
+                    mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ENROLLMENT_OK);
+
+                    InjectorUtils.provideUnimibDao(context).deleteAvailableExam(
+                            mExam.getAdsceId(),
+                            mExam.getAppId(),
+                            mExam.getAttDidEsaId(),
+                            mExam.getCdsEsaId());
+                    InjectorUtils.provideNetworkDataSource(context)
+                            .startFetchEnrolledExamsService();
+                    InjectorUtils.provideNetworkDataSource(context)
+                            .startFetchAvailableExamsService();
+
+                    boolean downloaded = downloadCertificate(mUser, mExam, context);
+                    if (downloaded) {
+                        boolean certFound = mExam.getCertificatePath().exists();
+                        if (certFound)
+                            mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_CERTIFICATE_DOWNLOADED);
+                    }
+                    else
+                        mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_CERTIFICATE);
+
+                    return true;
+                }
+
+            } catch (SocketTimeoutException e) {
+                mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_GENERAL);
+            } catch (IOException e) {
+                mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_GENERAL);
+                Utils.saveBugReport(e, TAG);
+            }
+
+            return false;
+        }
+
+
     }
     
 }

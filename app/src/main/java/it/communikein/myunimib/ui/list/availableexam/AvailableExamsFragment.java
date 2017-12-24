@@ -1,29 +1,50 @@
 package it.communikein.myunimib.ui.list.availableexam;
 
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.FileProvider;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.File;
+
+import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.database.AvailableExam;
+import it.communikein.myunimib.data.network.S3Helper;
+import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;
+import it.communikein.myunimib.ui.detail.availableexam.AvailableExamDetailsActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
+import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.utilities.UserUtils;
 
 
 /**
  * The {@link Fragment} responsible for showing the user's Available Exams.
  */
-public class AvailableExamsFragment extends Fragment {
+public class AvailableExamsFragment extends Fragment implements
+        AvailableExamAdapter.ListItemClickListener, LoaderManager.LoaderCallbacks,
+        S3Helper.EnrollLoader.EnrollUpdatesListener {
+
+    final public static int LOADER_ENROLL_ID = 4001;
 
     /*  */
     private AvailableExamAdapter mExamsAdapter;
@@ -33,6 +54,9 @@ public class AvailableExamsFragment extends Fragment {
 
     /* */
     private AvailableExamsFragmentViewModel mViewModel;
+
+    private AvailableExam chosenExam = null;
+    private ProgressDialog progress;
 
     /* Required empty public constructor */
     public AvailableExamsFragment() {}
@@ -65,9 +89,12 @@ public class AvailableExamsFragment extends Fragment {
          */
         mBinding.rvList.setHasFixedSize(true);
 
+        progress = new ProgressDialog(getActivity());
+        progress.setCancelable(false);
+
         /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
         if (getActivity() != null)
-            mExamsAdapter = new AvailableExamAdapter(getActivity(), null);
+            mExamsAdapter = new AvailableExamAdapter(getActivity(), this);
 
         return mBinding.getRoot();
     }
@@ -84,17 +111,163 @@ public class AvailableExamsFragment extends Fragment {
          */
         if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
             AvailableExamsViewModelFactory factory = InjectorUtils
-                    .provideAvailableExamsViewModelFactory(this.getContext());
+                    .provideAvailableExamsViewModelFactory(getActivity());
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(AvailableExamsFragmentViewModel.class);
 
             mViewModel.getAvailableExams().observe(this,
                     pagedList -> mExamsAdapter.setList(pagedList));
 
+            mViewModel.getModifiedAvailableExamsCount().observe(this, count -> {
+                if (getActivity() != null && count != null && count > 0) {
+                    createEntriesModifiedNotification(getActivity(), count);
+                }
+            });
+
             /* Setting the adapter attaches it to the RecyclerView in our layout. */
             mBinding.rvList.setAdapter(mExamsAdapter);
         }
     }
+
+    @Override
+    public void onListItemClick(AvailableExam exam) {
+        Intent intent = new Intent(getActivity(), AvailableExamDetailsActivity.class);
+        intent.putExtra(UnimibNetworkDataSource.ADSCE_ID, exam.getAdsceId());
+        intent.putExtra(UnimibNetworkDataSource.APP_ID, exam.getAppId());
+        intent.putExtra(UnimibNetworkDataSource.ATT_DID_ESA_ID, exam.getAttDidEsaId());
+        intent.putExtra(UnimibNetworkDataSource.CDS_ESA_ID, exam.getCdsEsaId());
+        startActivity(intent);
+    }
+
+    @Override
+    public void onEnrollmentClicked(AvailableExam exam) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.attention_title))
+                .setMessage("Sicuro di voler procedere con la prenotazione dell'esame?")
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> doEnroll(exam))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void doEnroll(AvailableExam exam) {
+        progress.setMessage("Sto prenotando l'esame..");
+        showProgress(true);
+
+        chosenExam = exam;
+        getLoaderManager()
+                .initLoader(LOADER_ENROLL_ID, null, this)
+                .forceLoad();
+    }
+
+
+
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case LOADER_ENROLL_ID:
+                if (chosenExam != null) {
+                    showProgress(true);
+
+                    return new S3Helper.EnrollLoader(getActivity(), chosenExam, this);
+                }
+                else return null;
+
+            default:
+                throw new RuntimeException("Loader Not Implemented: " + id);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Object result) {
+        showProgress(false);
+
+        switch (loader.getId()) {
+            case LOADER_ENROLL_ID:
+                handleEnrollExam((boolean) result);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void handleEnrollExam(boolean enrolled) {
+        showProgress(false);
+
+        if (enrolled) {
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.title_enrollment_completed)
+                    .setMessage(R.string.enrollment_completed_info)
+                    .setPositiveButton(R.string.action_go, (dialog, which) -> showCertificate())
+                    .setNegativeButton(R.string.action_ok, null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+
+            UnimibNetworkDataSource.getInstance(getActivity(), AppExecutors.getInstance())
+                    .startFetchAvailableExamsService();
+            UnimibNetworkDataSource.getInstance(getActivity(), AppExecutors.getInstance())
+                    .startFetchEnrolledExamsService();
+        }
+        else {
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.attention_title)
+                    .setMessage(R.string.enrollment_not_completed)
+                    .setNeutralButton(R.string.action_ok, null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {}
+
+    @Override
+    public void onEnrollmentUpdate(int status) {
+        switch (status) {
+            case S3Helper.EnrollLoader.STATUS_STARTED:
+                Snackbar.make(mBinding.rvList,
+                        "Enrollment started.", Snackbar.LENGTH_LONG).show();
+                break;
+
+            case S3Helper.EnrollLoader.STATUS_ENROLLMENT_OK:
+                Snackbar.make(mBinding.rvList,
+                        "Enrollment confirmed.", Snackbar.LENGTH_LONG).show();
+                break;
+
+            case S3Helper.EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
+                Snackbar.make(mBinding.rvList,
+                        "Certificate downloaded.", Snackbar.LENGTH_LONG)
+                        .setAction(R.string.open, v -> showCertificate())
+                        .show();
+                break;
+
+            case S3Helper.EnrollLoader.STATUS_ERROR_QUESTIONNAIRE_TO_FILL:
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.title_questionnaire)
+                        .setMessage(R.string.error_questionnaire_to_fill)
+                        .setPositiveButton(R.string.action_show_questionnaire,
+                                (dialog, which) -> showUnimibWebsite())
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+                break;
+
+            case S3Helper.EnrollLoader.STATUS_ERROR_CERTIFICATE:
+                Snackbar.make(mBinding.rvList,
+                        "ERROR: certificate not found.", Snackbar.LENGTH_LONG).show();
+                break;
+
+            case S3Helper.EnrollLoader.STATUS_ERROR_GENERAL:
+                Snackbar.make(mBinding.rvList,
+                        "ERROR: general.", Snackbar.LENGTH_LONG).show();
+                break;
+
+        }
+    }
+
+
 
     /**
      * Change the Activity's ActionBar title.
@@ -109,4 +282,36 @@ public class AvailableExamsFragment extends Fragment {
         }
     }
 
+    private void showProgress(final boolean show) {
+        if (show) progress.show();
+        else
+        if(progress != null && progress.isShowing()) progress.dismiss();
+    }
+
+    private void showUnimibWebsite() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://s3w.si.unimib.it/esse3/"));
+        startActivity(browserIntent);
+    }
+
+    private void showCertificate() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        File certificate_file = chosenExam.getCertificatePath();
+        Uri certificate_uri = FileProvider.getUriForFile(getActivity(),
+                getString(R.string.file_provider_authority), certificate_file);
+
+        intent.setDataAndType(certificate_uri, "application/pdf");
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
+    }
+
+    private void createEntriesModifiedNotification(@NonNull Context context, int count) {
+        String title = context.getString(R.string.channel_available_exams_name);
+        String content = context.getString(R.string.channel_available_exams_content_changes);
+        int notificationId = 3;
+
+        NotificationHelper notificationHelper = new NotificationHelper(getActivity());
+        notificationHelper.notify(notificationId,
+                notificationHelper.getNotificationAvailable(title, content));
+    }
 }

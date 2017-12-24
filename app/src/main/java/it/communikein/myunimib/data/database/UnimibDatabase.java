@@ -8,7 +8,7 @@ import android.content.Context;
 
 
 @Database(entities = {BookletEntry.class, EnrolledExam.class, AvailableExam.class},
-        version = 21, exportSchema = false)
+        version = 22, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class UnimibDatabase extends RoomDatabase {
 

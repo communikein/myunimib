@@ -3,11 +3,9 @@ package it.communikein.myunimib.ui;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -15,6 +13,8 @@ import android.support.design.widget.Snackbar;
 
 
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -184,8 +184,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
                     // Now that the user has selected the faculty, do the login again
                     Log.d("LOGIN_CHOOSE_FACULTY", "Trying to tell the server.");
-                    getLoaderManager().initLoader(LOADER_CONFIRM_FACULTY_ID,
-                            null, LoginActivity.this)
+                    getSupportLoaderManager()
+                            .initLoader(LOADER_CONFIRM_FACULTY_ID, null, this)
                             .forceLoad();
 
                     showProgress(true);
@@ -252,7 +252,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
     @SuppressWarnings("unchecked")
     private void attemptLogin() {
         if (mBinding.fakeLoginCheck.isChecked()) {
-            getLoaderManager()
+            getSupportLoaderManager()
                     .initLoader(LOADER_FAKE_LOGIN_ID, null, this)
                     .forceLoad();
 
@@ -292,7 +292,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
                     // perform the user login attempt.
                     showProgress(true);
 
-                    getLoaderManager()
+                    getSupportLoaderManager()
                             .initLoader(LOADER_LOGIN_ID, null, this)
                             .forceLoad();
                 }

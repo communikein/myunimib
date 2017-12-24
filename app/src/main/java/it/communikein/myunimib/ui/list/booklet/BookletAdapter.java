@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.ListBookletEntry;
+import it.communikein.myunimib.data.database.BookletEntry;
 import it.communikein.myunimib.ui.list.booklet.BookletAdapter.BookletAdapterViewHolder;
 
 
@@ -23,20 +23,20 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
 
     private final ListItemClickListener mOnClickListener;
 
-    private final PagedListAdapterHelper<ListBookletEntry> mHelper;
+    private final PagedListAdapterHelper<BookletEntry> mHelper;
 
     public interface ListItemClickListener {
         void onListItemClick(int adsce_id);
     }
 
-    private static final DiffCallback<ListBookletEntry> DIFF_CALLBACK = new DiffCallback<ListBookletEntry>() {
+    private static final DiffCallback<BookletEntry> DIFF_CALLBACK = new DiffCallback<BookletEntry>() {
         @Override
-        public boolean areItemsTheSame(@NonNull ListBookletEntry oldItem, @NonNull ListBookletEntry newItem) {
+        public boolean areItemsTheSame(@NonNull BookletEntry oldItem, @NonNull BookletEntry newItem) {
             return oldItem.equals(newItem);
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull ListBookletEntry oldItem, @NonNull ListBookletEntry newItem) {
+        public boolean areContentsTheSame(@NonNull BookletEntry oldItem, @NonNull BookletEntry newItem) {
             return newItem.getName().equals(oldItem.getName()) &&
                     newItem.getScore().equals(oldItem.getScore()) &&
                     newItem.getState().equals(oldItem.getState());
@@ -87,7 +87,7 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
      */
     @Override
     public void onBindViewHolder(BookletAdapterViewHolder holder, int position) {
-        ListBookletEntry exam = mHelper.getItem(position);
+        BookletEntry exam = mHelper.getItem(position);
         if (exam != null)
             holder.bindTo(exam);
         else
@@ -105,7 +105,7 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
         return mHelper.getItemCount();
     }
 
-    public void setList(PagedList<ListBookletEntry> pagedList) {
+    public void setList(PagedList<BookletEntry> pagedList) {
         mHelper.setList(pagedList);
     }
 
@@ -136,7 +136,7 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
                 mOnClickListener.onListItemClick(exam_adsce_id);
         }
 
-        void bindTo(ListBookletEntry entry) {
+        void bindTo(BookletEntry entry) {
             boolean passed = false;
             if (entry.getState().toLowerCase().contains("superata"))
                 passed = true;

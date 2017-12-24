@@ -1,18 +1,18 @@
 package it.communikein.myunimib.ui.detail.enrolledexam;
 
-import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.res.ColorStateList;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,8 +27,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 
+import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.EnrolledExam;
+import it.communikein.myunimib.data.database.ExamID;
 import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityEnrolledExamDetailsBinding;
@@ -46,7 +48,6 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
 
     private EnrolledExamDetailActivityViewModel mViewModel;
 
-    private int mAdsceId;
 
     //* Might be null if Google Play services APK is not available. */
     private GoogleMap mMap = null;
@@ -57,18 +58,25 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_enrolled_exam_details);
 
-        loadData();
-        initUI();
+        ExamID examID = loadData();
+        if (examID != null)
+            initUI(examID);
     }
 
-    private void loadData() {
-        if (getIntent() != null)
-            mAdsceId = getIntent().getIntExtra(UnimibNetworkDataSource.ADSCE_ID, -1);
+    private ExamID loadData() {
+        if (getIntent() != null) {
+            int adsceId = getIntent().getIntExtra(UnimibNetworkDataSource.ADSCE_ID, -1);
+            int appId = getIntent().getIntExtra(UnimibNetworkDataSource.APP_ID, -1);
+            int attDidEsaId = getIntent().getIntExtra(UnimibNetworkDataSource.ATT_DID_ESA_ID, -1);
+            int cdsEsaId = getIntent().getIntExtra(UnimibNetworkDataSource.CDS_ESA_ID, -1);
 
-        if (mAdsceId == -1) throw new NullPointerException("ADSCE_ID not found in intent extra.");
+            return new ExamID(cdsEsaId, attDidEsaId, appId, adsceId);
+        }
+
+        return null;
     }
 
-    private void initUI() {
+    private void initUI(final ExamID examID) {
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
 
@@ -76,11 +84,14 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
         initToolbar();
         initFab();
 
-        EnrolledExamViewModelFactory factory = InjectorUtils
-                .provideEnrolledExamViewModelFactory(this, mAdsceId);
-        mViewModel = ViewModelProviders.of(this, factory)
-                .get(EnrolledExamDetailActivityViewModel.class);
-        mViewModel.getExam().observe(this, this::updateUI);
+        AppExecutors.getInstance().diskIO().execute(() -> {
+            EnrolledExamViewModelFactory factory = InjectorUtils
+                    .provideEnrolledExamViewModelFactory(this, examID);
+            mViewModel = ViewModelProviders.of(this, factory)
+                    .get(EnrolledExamDetailActivityViewModel.class);
+
+            updateUI(mViewModel.getExam());
+        });
     }
 
     private void initMap() {
@@ -175,7 +186,7 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
 
-        updateMap(mViewModel.getExam().getValue());
+        updateMap(mViewModel.getExam());
     }
 
 
@@ -186,7 +197,7 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
             case LOADER_CERTIFICATE_ID:
                 toggleLoading(true);
 
-                return new S3Helper.CertificateLoader(this, mViewModel.getExam().getValue());
+                return new S3Helper.CertificateLoader(this, mViewModel.getExam());
 
             default:
                 throw new RuntimeException("Loader Not Implemented: " + id);
@@ -199,7 +210,7 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
 
         switch (loader.getId()) {
             case LOADER_CERTIFICATE_ID:
-                handleDownloadCertificate(mViewModel.getExam().getValue());
+                handleDownloadCertificate(mViewModel.getExam());
                 break;
 
             default:
@@ -214,8 +225,8 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
 
     private void showCertificate(EnrolledExam exam){
         if (exam != null){
-            if (!EnrolledExam.getCertificatePath(exam).exists())
-                getLoaderManager()
+            if (!exam.getCertificatePath().exists())
+                getSupportLoaderManager()
                         .initLoader(LOADER_CERTIFICATE_ID, null, this)
                         .forceLoad();
             else
@@ -228,7 +239,7 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
 
     private void openCertificate(EnrolledExam exam) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        File certificate_file = EnrolledExam.getCertificatePath(exam);
+        File certificate_file = exam.getCertificatePath();
         Uri certificate_uri = FileProvider.getUriForFile(this,
                 getString(R.string.file_provider_authority), certificate_file);
 
