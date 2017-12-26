@@ -135,6 +135,16 @@ public class BookletEntry {
         else this.score = score;
     }
 
+
+    public boolean isPassed() {
+        boolean passed = false;
+        if (getState().toLowerCase().contains("superata"))
+            passed = true;
+
+        return passed;
+    }
+
+
     @Ignore
     private JSONObject toJSON() {
         JSONObject json = new JSONObject();
@@ -166,6 +176,7 @@ public class BookletEntry {
         else
             return null;
     }
+
 
     @Override
     public boolean equals(Object obj) {

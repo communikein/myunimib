@@ -87,6 +87,11 @@ public class AvailableExam extends Exam {
     }
 
 
+
+
+
+
+
     @Ignore
     public JSONObject toJSON() {
         JSONObject obj;
@@ -103,12 +108,13 @@ public class AvailableExam extends Exam {
         return obj;
     }
 
-
     @Ignore
     @Override
     public String toString() {
         return toJSON().toString();
     }
+
+
 
     @Override
     public boolean isIdentic(Object obj) {

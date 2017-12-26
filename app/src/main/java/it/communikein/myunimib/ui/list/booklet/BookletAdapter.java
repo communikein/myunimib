@@ -70,7 +70,6 @@ public class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolde
     @Override
     public void onBindViewHolder(BookletAdapterViewHolder holder, int position) {
         holder.mBinding.setBookletEntry(mList.get(position));
-        holder.bindToData();
     }
 
     /**
@@ -133,17 +132,6 @@ public class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolde
             super(binding.getRoot());
 
             this.mBinding = binding;
-        }
-
-        void bindToData() {
-            BookletEntry entry = mBinding.getBookletEntry();
-            boolean passed = false;
-            if (entry.getState().toLowerCase().contains("superata"))
-                passed = true;
-
-            mBinding.examNameTextview.setText(entry.getName());
-            mBinding.examScoreTextview.setText(entry.getScore().toUpperCase());
-            mBinding.examIcon.setBackgroundResource(passed ? R.color.passed : R.color.waiting);
         }
     }
 

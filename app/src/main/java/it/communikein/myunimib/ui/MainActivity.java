@@ -98,8 +98,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private int getNavIdFromFragmentTag(String tag) {
-        int id;
-        switch(tag) {
+        int id = R.id.navigation_home;
+
+        if (tag != null) switch(tag) {
             case TAG_FRAGMENT_HOME:
                 id = R.id.navigation_home;
                 break;
