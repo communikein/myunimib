@@ -2,7 +2,6 @@ package it.communikein.myunimib.data;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.paging.DataSource;
 import android.util.Log;
 
 import java.util.List;
@@ -44,109 +43,103 @@ public class UnimibRepository {
 
         LiveData<List<BookletEntry>> bookletOnline =
                 mUnimibNetworkDataSource.getOnlineBooklet();
-        bookletOnline.observeForever(newOnlineData -> {
-            mExecutors.diskIO().execute(() -> {
-                int newExams = 0;
-                if (isBookletEmpty() && newOnlineData != null) {
-                    mUnimibDao.bulkInsertBooklet(newOnlineData);
-                    newExams = newOnlineData.size();
+        bookletOnline.observeForever(newOnlineData -> mExecutors.diskIO().execute(() -> {
+            int newExams = 0;
+            if (isBookletEmpty() && newOnlineData != null) {
+                mUnimibDao.bulkInsertBooklet(newOnlineData);
+                newExams = newOnlineData.size();
 
-                    Log.d(LOG_TAG, "New values inserted.");
-                }
-                else if (newOnlineData != null) {
-                    for (BookletEntry entry : newOnlineData) {
-                        BookletEntry oldEntry = mUnimibDao.getBookletEntry(entry.getAdsceId());
+                Log.d(LOG_TAG, "New values inserted.");
+            }
+            else if (newOnlineData != null) {
+                for (BookletEntry entry : newOnlineData) {
+                    BookletEntry oldEntry = mUnimibDao.getBookletEntry(entry.getAdsceId());
 
-                        if (oldEntry == null) {
-                            mUnimibDao.addBookletEntry(entry);
-                            Log.d(LOG_TAG, "New value inserted.");
-                            newExams++;
-                        }
-                        else if (!entry.isIdentic(oldEntry)) {
-                            mUnimibDao.updateBookletEntry(entry);
-                            Log.d(LOG_TAG, "Value updated.");
-                            newExams++;
-                        }
+                    if (oldEntry == null) {
+                        mUnimibDao.addBookletEntry(entry);
+                        Log.d(LOG_TAG, "New value inserted.");
+                        newExams++;
+                    }
+                    else if (!entry.isIdentic(oldEntry)) {
+                        mUnimibDao.updateBookletEntry(entry);
+                        Log.d(LOG_TAG, "Value updated.");
+                        newExams++;
                     }
                 }
+            }
 
-                mModifiedBookletEntriesCount.postValue(newExams);
-            });
-        });
+            mModifiedBookletEntriesCount.postValue(newExams);
+        }));
 
         LiveData<List<AvailableExam>> availableExamsOnline =
                 mUnimibNetworkDataSource.getOnlineAvailableExams();
-        availableExamsOnline.observeForever(newOnlineData -> {
-            mExecutors.diskIO().execute(() -> {
-                int newExams = 0;
+        availableExamsOnline.observeForever(newOnlineData -> mExecutors.diskIO().execute(() -> {
+            int newExams = 0;
 
-                if (isAvailableExamsEmpty() && newOnlineData != null) {
-                    mUnimibDao.bulkInsertAvailableExams(newOnlineData);
-                    newExams = newOnlineData.size();
+            if (isAvailableExamsEmpty() && newOnlineData != null) {
+                mUnimibDao.bulkInsertAvailableExams(newOnlineData);
+                newExams = newOnlineData.size();
 
-                    Log.d(LOG_TAG, "New values inserted.");
-                }
-                else if (newOnlineData != null) {
-                    for (AvailableExam entry : newOnlineData) {
-                        AvailableExam oldEntry = mUnimibDao.getAvailableExam(
-                                entry.getAdsceId(),
-                                entry.getAppId(),
-                                entry.getAttDidEsaId(),
-                                entry.getCdsEsaId());
+                Log.d(LOG_TAG, "New values inserted.");
+            }
+            else if (newOnlineData != null) {
+                for (AvailableExam entry : newOnlineData) {
+                    AvailableExam oldEntry = mUnimibDao.getAvailableExam(
+                            entry.getAdsceId(),
+                            entry.getAppId(),
+                            entry.getAttDidEsaId(),
+                            entry.getCdsEsaId());
 
-                        if (oldEntry == null) {
-                            mUnimibDao.addAvailableExam(entry);
-                            Log.d(LOG_TAG, "New value inserted.");
-                            newExams++;
-                        }
-                        else if (!entry.isIdentic(oldEntry)) {
-                            mUnimibDao.updateAvailableExam(entry);
-                            Log.d(LOG_TAG, "Value updated.");
-                            newExams++;
-                        }
+                    if (oldEntry == null) {
+                        mUnimibDao.addAvailableExam(entry);
+                        Log.d(LOG_TAG, "New value inserted.");
+                        newExams++;
+                    }
+                    else if (!entry.isIdentic(oldEntry)) {
+                        mUnimibDao.updateAvailableExam(entry);
+                        Log.d(LOG_TAG, "Value updated.");
+                        newExams++;
                     }
                 }
+            }
 
-                mModifiedAvailableExamsCount.postValue(newExams);
-            });
-        });
+            mModifiedAvailableExamsCount.postValue(newExams);
+        }));
 
         LiveData<List<EnrolledExam>> enrolledExamsOnline =
                 mUnimibNetworkDataSource.getOnlineEnrolledExams();
-        enrolledExamsOnline.observeForever(newOnlineData -> {
-            mExecutors.diskIO().execute(() -> {
-                int newExams = 0;
+        enrolledExamsOnline.observeForever(newOnlineData -> mExecutors.diskIO().execute(() -> {
+            int newExams = 0;
 
-                if (isEnrolledExamsEmpty() && newOnlineData != null) {
-                    mUnimibDao.bulkInsertEnrolledExams(newOnlineData);
-                    newExams = newOnlineData.size();
+            if (isEnrolledExamsEmpty() && newOnlineData != null) {
+                mUnimibDao.bulkInsertEnrolledExams(newOnlineData);
+                newExams = newOnlineData.size();
 
-                    Log.d(LOG_TAG, "New values inserted.");
-                }
-                else if (newOnlineData != null) {
-                    for (EnrolledExam entry : newOnlineData) {
-                        EnrolledExam oldEntry = mUnimibDao.getEnrolledExam(
-                                entry.getAdsceId(),
-                                entry.getAppId(),
-                                entry.getAttDidEsaId(),
-                                entry.getCdsEsaId());
+                Log.d(LOG_TAG, "New values inserted.");
+            }
+            else if (newOnlineData != null) {
+                for (EnrolledExam entry : newOnlineData) {
+                    EnrolledExam oldEntry = mUnimibDao.getEnrolledExam(
+                            entry.getAdsceId(),
+                            entry.getAppId(),
+                            entry.getAttDidEsaId(),
+                            entry.getCdsEsaId());
 
-                        if (oldEntry == null) {
-                            mUnimibDao.addEnrolledExam(entry);
-                            Log.d(LOG_TAG, "New value inserted.");
-                            newExams++;
-                        }
-                        else if (!entry.isIdentic(oldEntry)) {
-                            mUnimibDao.updateEnrolledExam(entry);
-                            Log.d(LOG_TAG, "Value updated.");
-                            newExams++;
-                        }
+                    if (oldEntry == null) {
+                        mUnimibDao.addEnrolledExam(entry);
+                        Log.d(LOG_TAG, "New value inserted.");
+                        newExams++;
+                    }
+                    else if (!entry.isIdentic(oldEntry)) {
+                        mUnimibDao.updateEnrolledExam(entry);
+                        Log.d(LOG_TAG, "Value updated.");
+                        newExams++;
                     }
                 }
+            }
 
-                mModifiedEnrolledExamsCount.postValue(newExams);
-            });
-        });
+            mModifiedEnrolledExamsCount.postValue(newExams);
+        }));
     }
 
     public synchronized static UnimibRepository getInstance(
@@ -205,19 +198,19 @@ public class UnimibRepository {
     }
 
 
-    public DataSource.Factory<Integer, BookletEntry> getCurrentBooklet() {
+    public LiveData<List<BookletEntry>> getCurrentBooklet() {
         initializeData();
 
         return mUnimibDao.getBooklet();
     }
 
-    public DataSource.Factory<Integer, AvailableExam> getCurrentAvailableExams() {
+    public LiveData<List<AvailableExam>> getCurrentAvailableExams() {
         initializeData();
 
         return mUnimibDao.getAvailableExams();
     }
 
-    public DataSource.Factory<Integer, EnrolledExam> getCurrentEnrolledExams() {
+    public LiveData<List<EnrolledExam>> getCurrentEnrolledExams() {
         initializeData();
 
         return mUnimibDao.getEnrolledExams();
@@ -237,10 +230,10 @@ public class UnimibRepository {
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
-    public AvailableExam getAvailableExam(ExamID examID) {
+    public LiveData<AvailableExam> getAvailableExam(ExamID examID) {
         initializeData();
 
-        return mUnimibDao.getAvailableExam(examID.getAdsceId(), examID.getAppId(),
+        return mUnimibDao.getObservableAvailableExam(examID.getAdsceId(), examID.getAppId(),
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
@@ -276,26 +269,28 @@ public class UnimibRepository {
 
 
     /** */
-    private void deleteExam(AvailableExam exam) {
-        mUnimibDao.deleteAvailableExam(exam.getAdsceId(), exam.getAppId(), exam.getAttDidEsaId(), exam.getCdsEsaId());
+    public void deleteAvailableExam(ExamID examId) {
+        mUnimibDao.deleteAvailableExam(examId.getAdsceId(), examId.getAppId(),
+                examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
 
-    private void deleteExam(EnrolledExam exam) {
-        mUnimibDao.deleteAvailableExam(exam.getAdsceId(), exam.getAppId(), exam.getAttDidEsaId(), exam.getCdsEsaId());
+    public void deleteEnrolledExam(ExamID examId) {
+        mUnimibDao.deleteAvailableExam(examId.getAdsceId(), examId.getAppId(),
+                examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
 
     /**
      * Network related operation
      */
-    private void startFetchBookletService() {
+    public void startFetchBookletService() {
         mUnimibNetworkDataSource.startFetchBookletService();
     }
 
-    private void startFetchAvailableExamsService() {
+    public void startFetchAvailableExamsService() {
         mUnimibNetworkDataSource.startFetchAvailableExamsService();
     }
 
-    private void startFetchEnrolledExamsService() {
+    public void startFetchEnrolledExamsService() {
         mUnimibNetworkDataSource.startFetchEnrolledExamsService();
     }
 

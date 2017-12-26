@@ -1,65 +1,46 @@
 package it.communikein.myunimib.ui.list.booklet;
 
-import android.arch.paging.PagedList;
-import android.arch.paging.PagedListAdapterHelper;
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.recyclerview.extensions.DiffCallback;
+import android.databinding.DataBindingUtil;
+import android.support.annotation.Nullable;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.BookletEntry;
+import it.communikein.myunimib.databinding.BookletListItemBinding;
 import it.communikein.myunimib.ui.list.booklet.BookletAdapter.BookletAdapterViewHolder;
 
 
-class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
+public class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
 
-    /* The context we use to utility methods, app resources and layout inflaters */
-    private final Context mContext;
+    @Nullable
+    private final ExamClickCallback mOnClickListener;
 
-    private final ListItemClickListener mOnClickListener;
+    private ArrayList<BookletEntry> mList;
 
-    private final PagedListAdapterHelper<BookletEntry> mHelper;
-
-    public interface ListItemClickListener {
+    public interface ExamClickCallback {
         void onListItemClick(int adsce_id);
     }
 
-    private static final DiffCallback<BookletEntry> DIFF_CALLBACK = new DiffCallback<BookletEntry>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull BookletEntry oldItem, @NonNull BookletEntry newItem) {
-            return oldItem.equals(newItem);
-        }
-
-        @Override
-        public boolean areContentsTheSame(@NonNull BookletEntry oldItem, @NonNull BookletEntry newItem) {
-            return newItem.getName().equals(oldItem.getName()) &&
-                    newItem.getScore().equals(oldItem.getScore()) &&
-                    newItem.getState().equals(oldItem.getState());
-        }
-    };
 
     /**
      * Creates a BookletAdapter.
      *
-     * @param context Used to talk to the UI and app resources
+     * @param examClickCallback Used to talk to the UI and app resources
      */
-    BookletAdapter(@NonNull Context context, ListItemClickListener handler) {
-        mHelper = new PagedListAdapterHelper<>(this, DIFF_CALLBACK);
-
-        mContext = context;
-        mOnClickListener = handler;
+    BookletAdapter(@Nullable ExamClickCallback examClickCallback) {
+        mOnClickListener = examClickCallback;
     }
 
     /**
      * This gets called when each new ViewHolder is created. This happens when the RecyclerView
      * is laid out. Enough ViewHolders will be created to fill the screen and allow for scrolling.
      *
-     * @param viewGroup The ViewGroup that these ViewHolders are contained within.
+     * @param parent    The ViewGroup that these ViewHolders are contained within.
      * @param viewType  If your RecyclerView has more than one type of item (like ours does) you
      *                  can use this viewType integer to provide a different layout. See
      *                  {@link android.support.v7.widget.RecyclerView.Adapter#getItemViewType(int)}
@@ -67,12 +48,13 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
      * @return A new ForecastAdapterViewHolder that holds the View for each list item
      */
     @Override
-    public BookletAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.booklet_list_item, viewGroup, false);
-        view.setFocusable(true);
+    public BookletAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        BookletListItemBinding binding = DataBindingUtil
+                .inflate(LayoutInflater.from(parent.getContext()), R.layout.booklet_list_item,
+                        parent, false);
+        binding.setCallback(mOnClickListener);
 
-        return new BookletAdapterViewHolder(view);
+        return new BookletAdapterViewHolder(binding);
     }
 
     /**
@@ -87,11 +69,8 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
      */
     @Override
     public void onBindViewHolder(BookletAdapterViewHolder holder, int position) {
-        BookletEntry exam = mHelper.getItem(position);
-        if (exam != null)
-            holder.bindTo(exam);
-        else
-            holder.clear();
+        holder.mBinding.setBookletEntry(mList.get(position));
+        holder.bindToData();
     }
 
     /**
@@ -102,11 +81,43 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
      */
     @Override
     public int getItemCount() {
-        return mHelper.getItemCount();
+        return mList == null ? 0 : mList.size();
     }
 
-    public void setList(PagedList<BookletEntry> pagedList) {
-        mHelper.setList(pagedList);
+    public void setList(final ArrayList<BookletEntry> newList) {
+        if (mList == null) {
+            mList = newList;
+            notifyItemRangeInserted(0, mList.size());
+        }
+        else {
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return mList.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newList.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return mList.get(oldItemPosition).equals(newList.get(newItemPosition));
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    BookletEntry newItem = newList.get(newItemPosition);
+                    BookletEntry oldItem = mList.get(oldItemPosition);
+                    return newItem.getName().equals(oldItem.getName()) &&
+                            newItem.getScore().equals(oldItem.getScore()) &&
+                            newItem.getState().equals(oldItem.getState());
+                }
+            });
+            mList = newList;
+            result.dispatchUpdatesTo(this);
+        }
     }
 
     /**
@@ -114,41 +125,25 @@ class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolder> {
      * a cache of the child views for a forecast item. It's also a convenient place to set an
      * OnClickListener, since it has access to the adapter and the views.
      */
-    class BookletAdapterViewHolder extends RecyclerView.ViewHolder implements
-            View.OnClickListener {
-        int exam_adsce_id;
+    class BookletAdapterViewHolder extends RecyclerView.ViewHolder {
 
-        final TextView bookletCourseName;
-        final TextView bookletCourseScore;
-        final View bookletCourseStatus;
+        BookletListItemBinding mBinding;
 
-        BookletAdapterViewHolder(View view) {
-            super(view);
+        BookletAdapterViewHolder(BookletListItemBinding binding) {
+            super(binding.getRoot());
 
-            bookletCourseName = view.findViewById(R.id.tv_name);
-            bookletCourseScore = view.findViewById(R.id.tv_score);
-            bookletCourseStatus = view.findViewById(R.id.exam_icon);
+            this.mBinding = binding;
         }
 
-        @Override
-        public void onClick(View view) {
-            if (mOnClickListener != null)
-                mOnClickListener.onListItemClick(exam_adsce_id);
-        }
-
-        void bindTo(BookletEntry entry) {
+        void bindToData() {
+            BookletEntry entry = mBinding.getBookletEntry();
             boolean passed = false;
             if (entry.getState().toLowerCase().contains("superata"))
                 passed = true;
 
-            exam_adsce_id = entry.getAdsceId();
-            bookletCourseName.setText(entry.getName());
-            bookletCourseScore.setText(entry.getScore().toUpperCase());
-            bookletCourseStatus.setBackgroundResource(passed ? R.color.passed : R.color.waiting);
-        }
-
-        void clear() {
-
+            mBinding.examNameTextview.setText(entry.getName());
+            mBinding.examScoreTextview.setText(entry.getScore().toUpperCase());
+            mBinding.examIcon.setBackgroundResource(passed ? R.color.passed : R.color.waiting);
         }
     }
 

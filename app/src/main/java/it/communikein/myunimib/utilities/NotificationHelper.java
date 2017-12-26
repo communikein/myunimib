@@ -1,15 +1,14 @@
 package it.communikein.myunimib.utilities;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Color;
 import android.os.Build;
-import android.test.suitebuilder.annotation.Suppress;
+import android.support.v4.app.NotificationCompat;
 
 import it.communikein.myunimib.R;
 
@@ -53,7 +52,7 @@ public class NotificationHelper extends ContextWrapper {
         channel.enableVibration(true);
         channel.setLightColor(Color.RED);
         channel.setShowBadge(true);
-        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         getManager().createNotificationChannel(channel);
 
         channel = new NotificationChannel(CHANNEL_AVAILABLE_EXAMS_ID,
@@ -74,59 +73,68 @@ public class NotificationHelper extends ContextWrapper {
     }
 
 
-    public Notification.Builder getNotificationBooklet(String title, String body) {
+    public NotificationCompat.Builder getNotificationBooklet(String title, String body,
+                                                             PendingIntent pendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new Notification.Builder(getApplicationContext(), CHANNEL_BOOKLET_ID)
+            return new NotificationCompat.Builder(getApplicationContext(), CHANNEL_BOOKLET_ID)
                     .setContentTitle(title)
                     .setContentText(body)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
         }
         else {
-            return new Notification.Builder(getApplicationContext())
+            return new NotificationCompat.Builder(getApplicationContext())
                     .setContentTitle(title)
                     .setContentText(body)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
         }
     }
 
-    public Notification.Builder getNotificationAvailable(String title, String body) {
+    public NotificationCompat.Builder getNotificationAvailable(String title, String body,
+                                                               PendingIntent pendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new Notification.Builder(getApplicationContext(), CHANNEL_AVAILABLE_EXAMS_ID)
+            return new NotificationCompat.Builder(getApplicationContext(), CHANNEL_AVAILABLE_EXAMS_ID)
                     .setContentTitle(title)
                     .setContentText(body)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
         }
         else {
-            return new Notification.Builder(getApplicationContext())
+            return new NotificationCompat.Builder(getApplicationContext())
                     .setContentTitle(title)
                     .setContentText(body)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
         }
     }
 
-    public Notification.Builder getNotificationEnrolled(String title, String body) {
+    public NotificationCompat.Builder getNotificationEnrolled(String title, String body,
+                                                              PendingIntent pendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new Notification.Builder(getApplicationContext(), CHANNEL_ENROLLED_EXAMS_ID)
+            return new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ENROLLED_EXAMS_ID)
                     .setContentTitle(title)
                     .setContentText(body)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
         }
         else {
-            return new Notification.Builder(getApplicationContext())
+            return new NotificationCompat.Builder(getApplicationContext())
                     .setContentTitle(title)
                     .setContentText(body)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
         }
     }
 
 
-    public void notify(int id, Notification.Builder notification) {
+    public void notify(int id, NotificationCompat.Builder notification) {
         getManager().notify(id, notification.build());
     }
 

@@ -9,10 +9,8 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.widget.TextView;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.AvailableExam;
 import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.Exam;
 import it.communikein.myunimib.utilities.InjectorUtils;
@@ -20,6 +18,7 @@ import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.data.User;
 
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -334,6 +333,8 @@ public class S3Helper {
 
         static final String TAG = LoginLoader.class.getSimpleName();
 
+        public static final String RESULT = "RESULT";
+
         // Weak references will still allow the Context to be garbage-collected
         private final WeakReference<Activity> mActivity;
 
@@ -357,7 +358,22 @@ public class S3Helper {
             int loggedIn;
             try {
                 /* Try logging in the user */
-                loggedIn = doLogin(mUser, context);
+                Bundle result = doLogin(mUser, context);
+                loggedIn = result.getInt(RESULT);
+
+                String sessionId = result.getString(User.PREF_SESSION_ID);
+                String facultiesString = result.getString(User.PREF_FACULTIES);
+
+                if (sessionId != null)
+                    mUser.setSessionID(sessionId);
+                if (facultiesString != null) {
+                    JSONObject facultiesJson = new JSONObject(facultiesString);
+
+                    mUser.setFaculties(facultiesJson);
+                }
+                if (sessionId != null || facultiesString != null)
+                    UserUtils.saveUser(mUser, context);
+
 
                 /*
                  * If the server recognise the user as logged in, download the user's data and
@@ -387,7 +403,8 @@ public class S3Helper {
             cancelLoad();
         }
 
-        private static int doLogin(User user, Context context) throws SocketTimeoutException {
+        public static Bundle doLogin(User user, Context context) throws SocketTimeoutException {
+            Bundle result = new Bundle();
             int ris;
 
             try {
@@ -429,7 +446,10 @@ public class S3Helper {
                         if (resp != null && resp.getHeaderField("Set-Cookie") != null) {
                             /* Update the user's session ID */
                             String jsessionid = resp.getHeaderField("Set-Cookie");
-                            user = UserUtils.updateSessionId(user, jsessionid, context);
+                            user.setSessionID(jsessionid);
+
+                            result.putString(User.PREF_SESSION_ID, jsessionid);
+                            //user = UserUtils.updateSessionId(user, jsessionid, context);
 
                             Log.d(TAG, "Got new JSESSIONID");
 
@@ -516,7 +536,9 @@ public class S3Helper {
 
                                     /* Set the user's faculties and save it. */
                                     user.setFaculties(faculties);
-                                    UserUtils.saveUser(user, context);
+
+                                    result.putString(User.PREF_FACULTIES, user.getFacultiesJSON().toString());
+                                    //UserUtils.saveUser(user, context);
 
                                     ris = ERROR_FACULTY_TO_CHOOSE;
                                 }
@@ -537,7 +559,9 @@ public class S3Helper {
                 ris = ERROR_GENERIC;
             }
 
-            return ris;
+            result.putInt(RESULT, ris);
+            return result;
+            // return ris;
         }
 
     }
@@ -670,14 +694,14 @@ public class S3Helper {
         // Weak references will still allow the Context to be garbage-collected
         private final WeakReference<Activity> mActivity;
         private User mUser;
-        private final AvailableExam mExam;
+        private final Exam mExam;
         private final EnrollUpdatesListener mEnrollUpdatesListener;
 
         public interface EnrollUpdatesListener {
             void onEnrollmentUpdate(int status);
         }
 
-        public EnrollLoader(Activity activity, AvailableExam exam, EnrollUpdatesListener listener) {
+        public EnrollLoader(Activity activity, Exam exam, EnrollUpdatesListener listener) {
             super(activity);
 
             this.mActivity = new WeakReference<>(activity);
@@ -712,11 +736,7 @@ public class S3Helper {
                 else if (responseText.equals("") && s3_response == HttpURLConnection.HTTP_OK){
                     mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ENROLLMENT_OK);
 
-                    InjectorUtils.provideUnimibDao(context).deleteAvailableExam(
-                            mExam.getAdsceId(),
-                            mExam.getAppId(),
-                            mExam.getAttDidEsaId(),
-                            mExam.getCdsEsaId());
+                    InjectorUtils.provideRepository(context).deleteAvailableExam(mExam);
                     InjectorUtils.provideNetworkDataSource(context)
                             .startFetchEnrolledExamsService();
                     InjectorUtils.provideNetworkDataSource(context)

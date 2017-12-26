@@ -3,21 +3,16 @@ package it.communikein.myunimib.data.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Index;
-import android.os.Environment;
-
-import it.communikein.myunimib.utilities.MyunimibDateUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 
-@Entity(tableName = "enrolled_exams", primaryKeys = {"adsceId", "appId", "appId", "cdsEsaId"})
+@Entity(tableName = "enrolled_exams", primaryKeys = {"adsceId", "appId", "attDidEsaId", "cdsEsaId"})
 public class EnrolledExam extends Exam {
 
     private static final String ARG_CODE = "ARG_CODE";

@@ -2,6 +2,7 @@ package it.communikein.myunimib.ui.list.availableexam;
 
 
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -16,22 +17,27 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.AvailableExam;
+import it.communikein.myunimib.data.database.Exam;
+import it.communikein.myunimib.data.database.ExamID;
 import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.ui.detail.availableexam.AvailableExamDetailsActivity;
+import it.communikein.myunimib.ui.detail.availableexam.AvailableExamDetailActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.utilities.UserUtils;
@@ -41,21 +47,18 @@ import it.communikein.myunimib.utilities.UserUtils;
  * The {@link Fragment} responsible for showing the user's Available Exams.
  */
 public class AvailableExamsFragment extends Fragment implements
-        AvailableExamAdapter.ListItemClickListener, LoaderManager.LoaderCallbacks,
-        S3Helper.EnrollLoader.EnrollUpdatesListener {
+        AvailableExamAdapter.ExamClickCallback, LoaderManager.LoaderCallbacks,
+        S3Helper.EnrollLoader.EnrollUpdatesListener, SwipeRefreshLayout.OnRefreshListener {
 
     final public static int LOADER_ENROLL_ID = 4001;
-
-    /*  */
-    private AvailableExamAdapter mExamsAdapter;
 
     /*  */
     private FragmentExamsBinding mBinding;
 
     /* */
-    private AvailableExamsFragmentViewModel mViewModel;
+    private AvailableExamsListViewModel mViewModel;
 
-    private AvailableExam chosenExam = null;
+    private Exam chosenExam = null;
     private ProgressDialog progress;
 
     /* Required empty public constructor */
@@ -67,6 +70,9 @@ public class AvailableExamsFragment extends Fragment implements
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_exams, container, false);
+
+        /* Show data downloading */
+        mBinding.swipeRefresh.setRefreshing(true);
 
         /*
          * A LinearLayoutManager is responsible for measuring and positioning item views within a
@@ -92,10 +98,6 @@ public class AvailableExamsFragment extends Fragment implements
         progress = new ProgressDialog(getActivity());
         progress.setCancelable(false);
 
-        /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
-        if (getActivity() != null)
-            mExamsAdapter = new AvailableExamAdapter(getActivity(), this);
-
         return mBinding.getRoot();
     }
 
@@ -110,13 +112,18 @@ public class AvailableExamsFragment extends Fragment implements
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
         if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
+            /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
+            final AvailableExamAdapter mExamsAdapter = new AvailableExamAdapter(this);
+
             AvailableExamsViewModelFactory factory = InjectorUtils
                     .provideAvailableExamsViewModelFactory(getActivity());
             mViewModel = ViewModelProviders.of(this, factory)
-                    .get(AvailableExamsFragmentViewModel.class);
+                    .get(AvailableExamsListViewModel.class);
 
-            mViewModel.getAvailableExams().observe(this,
-                    pagedList -> mExamsAdapter.setList(pagedList));
+            mViewModel.getAvailableExams().observe(this, list -> {
+                mBinding.swipeRefresh.setRefreshing(false);
+                mExamsAdapter.setList((ArrayList<AvailableExam>) list);
+            });
 
             mViewModel.getModifiedAvailableExamsCount().observe(this, count -> {
                 if (getActivity() != null && count != null && count > 0) {
@@ -130,17 +137,35 @@ public class AvailableExamsFragment extends Fragment implements
     }
 
     @Override
-    public void onListItemClick(AvailableExam exam) {
-        Intent intent = new Intent(getActivity(), AvailableExamDetailsActivity.class);
-        intent.putExtra(UnimibNetworkDataSource.ADSCE_ID, exam.getAdsceId());
-        intent.putExtra(UnimibNetworkDataSource.APP_ID, exam.getAppId());
-        intent.putExtra(UnimibNetworkDataSource.ATT_DID_ESA_ID, exam.getAttDidEsaId());
-        intent.putExtra(UnimibNetworkDataSource.CDS_ESA_ID, exam.getCdsEsaId());
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                onRefresh();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onRefresh() {
+        mViewModel.refreshAvailableExams();
+    }
+
+    @Override
+    public void onListItemClick(ExamID examID) {
+        Intent intent = new Intent(getActivity(), AvailableExamDetailActivity.class);
+        intent.putExtra(UnimibNetworkDataSource.ADSCE_ID, examID.getAdsceId());
+        intent.putExtra(UnimibNetworkDataSource.APP_ID, examID.getAppId());
+        intent.putExtra(UnimibNetworkDataSource.ATT_DID_ESA_ID, examID.getAttDidEsaId());
+        intent.putExtra(UnimibNetworkDataSource.CDS_ESA_ID, examID.getCdsEsaId());
         startActivity(intent);
     }
 
     @Override
-    public void onEnrollmentClicked(AvailableExam exam) {
+    public void onEnrollmentClicked(Exam exam) {
         new AlertDialog.Builder(getActivity())
                 .setTitle(getString(R.string.attention_title))
                 .setMessage("Sicuro di voler procedere con la prenotazione dell'esame?")
@@ -151,7 +176,7 @@ public class AvailableExamsFragment extends Fragment implements
     }
 
     @SuppressWarnings("unchecked")
-    private void doEnroll(AvailableExam exam) {
+    private void doEnroll(Exam exam) {
         progress.setMessage("Sto prenotando l'esame..");
         showProgress(true);
 
@@ -310,8 +335,18 @@ public class AvailableExamsFragment extends Fragment implements
         String content = context.getString(R.string.channel_available_exams_content_changes);
         int notificationId = 3;
 
+        PendingIntent intent = buildPendingIntent();
         NotificationHelper notificationHelper = new NotificationHelper(getActivity());
         notificationHelper.notify(notificationId,
-                notificationHelper.getNotificationAvailable(title, content));
+                notificationHelper.getNotificationAvailable(title, content, intent));
+    }
+
+    private PendingIntent buildPendingIntent() {
+        MainActivity activity = (MainActivity) getActivity();
+
+        if (activity != null)
+            return activity.buildPendingIntent(R.id.navigation_exams_available);
+        else
+            return null;
     }
 }

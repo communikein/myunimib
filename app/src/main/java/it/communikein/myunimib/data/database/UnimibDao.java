@@ -1,10 +1,9 @@
 package it.communikein.myunimib.data.database;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.paging.DataSource;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
-import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
@@ -54,17 +53,21 @@ public interface UnimibDao {
 
 
     @Query("SELECT * FROM booklet")
-    DataSource.Factory<Integer, BookletEntry> getBooklet();
+    LiveData<List<BookletEntry>> getBooklet();
 
     @Query("SELECT * FROM available_exams")
-    DataSource.Factory<Integer, AvailableExam> getAvailableExams();
+    LiveData<List<AvailableExam>> getAvailableExams();
 
     @Query("SELECT * FROM enrolled_exams")
-    DataSource.Factory<Integer, EnrolledExam> getEnrolledExams();
+    LiveData<List<EnrolledExam>> getEnrolledExams();
 
 
     @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")
     BookletEntry getBookletEntry(int adsceId);
+
+    @Query("SELECT * FROM available_exams WHERE adsceId = :adsceId AND appId = :appId " +
+            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
+    LiveData<AvailableExam> getObservableAvailableExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
     @Query("SELECT * FROM available_exams WHERE adsceId = :adsceId AND appId = :appId " +
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")

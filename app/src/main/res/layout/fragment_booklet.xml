@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.MainActivity">
 
-    <FrameLayout
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -15,14 +16,6 @@
             android:clipToPadding="false"
             android:paddingBottom="8dp"/>
 
-        <!-- A progress bar that will be shown to users to indicate the data is loading -->
-        <ProgressBar
-            android:id="@+id/pb_loading_indicator"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_gravity="center"
-            android:visibility="invisible" />
-
-    </FrameLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </layout>

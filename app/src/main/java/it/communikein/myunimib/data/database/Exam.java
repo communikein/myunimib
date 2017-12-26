@@ -5,13 +5,11 @@ import android.content.Context;
 import android.os.Environment;
 
 import it.communikein.myunimib.utilities.MyunimibDateUtils;
-import it.communikein.myunimib.utilities.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.text.ParseException;
 import java.util.Date;
 
 public class Exam extends ExamID {

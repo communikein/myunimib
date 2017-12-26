@@ -2,9 +2,6 @@ package it.communikein.myunimib.data.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Index;
-
-import it.communikein.myunimib.utilities.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +9,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.util.Date;
 
-@Entity(tableName = "available_exams", primaryKeys = {"adsceId", "appId", "appId", "cdsEsaId"})
+@Entity(tableName = "available_exams", primaryKeys = {"adsceId", "appId", "attDidEsaId", "cdsEsaId"})
 public class AvailableExam extends Exam {
 
     private static final String ARG_BEGIN_ENROLLMENT = "ARG_BEGIN_ENROLLMENT";

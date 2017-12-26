@@ -3,12 +3,14 @@ package it.communikein.myunimib.data.network;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -17,43 +19,69 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
+
+import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.User;
 import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.utilities.UserUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 
-public class ProfilePictureVolleyRequest {
+public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
 
+    // For Singleton instantiation
+    private static final Object LOCK = new Object();
+    private static ProfilePictureVolleyRequest sInstance;
     private final Context mContext;
+
     private RequestQueue mRequestQueue;
-    private final ImageLoader mImageLoader;
+    private final ProfilePictureLoader mImageLoader;
 
+    private final LruCache<String, Bitmap> cache = new LruCache<>(1);
 
-    public ProfilePictureVolleyRequest(Context context, User user) {
+    private ProfilePictureVolleyRequest(Context context, User user) {
         this.mContext = context;
         this.mRequestQueue = getRequestQueue();
 
-        mImageLoader = new ProfilePictureLoader(user, mRequestQueue, new ImageLoader.ImageCache() {
-                private final LruCache<String, Bitmap> cache = new LruCache<>(20);
-
-                @Override
-                public Bitmap getBitmap(String url) {
-                    return cache.get(url);
-                }
-
-                @Override
-                public void putBitmap(String url, Bitmap bitmap) {
-                    cache.put(url, bitmap);
-                }
-        });
+        mImageLoader = new ProfilePictureLoader(user, mRequestQueue, this);
     }
+
+    public static ProfilePictureVolleyRequest getInstance(Context context, User user) {
+        if (sInstance == null) {
+            synchronized (LOCK) {
+                sInstance = new ProfilePictureVolleyRequest(context, user);
+            }
+        }
+        return sInstance;
+    }
+
+
+    @Override
+    public Bitmap getBitmap(String url) {
+        Bitmap match = cache.get(url);
+        if (match != null)
+            Log.d(ProfilePictureRequest.class.getSimpleName(), "Found image in cache.");
+
+        return match;
+    }
+
+    @Override
+    public void putBitmap(String url, Bitmap bitmap) {
+        Log.d(ProfilePictureRequest.class.getSimpleName(), "Saving bitmap in cache (" + url + ").");
+        cache.put(url, bitmap);
+    }
+
 
     private RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
-            Cache cache = new DiskBasedCache(mContext.getCacheDir(), 10 * 1024 * 1024);
+            Cache cache = new DiskBasedCache(mContext.getCacheDir(), 1024 * 1024);
             Network network = new BasicNetwork(
                     new HurlStack(null, S3Helper.getSocketFactory(mContext)));
             mRequestQueue = new RequestQueue(cache, network);
@@ -62,13 +90,13 @@ public class ProfilePictureVolleyRequest {
         return mRequestQueue;
     }
 
-    public ImageLoader getImageLoader() {
+    public ProfilePictureLoader getImageLoader() {
         return mImageLoader;
     }
 
 
 
-    final class ProfilePictureLoader extends ImageLoader {
+    public final class ProfilePictureLoader extends ImageLoader {
 
         private User mUser;
 
@@ -107,7 +135,7 @@ public class ProfilePictureVolleyRequest {
         }
     }
 
-    final class ProfilePictureRequest extends ImageRequest {
+    public final class ProfilePictureRequest extends ImageRequest {
 
         private final User mUser;
 
@@ -126,6 +154,16 @@ public class ProfilePictureVolleyRequest {
             headers.put("Authorization", "Basic " + mUser.getAuthToken());
             headers.put("Cookie", "JSESSIONID=" + mUser.getSessionID());
             return headers;
+        }
+
+        @Override
+        protected Response<Bitmap> parseNetworkResponse(NetworkResponse response) {
+            String last_modified = response.headers.get("Last-Modified");
+            last_modified = last_modified.substring(0, last_modified.length() - 4) + "GMT";
+
+            response.headers.put("Last-Modified", last_modified);
+
+            return super.parseNetworkResponse(response);
         }
     }
 

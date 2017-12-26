@@ -16,7 +16,7 @@ import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsViewModelFactor
 
 public class InjectorUtils {
 
-    private static UnimibRepository provideRepository(Context context) {
+    public static UnimibRepository provideRepository(Context context) {
         UnimibDatabase database = UnimibDatabase
                 .getInstance(context.getApplicationContext());
         AppExecutors executors = AppExecutors.getInstance();

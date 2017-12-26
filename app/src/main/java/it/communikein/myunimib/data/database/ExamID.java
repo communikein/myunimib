@@ -1,7 +1,6 @@
 package it.communikein.myunimib.data.database;
 
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
 
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 

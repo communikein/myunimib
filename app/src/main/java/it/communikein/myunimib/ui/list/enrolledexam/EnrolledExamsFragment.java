@@ -1,6 +1,7 @@
 package it.communikein.myunimib.ui.list.enrolledexam;
 
 
+import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -9,17 +10,22 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.ExamID;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
-import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamDetailsActivity;
+import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamDetailActivity;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.NotificationHelper;
@@ -30,16 +36,13 @@ import it.communikein.myunimib.utilities.UserUtils;
  * The {@link Fragment} responsible for showing the user's Enrolled Exams.
  */
 public class EnrolledExamsFragment extends Fragment implements
-        EnrolledExamAdapter.ListItemClickListener {
-
-    /*  */
-    private EnrolledExamAdapter mExamsAdapter;
+        EnrolledExamAdapter.ExamClickCallback, SwipeRefreshLayout.OnRefreshListener {
 
     /*  */
     private FragmentExamsBinding mBinding;
 
     /* */
-    private EnrolledExamsFragmentViewModel mViewModel;
+    private EnrolledExamsListViewModel mViewModel;
 
     /* Required empty public constructor */
     public EnrolledExamsFragment() {}
@@ -72,10 +75,6 @@ public class EnrolledExamsFragment extends Fragment implements
          */
         mBinding.rvList.setHasFixedSize(true);
 
-        /* Create a new EnrolledExamAdapter. It will be responsible for displaying the list's items */
-        if (getActivity() != null)
-            mExamsAdapter = new EnrolledExamAdapter(getActivity(), this);
-
         return mBinding.getRoot();
     }
 
@@ -90,13 +89,18 @@ public class EnrolledExamsFragment extends Fragment implements
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
         if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
+            /* Create a new EnrolledExamAdapter. It will be responsible for displaying the list's items */
+            final EnrolledExamAdapter mExamsAdapter = new EnrolledExamAdapter(this);
+
             EnrolledExamsViewModelFactory factory = InjectorUtils
                     .provideEnrolledExamsViewModelFactory(this.getContext());
             mViewModel = ViewModelProviders.of(this, factory)
-                    .get(EnrolledExamsFragmentViewModel.class);
+                    .get(EnrolledExamsListViewModel.class);
 
-            mViewModel.getEnrolledExams().observe(this,
-                    pagedList -> mExamsAdapter.setList(pagedList));
+            mViewModel.getEnrolledExams().observe(this, list -> {
+                mBinding.swipeRefresh.setRefreshing(true);
+                mExamsAdapter.setList((ArrayList<EnrolledExam>) list);
+            });
 
             mViewModel.getModifiedEnrolledExamsCount().observe(this, count -> {
                 if (getActivity() != null && count != null && count > 0) {
@@ -108,6 +112,24 @@ public class EnrolledExamsFragment extends Fragment implements
             /* Setting the adapter attaches it to the RecyclerView in our layout. */
             mBinding.rvList.setAdapter(mExamsAdapter);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                onRefresh();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onRefresh() {
+        mViewModel.refreshEnrolledExams();
     }
 
     /**
@@ -129,15 +151,25 @@ public class EnrolledExamsFragment extends Fragment implements
         String content = context.getString(R.string.channel_enrolled_exams_content_changes);
         int notificationId = 2;
 
+        PendingIntent intent = buildPendingIntent();
         NotificationHelper notificationHelper = new NotificationHelper(getActivity());
         notificationHelper.notify(notificationId,
-                notificationHelper.getNotificationEnrolled(title, content));
+                notificationHelper.getNotificationEnrolled(title, content, intent));
+    }
+
+    private PendingIntent buildPendingIntent() {
+        MainActivity activity = (MainActivity) getActivity();
+
+        if (activity != null)
+            return activity.buildPendingIntent(R.id.navigation_exams_enrolled);
+        else
+            return null;
     }
 
 
     @Override
     public void onListItemClick(ExamID examID) {
-        Intent intent = new Intent(getActivity(), EnrolledExamDetailsActivity.class);
+        Intent intent = new Intent(getActivity(), EnrolledExamDetailActivity.class);
         intent.putExtra(UnimibNetworkDataSource.ADSCE_ID, examID.getAdsceId());
         intent.putExtra(UnimibNetworkDataSource.APP_ID, examID.getAppId());
         intent.putExtra(UnimibNetworkDataSource.ATT_DID_ESA_ID, examID.getAttDidEsaId());

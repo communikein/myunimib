@@ -5,9 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import it.communikein.myunimib.data.UnimibRepository;
-import it.communikein.myunimib.data.database.Exam;
 import it.communikein.myunimib.data.database.ExamID;
-import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamDetailActivityViewModel;
 
 /**
  * Created by eliam on 12/23/2017.

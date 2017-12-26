@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -41,15 +43,17 @@ public class MainActivity extends AppCompatActivity implements
 
     private final List<Fragment> fragments = new ArrayList<>();
 
+    public static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
+
     private static final int INDEX_FRAGMENT_HOME = 0;
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
     private static final int INDEX_FRAGMENT_EXAMS_AVAILABLE = 2;
     private static final int INDEX_FRAGMENT_EXAMS_ENROLLED = 3;
 
-    private static final String TAG_FRAGMENT_HOME = "tab-home";
-    private static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
-    private static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
-    private static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
+    public static final String TAG_FRAGMENT_HOME = "tab-home";
+    public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
+    public static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
+    public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
 
     private static final int LOADER_LOGOUT_ID = 2200;
 
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         initUI();
+        parseIntent();
     }
 
     private void initUI(){
@@ -74,6 +79,17 @@ public class MainActivity extends AppCompatActivity implements
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.label_logging_out));
         progressDialog.setCancelable(false);
+    }
+
+    private void parseIntent() {
+        Intent intent = getIntent();
+
+        if (intent != null) {
+            int nav_id = intent.getIntExtra(INTENT_PARAM_SHOW_FRAGMENT, -1);
+
+            if (nav_id >= 0)
+                mBinding.navigation.setSelectedItemId(nav_id);
+        }
     }
 
     private void buildFragmentsList() {
@@ -173,9 +189,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLoaderReset(Loader loader) {
-
-    }
+    public void onLoaderReset(Loader loader) {}
 
 
     private void finishLogout() {
@@ -277,5 +291,18 @@ public class MainActivity extends AppCompatActivity implements
     private void showProgress(final boolean show) {
         if (show) progressDialog.show();
         else if(progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
+    }
+
+    public PendingIntent buildPendingIntent(int navigation_tab_id) {
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        resultIntent.putExtra(INTENT_PARAM_SHOW_FRAGMENT, navigation_tab_id);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
+        // Adds the back stack
+        stackBuilder.addParentStack(MainActivity.class);
+        // Adds the Intent to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        // Gets a PendingIntent containing the entire back stack
+        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

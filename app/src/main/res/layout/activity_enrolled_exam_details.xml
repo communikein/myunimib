@@ -20,7 +20,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             map:uiZoomControls="false"
             map:mapType="normal"
-            tools:context=".ui.detail.enrolledexam.EnrolledExamDetailsActivity"/>
+            tools:context=".ui.detail.enrolledexam.EnrolledExamDetailActivity"/>
 
         <ScrollView
             android:id="@+id/container"

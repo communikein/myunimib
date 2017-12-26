@@ -19,7 +19,7 @@ public class AvailableExamsViewModelFactory extends ViewModelProvider.NewInstanc
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new AvailableExamsFragmentViewModel(mRepository);
+        return (T) new AvailableExamsListViewModel(mRepository);
     }
 
 }

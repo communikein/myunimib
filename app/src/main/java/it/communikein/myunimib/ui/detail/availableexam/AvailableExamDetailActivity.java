@@ -32,7 +32,7 @@ import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.MyunimibDateUtils;
 
 
-public class AvailableExamDetailsActivity extends AppCompatActivity implements
+public class AvailableExamDetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks, S3Helper.EnrollLoader.EnrollUpdatesListener {
 
     final public static int LOADER_ENROLL_ID = 4000;
@@ -72,14 +72,12 @@ public class AvailableExamDetailsActivity extends AppCompatActivity implements
         initFab();
         initToolbar();
 
-        AppExecutors.getInstance().diskIO().execute(() -> {
-            AvailableExamViewModelFactory factory = InjectorUtils
-                    .provideAvailableExamViewModelFactory(this, examID);
-            mViewModel = ViewModelProviders.of(this, factory)
-                    .get(AvailableExamDetailViewModel.class);
+        AvailableExamViewModelFactory factory = InjectorUtils
+                .provideAvailableExamViewModelFactory(this, examID);
+        mViewModel = ViewModelProviders.of(this, factory)
+                .get(AvailableExamDetailViewModel.class);
 
-            updateUI(mViewModel.getExam());
-        });
+        mViewModel.getExam().observe(this, this::updateUI);
     }
 
     private void initFab(){
@@ -154,7 +152,7 @@ public class AvailableExamDetailsActivity extends AppCompatActivity implements
             case LOADER_ENROLL_ID:
                 showProgress(true);
 
-                return new S3Helper.EnrollLoader(this, mViewModel.getExam(), this);
+                return new S3Helper.EnrollLoader(this, mViewModel.getExam().getValue(), this);
 
             default:
                 throw new RuntimeException("Loader Not Implemented: " + id);
@@ -277,7 +275,7 @@ public class AvailableExamDetailsActivity extends AppCompatActivity implements
 
     private void showCertificate() {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        File certificate_file = mViewModel.getExam().getCertificatePath();
+        File certificate_file = mViewModel.getExam().getValue().getCertificatePath();
         Uri certificate_uri = FileProvider.getUriForFile(this,
                 getString(R.string.file_provider_authority), certificate_file);
 

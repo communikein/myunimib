@@ -78,9 +78,10 @@ public class HomeFragment extends Fragment {
             mBinding.userImageView.setDefaultImageResId(R.drawable.ic_person_black_24dp);
         }
         else {
-            ProfilePictureVolleyRequest profilePictureVolleyRequest =
-                    new ProfilePictureVolleyRequest(getActivity(), Utils.user);
-            ImageLoader imageLoader = profilePictureVolleyRequest.getImageLoader();
+            ProfilePictureVolleyRequest.ProfilePictureLoader imageLoader =
+                    ProfilePictureVolleyRequest
+                            .getInstance(getActivity(), Utils.user)
+                            .getImageLoader();
 
             imageLoader.get(S3Helper.URL_PROFILE_PICTURE,
                     ImageLoader.getImageListener(
@@ -88,6 +89,7 @@ public class HomeFragment extends Fragment {
                             R.drawable.ic_person_black_24dp,
                             android.R.drawable.ic_dialog_alert)
             );
+
             mBinding.userImageView.setImageUrl(S3Helper.URL_PROFILE_PICTURE, imageLoader);
         }
     }

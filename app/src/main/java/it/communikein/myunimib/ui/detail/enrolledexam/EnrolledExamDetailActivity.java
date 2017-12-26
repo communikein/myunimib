@@ -39,14 +39,14 @@ import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.UniversityUtils;
 
 @SuppressWarnings("unchecked")
-public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
+public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
          implements OnMapReadyCallback, LoaderManager.LoaderCallbacks {
 
     final public static int LOADER_CERTIFICATE_ID = 3000;
 
     private ActivityEnrolledExamDetailsBinding mBinding;
 
-    private EnrolledExamDetailActivityViewModel mViewModel;
+    private EnrolledExamDetailViewModel mViewModel;
 
 
     //* Might be null if Google Play services APK is not available. */
@@ -88,7 +88,7 @@ public class EnrolledExamDetailsActivity extends FragmentAppCompatActivity
             EnrolledExamViewModelFactory factory = InjectorUtils
                     .provideEnrolledExamViewModelFactory(this, examID);
             mViewModel = ViewModelProviders.of(this, factory)
-                    .get(EnrolledExamDetailActivityViewModel.class);
+                    .get(EnrolledExamDetailViewModel.class);
 
             updateUI(mViewModel.getExam());
         });

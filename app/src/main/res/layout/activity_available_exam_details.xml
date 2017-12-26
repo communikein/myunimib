@@ -6,7 +6,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.detail.availableexam.AvailableExamDetailsActivity">
+        tools:context=".ui.detail.availableexam.AvailableExamDetailActivity">
 
         <ScrollView
             android:id="@+id/container"

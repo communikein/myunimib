@@ -19,7 +19,7 @@ public class EnrolledExamsViewModelFactory extends ViewModelProvider.NewInstance
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new EnrolledExamsFragmentViewModel(mRepository);
+        return (T) new EnrolledExamsListViewModel(mRepository);
     }
 
 }

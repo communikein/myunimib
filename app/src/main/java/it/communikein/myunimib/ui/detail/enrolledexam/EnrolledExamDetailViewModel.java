@@ -7,11 +7,11 @@ import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.ExamID;
 
 
-public class EnrolledExamDetailActivityViewModel extends ViewModel {
+public class EnrolledExamDetailViewModel extends ViewModel {
 
     private final EnrolledExam mData;
 
-    public EnrolledExamDetailActivityViewModel(UnimibRepository repository, ExamID examID) {
+    public EnrolledExamDetailViewModel(UnimibRepository repository, ExamID examID) {
         mData = repository.getEnrolledExam(examID);
     }
 

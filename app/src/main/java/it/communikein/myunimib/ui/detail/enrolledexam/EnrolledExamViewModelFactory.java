@@ -26,7 +26,7 @@ public class EnrolledExamViewModelFactory extends ViewModelProvider.NewInstanceF
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new EnrolledExamDetailActivityViewModel(mRepository, mExamId);
+        return (T) new EnrolledExamDetailViewModel(mRepository, mExamId);
     }
 
 }

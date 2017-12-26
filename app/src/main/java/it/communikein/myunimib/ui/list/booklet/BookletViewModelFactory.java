@@ -19,7 +19,7 @@ public class BookletViewModelFactory extends ViewModelProvider.NewInstanceFactor
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new BookletFragmentViewModel(mRepository);
+        return (T) new BookletViewModel(mRepository);
     }
 
 }
