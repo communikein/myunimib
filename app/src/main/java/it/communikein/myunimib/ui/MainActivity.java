@@ -43,7 +43,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private final List<Fragment> fragments = new ArrayList<>();
 
-    public static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
+    private static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
+    private static final String SAVE_FRAGMENT_SELECTED = "save-fragment-selected";
+    private String FRAGMENT_SELECTED_TAG;
 
     private static final int INDEX_FRAGMENT_HOME = 0;
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
@@ -65,8 +67,21 @@ public class MainActivity extends AppCompatActivity implements
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        initUI();
         parseIntent();
+        restoreInstanceState(savedInstanceState);
+        initUI();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(SAVE_FRAGMENT_SELECTED, FRAGMENT_SELECTED_TAG);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    private void restoreInstanceState(Bundle savedInstanceState) {
+        if (FRAGMENT_SELECTED_TAG == null && savedInstanceState != null)
+            FRAGMENT_SELECTED_TAG = savedInstanceState.getString(SAVE_FRAGMENT_SELECTED);
     }
 
     private void initUI(){
@@ -74,21 +89,49 @@ public class MainActivity extends AppCompatActivity implements
 
         mBinding.navigation.setOnNavigationItemSelectedListener(item ->
                 switchFragment(item.getItemId()));
-        mBinding.navigation.setSelectedItemId(R.id.navigation_home);
+        int navId = getNavIdFromFragmentTag(FRAGMENT_SELECTED_TAG);
+        mBinding.navigation.setSelectedItemId(navId);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.label_logging_out));
         progressDialog.setCancelable(false);
     }
 
+    private int getNavIdFromFragmentTag(String tag) {
+        int id;
+        switch(tag) {
+            case TAG_FRAGMENT_HOME:
+                id = R.id.navigation_home;
+                break;
+
+            case TAG_FRAGMENT_BOOKLET:
+                id = R.id.navigation_booklet;
+                break;
+
+            case TAG_FRAGMENT_EXAMS_AVAILABLE:
+                id = R.id.navigation_exams_available;
+                break;
+
+            case TAG_FRAGMENT_EXAMS_ENROLLED:
+                id = R.id.navigation_exams_enrolled;
+                break;
+
+            default:
+                id = R.id.navigation_home;
+                break;
+        }
+
+        return id;
+    }
+
     private void parseIntent() {
         Intent intent = getIntent();
 
         if (intent != null) {
-            int nav_id = intent.getIntExtra(INTENT_PARAM_SHOW_FRAGMENT, -1);
+            String fragment_tag = intent.getStringExtra(INTENT_PARAM_SHOW_FRAGMENT);
 
-            if (nav_id >= 0)
-                mBinding.navigation.setSelectedItemId(nav_id);
+            if (fragment_tag != null)
+                FRAGMENT_SELECTED_TAG = fragment_tag;
         }
     }
 
@@ -101,24 +144,23 @@ public class MainActivity extends AppCompatActivity implements
 
     private boolean switchFragment(int tab_id) {
         int index;
-        String tag;
 
         switch (tab_id) {
             case R.id.navigation_home:
                 index = INDEX_FRAGMENT_HOME;
-                tag = TAG_FRAGMENT_HOME;
+                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_HOME;
                 break;
             case R.id.navigation_booklet:
                 index = INDEX_FRAGMENT_BOOKLET;
-                tag = TAG_FRAGMENT_BOOKLET;
+                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_BOOKLET;
                 break;
             case R.id.navigation_exams_available:
                 index = INDEX_FRAGMENT_EXAMS_AVAILABLE;
-                tag = TAG_FRAGMENT_EXAMS_AVAILABLE;
+                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_EXAMS_AVAILABLE;
                 break;
             case R.id.navigation_exams_enrolled:
                 index = INDEX_FRAGMENT_EXAMS_ENROLLED;
-                tag = TAG_FRAGMENT_EXAMS_ENROLLED;
+                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_EXAMS_ENROLLED;
                 break;
             default:
                 return false;
@@ -126,10 +168,12 @@ public class MainActivity extends AppCompatActivity implements
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.tab_container, fragments.get(index), tag)
+                .replace(R.id.tab_container, fragments.get(index), FRAGMENT_SELECTED_TAG)
                 .commit();
         return true;
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -156,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements
 
         return super.onOptionsItemSelected(item);
     }
+
 
 
     @Override
@@ -190,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(Loader loader) {}
+
 
 
     private void finishLogout() {
