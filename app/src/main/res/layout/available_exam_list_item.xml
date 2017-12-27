@@ -85,7 +85,8 @@
                 android:layout_height="match_parent"
                 android:text="+"
                 android:onClick="@{() -> callback.onEnrollmentClicked(exam)}"
-                android:gravity="center" />
+                android:gravity="center"
+                android:theme="@style/MyButton"/>
 
         </LinearLayout>
 
