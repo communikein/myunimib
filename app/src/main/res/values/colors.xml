@@ -19,4 +19,6 @@
 
     <color name="passed">#2e7d32</color>
     <color name="waiting">#fdd835</color>
+
+    <color name="dark_red">#ab000d</color>
 </resources>

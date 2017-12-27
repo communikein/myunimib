@@ -9,21 +9,23 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 
 
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.User;
@@ -100,8 +102,35 @@ public class LoginActivity extends AuthAppCompatActivity implements
                     Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.login_menu, menu);
+        return true;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_fake_login:
+
+                getSupportLoaderManager()
+                        .initLoader(LOADER_FAKE_LOGIN_ID, null, this)
+                        .forceLoad();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+
     private void initUI() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+
+        showMainLoginView();
+        hideFacultyChoiceView();
 
         mBinding.buttonLogin.setOnClickListener(view -> attemptLogin());
 
@@ -144,38 +173,43 @@ public class LoginActivity extends AuthAppCompatActivity implements
     }
 
 
+
+
     @SuppressWarnings("unchecked")
     private void handleLoginResults(final Context context, final User user){
         showProgress(false);
 
+        /* Get the login result */
         int ris = (int) user.getTag();
         switch (ris){
-            // If the user has to choose the faculty
-            case S3Helper.ERROR_FACULTY_TO_CHOOSE:
-                // Tell the user he needs to choose the faculty
-                Snackbar.make(mBinding.loginView, R.string.faculty_to_choose, Snackbar.LENGTH_LONG)
-                        .show();
 
-                // Carico l'elenco dei corsi di studio
+            /* If the user has to choose the faculty */
+            case S3Helper.ERROR_FACULTY_TO_CHOOSE:
+
+                /* Update the UI */
+                hideMainLoginView();
+                showFacultyChoiceView();
+
+                /* Signal the user */
+                Snackbar.make(mBinding.loginView,
+                        R.string.faculty_to_choose, Snackbar.LENGTH_LONG).show();
+
+                /* Load the faculties */
                 ArrayList<String> courses_names = new ArrayList<>();
                 for (int i=0; i<user.getFaculties().size(); i++)
                     courses_names.add(user.getFaculties().valueAt(i));
 
-                // Imposto nello Spinner i corsi di studio disponibili
+                /* Show the faculties list */
                 final ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
                         R.layout.simple_spinner_item, courses_names);
                 mBinding.coursesSpinner.setAdapter(adapter);
 
-                Log.d("LOGIN_CHOOSE_FACULTY", "Faculties shown to user. Waiting for user input.");
-
-                // Quando l'utente seleziona il corso di studio e da conferma
+                /* When the user has chosen the faculty */
                 mBinding.dialogButtonOK.setOnClickListener(v -> {
                     /* Save the chosen faculty */
                     selectedFaculty = user.getFaculties().keyAt(selected);
-                    Log.d("LOGIN_CHOOSE_FACULTY", "Faculty chosen: " + selected);
 
-                    // Now that the user has selected the faculty, do the login again
-                    Log.d("LOGIN_CHOOSE_FACULTY", "Trying to tell the server.");
+                    /* Do the login again */
                     getSupportLoaderManager()
                             .initLoader(LOADER_CONFIRM_FACULTY_ID, null, this)
                             .forceLoad();
@@ -183,39 +217,38 @@ public class LoginActivity extends AuthAppCompatActivity implements
                     showProgress(true);
                 });
                 break;
-            // Se il login ha avuto successo
+
+            /* If the login process is completed successfully */
             case S3Helper.OK_LOGGED_IN:
             case S3Helper.OK_UPDATED:
-                // Finalize login process
+                /* Finalize login process */
                 finishLogin(user);
                 break;
 
-            // Se S3 non è disponibile
+            /* If S3 is not available */
             case S3Helper.ERROR_S3_NOT_AVAILABLE:
-                // Avviso l'utente
+                /* Signal the user */
                 Snackbar.make(mBinding.loginView, R.string.error_S3_not_available, Snackbar.LENGTH_LONG)
                         .show();
                 break;
 
-            // Se ho sbagliato password
+            /* If password or username are wrong */
             case S3Helper.ERROR_WRONG_PASSWORD:
-                // Avviso l'utente
-                Snackbar.make(mBinding.loginView, R.string.error_password_incorrect, Snackbar.LENGTH_LONG)
-                        .show();
-
-                mBinding.passwordTextInputLayout.setError(getString(R.string.error_password_incorrect));
+                /* Show the credentials error */
+                mBinding.passwordTextInputLayout.setError(getString(R.string.error_username_password_incorrect));
                 mBinding.passwordTextInputLayout.requestFocus();
                 break;
 
-            // Se la connessione sta impiegando troppo tempo
+            /* If the internet connection is too slow */
             case S3Helper.ERROR_CONNECTION_TIMEOUT:
-                // Avviso l'utente
+                /* Signal the user */
                 Snackbar.make(mBinding.loginView, R.string.error_connection_timeout, Snackbar.LENGTH_LONG)
                         .show();
                 break;
 
-            // For any other response
+            /* If any other error happens */
             default:
+                /* Signal the user */
                 Snackbar.make(mBinding.loginView, R.string.error_generic_exception, Snackbar.LENGTH_LONG)
                         .show();
                 break;
@@ -223,65 +256,55 @@ public class LoginActivity extends AuthAppCompatActivity implements
     }
 
     private void finishLogin(User user) {
+        /* Create a new UNIMIB account to save on the device */
         final Account account = new Account(user.getUsername(), AccountUtils.ACCOUNT_TYPE);
 
-        Bundle bundle = new Bundle();
-        bundle.putString(User.PREF_USERNAME, user.getUsername());
-        bundle.putString(User.PREF_MATRICOLA, user.getMatricola());
-        mAccountManager.addAccountExplicitly(account, user.getPassword(), bundle);
+        /* Save the account on the device via Account Manager */
+        mAccountManager.addAccountExplicitly(account, user.getPassword(), null);
 
-        Bundle data = new Bundle();
-        data.putString(AccountManager.KEY_ACCOUNT_NAME, user.getUsername());
-        data.putString(User.PREF_USERNAME, user.getUsername());
-        data.putString(User.PREF_PASSWORD, user.getPassword());
-        data.putString(User.PREF_MATRICOLA, user.getMatricola());
-        setAccountAuthenticatorResult(data);
-
+        /* Since the user is logged in, start the Main Activity */
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 
     @SuppressWarnings("unchecked")
     private void attemptLogin() {
-        if (mBinding.fakeLoginCheck.isChecked()) {
-            getSupportLoaderManager()
-                    .initLoader(LOADER_FAKE_LOGIN_ID, null, this)
-                    .forceLoad();
 
-            return;
-        }
-
+        /* If the user has accepted the Terms and Conditions */
         if (mBinding.termsCheck.isChecked()) {
+
+            /* If the device is online */
             if (NetworkUtils.isDeviceOnline(this)) {
                 Utils.hideKeyboard(this);
 
-                // Reset errors.
+                /* Reset errors. */
                 mBinding.usernameTextInputLayout.setError(null);
                 mBinding.passwordTextInputLayout.setError(null);
 
                 boolean cancel = false;
                 View focusView = null;
 
-                // Check for a valid password, if the user entered one.
-                if (!isPasswordValid(mBinding.passwordTextInputLayout.getEditText())) {
+                /* Check for a valid password, if the user entered one. */
+                if (!isPasswordValid(mBinding.passwordTextInputLayout)) {
                     focusView = mBinding.passwordTextInputLayout;
                     cancel = true;
                 }
 
-                // Check for a valid username.
-                username = validateUsername(mBinding.usernameTextInputLayout.getEditText());
+                /* Check for a valid username, if the user entered one. */
+                username = validateUsername(mBinding.usernameTextInputLayout);
                 if (username == null) {
                     focusView = mBinding.usernameTextInputLayout;
                     cancel = true;
                 }
 
+                /* If there are errors to show */
                 if (cancel) {
-                    // There was an error; don't attempt login and focus the first
-                    // form field with an error.
+                    /* Cancel the login process and focus on the field with an error. */
                     focusView.requestFocus();
-                } else {
-                    // Show a progress spinner, and kick off a background task to
-                    // perform the user login attempt.
+                }
+                /* No errors found */
+                else {
+                    /* Show a progress dialog and start the Loader for the login. */
                     showProgress(true);
 
                     getSupportLoaderManager()
@@ -290,34 +313,51 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 }
             }
             else
+                /* Tell the user that there is no internet available. */
                 Snackbar.make(
                         mBinding.loginView,
                         R.string.error_no_internet,
                         Snackbar.LENGTH_LONG).show();
-        } else {
+        }
+        /* Tell the user that is necessary to accept the Terms and Conditions. */
+        else {
             mBinding.termsCheck.setError(getString(R.string.terms_not_checked));
             mBinding.termsCheck.requestFocus();
         }
     }
 
-    private String validateUsername(TextView view) {
-        String user = view.getText().toString().trim();
+    @Nullable
+    private String validateUsername(@Nullable TextInputLayout view) {
+        /* If there is no view to work with, return */
+        if (view == null || view.getEditText() == null) return null;
 
+        /* Get the username */
+        String user = view.getEditText().getText().toString().trim();
+
+        /* Check the username for errors */
         if (TextUtils.isEmpty(user)){
+            /* The username is empty, set the error and return. */
             user = null;
             view.setError(getString(R.string.error_user_empty));
         } else if (user.contains(" ")) {
+            /* The username contains whitespaces, set the error and return. */
             user = null;
             view.setError(getString(R.string.error_user_with_blank_spaces));
         } else if (user.contains("@")) {
+            /*
+             * The user has input the university email, but the app only needs the username,
+             * so remove everything that is after the '@', including '@', and return.
+             */
             user = user.substring(0, user.indexOf("@"));
         }
 
         return user;
     }
 
-    private boolean isPasswordValid(TextView view) {
-        String password = view.getText().toString().trim();
+    private boolean isPasswordValid(@Nullable TextInputLayout view) {
+        if (view == null || view.getEditText() == null) return false;
+
+        String password = view.getEditText().getText().toString().trim();
         boolean valid = true;
 
         if (TextUtils.isEmpty(password)){
@@ -337,6 +377,31 @@ public class LoginActivity extends AuthAppCompatActivity implements
         return valid;
     }
 
+    private void showFacultyChoiceView() {
+        mBinding.coursesLabel.setVisibility(View.VISIBLE);
+        mBinding.coursesSpinner.setVisibility(View.VISIBLE);
+        mBinding.dialogButtonOK.setVisibility(View.VISIBLE);
+    }
+
+    private void hideFacultyChoiceView() {
+        mBinding.coursesLabel.setVisibility(View.INVISIBLE);
+        mBinding.coursesSpinner.setVisibility(View.INVISIBLE);
+        mBinding.dialogButtonOK.setVisibility(View.INVISIBLE);
+    }
+
+    private void showMainLoginView() {
+        mBinding.usernameTextInputLayout.setVisibility(View.VISIBLE);
+        mBinding.passwordTextInputLayout.setVisibility(View.VISIBLE);
+        mBinding.termsCheck.setVisibility(View.VISIBLE);
+        mBinding.buttonLogin.setVisibility(View.VISIBLE);
+    }
+
+    private void hideMainLoginView() {
+        mBinding.usernameTextInputLayout.setVisibility(View.GONE);
+        mBinding.passwordTextInputLayout.setVisibility(View.GONE);
+        mBinding.termsCheck.setVisibility(View.GONE);
+        mBinding.buttonLogin.setVisibility(View.GONE);
+    }
 
 
     @Override

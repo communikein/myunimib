@@ -22,7 +22,9 @@
                 android:id="@+id/username_text_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:errorEnabled="true" >
+                app:hintTextAppearance="@style/LoginHintText"
+                app:errorEnabled="true"
+                app:errorTextAppearance="@style/ErrorText">
 
                 <EditText
                     android:layout_width="match_parent"
@@ -30,7 +32,8 @@
                     android:ems="10"
                     android:inputType="textEmailAddress"
                     tools:text="e.maracani"
-                    android:hint="@string/prompt_university_email"/>
+                    android:hint="@string/prompt_university_email"
+                    android:theme="@style/LoginEditText"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -42,8 +45,10 @@
                 app:layout_constraintStart_toStartOf="@+id/username_text_input_layout"
                 app:layout_constraintTop_toBottomOf="@+id/username_text_input_layout"
                 app:passwordToggleEnabled="true"
-                app:passwordToggleTint="@color/colorAccent"
-                app:errorEnabled="true" >
+                app:hintTextAppearance="@style/LoginHintText"
+                app:passwordToggleTint="@color/colorPrimaryDark"
+                app:errorEnabled="true"
+                app:errorTextAppearance="@style/ErrorText">
 
                 <EditText
                     android:layout_width="match_parent"
@@ -51,7 +56,8 @@
                     android:ems="10"
                     android:hint="@string/prompt_password"
                     android:inputType="textPassword"
-                    tools:text="@string/prompt_password" />
+                    tools:text="@string/prompt_password"
+                    android:theme="@style/LoginEditText"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -64,15 +70,6 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"/>
 
-            <CheckBox
-                android:id="@+id/fake_login_check"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/label_do_fake_login"
-                app:layout_constraintTop_toBottomOf="@id/terms_check"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
-
             <Button
                 android:id="@+id/buttonLogin"
                 android:layout_width="0dp"
@@ -80,7 +77,8 @@
                 android:text="@string/action_sign_in"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fake_login_check" />
+                app:layout_constraintTop_toBottomOf="@id/terms_check"
+                android:theme="@style/MyButton"/>
 
             <TextView
                 android:id="@+id/coursesLabel"
@@ -107,7 +105,8 @@
                 android:text="@android:string/ok"
                 app:layout_constraintEnd_toEndOf="@+id/coursesSpinner"
                 app:layout_constraintStart_toStartOf="@+id/coursesSpinner"
-                app:layout_constraintTop_toBottomOf="@id/coursesSpinner" />
+                app:layout_constraintTop_toBottomOf="@id/coursesSpinner"
+                android:theme="@style/MyButton"/>
 
         </android.support.constraint.ConstraintLayout>
 

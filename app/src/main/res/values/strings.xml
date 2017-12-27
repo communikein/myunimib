@@ -48,6 +48,7 @@
     <string name="error_user_with_blank_spaces">The username can\'t contain blank spaces</string>
 
     <string name="error_password_incorrect">Password not valid</string>
+    <string name="error_username_password_incorrect">Username or password not valid</string>
     <string name="error_password_empty">Password required</string>
     <string name="error_password_less_then_10_chars">The password must be at least 10 chars</string>
     <string name="error_password_more_then_20_chars">The password must be no more than 20 chars</string>
@@ -167,4 +168,5 @@
     <string name="error_enrolled_exam_missing">Enrolled exam\'s info missing</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_refresh">Refresh</string>
+    <string name="action_fake_login">Try the app</string>
 </resources>

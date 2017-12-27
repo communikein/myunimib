@@ -21,4 +21,23 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="MyButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/colorPrimaryDark</item>
+        <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="android:textColor">@color/primary_text</item>
+    </style>
+
+
+    <style name="ErrorText" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/dark_red</item>
+    </style>
+
+    <style name="LoginHintText" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="LoginEditText" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/secondary_text</item>
+        <item name="colorControlActivated">@color/colorPrimaryDark</item>
+    </style>
 </resources>
