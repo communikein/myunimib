@@ -2,12 +2,16 @@ package it.communikein.myunimib.data.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
+import android.content.Context;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.ContentHandler;
 import java.text.ParseException;
 import java.util.Date;
+
+import it.communikein.myunimib.utilities.MyunimibDateUtils;
 
 @Entity(tableName = "available_exams", primaryKeys = {"adsceId", "appId", "attDidEsaId", "cdsEsaId"})
 public class AvailableExam extends Exam {
@@ -88,7 +92,21 @@ public class AvailableExam extends Exam {
 
 
 
+    public String printFriendlyBeginDate(Context context) {
+        return MyunimibDateUtils.getFriendlyDateString(
+                context,
+                getBeginEnrollment().getTime(),
+                false,
+                false);
+    }
 
+    public String printFriendlyEndDate(Context context) {
+        return MyunimibDateUtils.getFriendlyDateString(
+                context,
+                getEndEnrollment().getTime(),
+                false,
+                false);
+    }
 
 
 

@@ -19,6 +19,8 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
+import it.communikein.myunimib.BR;
+
 import java.io.File;
 
 import it.communikein.myunimib.AppExecutors;
@@ -29,7 +31,6 @@ import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityAvailableExamDetailsBinding;
 import it.communikein.myunimib.utilities.InjectorUtils;
-import it.communikein.myunimib.utilities.MyunimibDateUtils;
 
 
 public class AvailableExamDetailActivity extends AppCompatActivity implements
@@ -48,8 +49,16 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_available_exam_details);
 
         ExamID examID = loadData();
-        if (examID != null)
-            initUI(examID);
+
+        AvailableExamViewModelFactory factory = InjectorUtils
+                .provideAvailableExamViewModelFactory(this, examID);
+        mViewModel = ViewModelProviders.of(this, factory)
+                .get(AvailableExamDetailViewModel.class);
+
+        mBinding.setLifecycleOwner(this);
+        mBinding.setVariable(BR.viewModel, mViewModel);
+
+        if (examID != null) initUI();
     }
 
     private ExamID loadData() {
@@ -65,17 +74,12 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
         return null;
     }
 
-    private void initUI(ExamID examID) {
+    private void initUI() {
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
 
         initFab();
         initToolbar();
-
-        AvailableExamViewModelFactory factory = InjectorUtils
-                .provideAvailableExamViewModelFactory(this, examID);
-        mViewModel = ViewModelProviders.of(this, factory)
-                .get(AvailableExamDetailViewModel.class);
 
         mViewModel.getExam().observe(this, this::updateUI);
     }
@@ -95,27 +99,6 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
 
     private void updateUI(AvailableExam exam) {
         if (exam != null) {
-            String friendly_date_begin = MyunimibDateUtils.getFriendlyDateString(
-                    this,
-                    exam.getBeginEnrollment().getTime(),
-                    false,
-                    false);
-            String friendly_date_end = MyunimibDateUtils.getFriendlyDateString(
-                    this,
-                    exam.getEndEnrollment().getTime(),
-                    false,
-                    false);
-            String friendly_date = MyunimibDateUtils.getFriendlyDateString(
-                    this,
-                    exam.getDate().getTime(),
-                    false,
-                    false);
-
-            mBinding.examBeginEnrollmentTextview.setText(friendly_date_begin);
-            mBinding.examEndEnrollmentTextview.setText(friendly_date_end);
-            mBinding.examDateTextview.setText(friendly_date);
-            mBinding.examDescriptionTextview.setText(exam.getDescription());
-
             updateToolbar(exam);
             updateFab();
         }
@@ -180,17 +163,17 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
     public void onEnrollmentUpdate(int status) {
         switch (status) {
             case S3Helper.EnrollLoader.STATUS_STARTED:
-                Snackbar.make(mBinding.container,
+                Snackbar.make(mBinding.examDataLayout,
                         "Enrollment started.", Snackbar.LENGTH_LONG).show();
                 break;
 
             case S3Helper.EnrollLoader.STATUS_ENROLLMENT_OK:
-                Snackbar.make(mBinding.container,
+                Snackbar.make(mBinding.examDataLayout,
                         "Enrollment confirmed.", Snackbar.LENGTH_LONG).show();
                 break;
 
             case S3Helper.EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
-                Snackbar.make(mBinding.container,
+                Snackbar.make(mBinding.examDataLayout,
                         "Certificate downloaded.", Snackbar.LENGTH_LONG)
                         .setAction(R.string.open, v -> showCertificate())
                         .show();
@@ -208,12 +191,12 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
                 break;
 
             case S3Helper.EnrollLoader.STATUS_ERROR_CERTIFICATE:
-                Snackbar.make(mBinding.container,
+                Snackbar.make(mBinding.examDataLayout,
                         "ERROR: certificate not found.", Snackbar.LENGTH_LONG).show();
                 break;
 
             case S3Helper.EnrollLoader.STATUS_ERROR_GENERAL:
-                Snackbar.make(mBinding.container,
+                Snackbar.make(mBinding.examDataLayout,
                         "ERROR: general.", Snackbar.LENGTH_LONG).show();
                 break;
         }

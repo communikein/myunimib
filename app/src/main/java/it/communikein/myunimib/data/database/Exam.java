@@ -97,6 +97,7 @@ public class Exam extends ExamID {
     }
 
 
+
     @Ignore
     @Override
     public JSONObject toJSON() {
@@ -121,6 +122,8 @@ public class Exam extends ExamID {
         return toJSON().toString();
     }
 
+
+
     @Override
     public boolean isIdentic(Object obj) {
         if (! (obj instanceof Exam)) return false;
@@ -132,6 +135,14 @@ public class Exam extends ExamID {
                 exam.getMillis() == getMillis();
     }
 
+
+    public String printFriendlyDate(Context context) {
+        return MyunimibDateUtils.getFriendlyDateString(
+                context,
+                getDate().getTime(),
+                false,
+                false);
+    }
 
     @Ignore
     public String getCertificateName(){

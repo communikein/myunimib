@@ -103,14 +103,6 @@ public class LoginActivity extends AuthAppCompatActivity implements
     private void initUI() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
-        mBinding.editTextPassword.setOnEditorActionListener((textView, id, keyEvent) -> {
-            if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                attemptLogin();
-                return true;
-            }
-            return false;
-        });
-
         mBinding.buttonLogin.setOnClickListener(view -> attemptLogin());
 
         mBinding.coursesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -142,7 +134,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
         if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
             username = appLinkData.getLastPathSegment();
-            mBinding.editTextUniversityMail.setText(username);
+            mBinding.usernameTextInputLayout.getEditText().setText(username);
         }
     }
 
@@ -211,8 +203,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 Snackbar.make(mBinding.loginView, R.string.error_password_incorrect, Snackbar.LENGTH_LONG)
                         .show();
 
-                mBinding.editTextPassword.setError(getString(R.string.error_password_incorrect));
-                mBinding.editTextPassword.requestFocus();
+                mBinding.passwordTextInputLayout.setError(getString(R.string.error_password_incorrect));
+                mBinding.passwordTextInputLayout.requestFocus();
                 break;
 
             // Se la connessione sta impiegando troppo tempo
@@ -264,22 +256,22 @@ public class LoginActivity extends AuthAppCompatActivity implements
                 Utils.hideKeyboard(this);
 
                 // Reset errors.
-                mBinding.editTextUniversityMail.setError(null);
-                mBinding.editTextPassword.setError(null);
+                mBinding.usernameTextInputLayout.setError(null);
+                mBinding.passwordTextInputLayout.setError(null);
 
                 boolean cancel = false;
                 View focusView = null;
 
                 // Check for a valid password, if the user entered one.
-                if (!isPasswordValid(mBinding.editTextPassword)) {
-                    focusView = mBinding.editTextPassword;
+                if (!isPasswordValid(mBinding.passwordTextInputLayout.getEditText())) {
+                    focusView = mBinding.passwordTextInputLayout;
                     cancel = true;
                 }
 
                 // Check for a valid username.
-                username = validateUsername(mBinding.editTextUniversityMail);
+                username = validateUsername(mBinding.usernameTextInputLayout.getEditText());
                 if (username == null) {
-                    focusView = mBinding.editTextUniversityMail;
+                    focusView = mBinding.usernameTextInputLayout;
                     cancel = true;
                 }
 
@@ -355,8 +347,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
                  * Get the username and password inserted by the user, create an
                  * authentic user, then start the login process.
                  */
-                username = mBinding.editTextUniversityMail.getText().toString();
-                String password = mBinding.editTextPassword.getText().toString();
+                username = mBinding.usernameTextInputLayout.getEditText().getText().toString();
+                String password = mBinding.passwordTextInputLayout.getEditText().getText().toString();
                 User temp_user = new User(username, password);
                 temp_user.setFake(false);
 
@@ -405,16 +397,10 @@ public class LoginActivity extends AuthAppCompatActivity implements
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
     private void getAccountPermission() {
         if (EasyPermissions.hasPermissions(this, android.Manifest.permission.GET_ACCOUNTS)) {
-            if (!TextUtils.isEmpty(mBinding.editTextPassword.getText())){
-                Snackbar.make(mBinding.loginView, R.string.permissions_granted, Snackbar.LENGTH_LONG)
-                        .setAction(R.string.retry, v -> attemptLogin()).show();
-            }
-            else {
-                Snackbar.make(
-                        mBinding.loginView,
-                        R.string.permissions_granted,
-                        Snackbar.LENGTH_LONG).show();
-            }
+            Snackbar.make(
+                    mBinding.loginView,
+                    R.string.permissions_granted,
+                    Snackbar.LENGTH_LONG).show();
         } else {
             // Request the GET_ACCOUNTS permission via a user dialog
             EasyPermissions.requestPermissions(

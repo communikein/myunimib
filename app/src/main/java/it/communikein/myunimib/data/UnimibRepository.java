@@ -223,10 +223,10 @@ public class UnimibRepository {
         return mUnimibDao.getBookletEntry(adsceId);
     }
 
-    public EnrolledExam getEnrolledExam(ExamID examID) {
+    public LiveData<EnrolledExam> getEnrolledExam(ExamID examID) {
         initializeData();
 
-        return mUnimibDao.getEnrolledExam(examID.getAdsceId(), examID.getAppId(),
+        return mUnimibDao.getObservableEnrolledExam(examID.getAdsceId(), examID.getAppId(),
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 

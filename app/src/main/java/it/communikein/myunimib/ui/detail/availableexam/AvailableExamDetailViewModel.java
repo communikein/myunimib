@@ -10,14 +10,14 @@ import it.communikein.myunimib.data.database.ExamID;
 
 public class AvailableExamDetailViewModel extends ViewModel {
 
-    private final LiveData<AvailableExam> mData;
+    private final LiveData<AvailableExam> exam;
 
     public AvailableExamDetailViewModel(UnimibRepository repository, ExamID examID) {
-        mData = repository.getAvailableExam(examID);
+        exam = repository.getAvailableExam(examID);
     }
 
     public LiveData<AvailableExam> getExam() {
-        return mData;
+        return exam;
     }
 
 }

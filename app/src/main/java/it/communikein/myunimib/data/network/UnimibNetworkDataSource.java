@@ -15,6 +15,7 @@ import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
+import com.google.firebase.crash.FirebaseCrash;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -371,6 +372,7 @@ public class UnimibNetworkDataSource {
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
 
             if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
+                FirebaseCrash.log(html);
                 Document doc = Jsoup.parse(html);
                 Elements els = doc.select("div#esse3old table.detail_table tr");
                 // Rimuovi la riga dell'intestazione
@@ -429,7 +431,7 @@ public class UnimibNetworkDataSource {
             Log.i(LOG_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG, html);
+            Utils.saveBugReport(e, LOG_TAG);
         }
 
         return null;
@@ -451,6 +453,7 @@ public class UnimibNetworkDataSource {
 
             // Se l'utente è autenticato
             if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
+                FirebaseCrash.log(html);
                 Document doc = Jsoup.parse(html);
                 Elements rows = doc.select("table#app-tabella_appelli tbody tr");
 
@@ -492,7 +495,7 @@ public class UnimibNetworkDataSource {
             Log.i(LOG_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG, html);
+            Utils.saveBugReport(e, LOG_TAG);
         }
 
         return null;
@@ -514,6 +517,7 @@ public class UnimibNetworkDataSource {
 
             // Se l'utente è autenticato
             if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
+                FirebaseCrash.log(html);
                 Document doc = Jsoup.parse(html);
                 Elements rows = doc.select("div#esse3old table.detail_table");
 
@@ -554,7 +558,7 @@ public class UnimibNetworkDataSource {
             Log.i(LOG_TAG, "SOCKET_TIMEOUT");
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG, html);
+            Utils.saveBugReport(e, LOG_TAG);
         }
 
         return null;

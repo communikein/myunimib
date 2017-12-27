@@ -27,7 +27,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 
-import it.communikein.myunimib.AppExecutors;
+import it.communikein.myunimib.BR;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.ExamID;
@@ -59,8 +59,16 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_enrolled_exam_details);
 
         ExamID examID = loadData();
-        if (examID != null)
-            initUI(examID);
+
+        EnrolledExamViewModelFactory factory = InjectorUtils
+                .provideEnrolledExamViewModelFactory(this, examID);
+        mViewModel = ViewModelProviders.of(this, factory)
+                .get(EnrolledExamDetailViewModel.class);
+
+        mBinding.setLifecycleOwner(this);
+        mBinding.setVariable(BR.viewModel, mViewModel);
+
+        if (examID != null) initUI();
     }
 
     private ExamID loadData() {
@@ -76,7 +84,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
         return null;
     }
 
-    private void initUI(final ExamID examID) {
+    private void initUI() {
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
 
@@ -84,14 +92,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
         initToolbar();
         initFab();
 
-        AppExecutors.getInstance().diskIO().execute(() -> {
-            EnrolledExamViewModelFactory factory = InjectorUtils
-                    .provideEnrolledExamViewModelFactory(this, examID);
-            mViewModel = ViewModelProviders.of(this, factory)
-                    .get(EnrolledExamDetailViewModel.class);
-
-            updateUI(mViewModel.getExam());
-        });
+        mViewModel.getExam().observe(this, this::updateUI);
     }
 
     private void initMap() {
@@ -110,19 +111,11 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
     private void initFab(){
         mBinding.examCertificateFab.setBackgroundTintList(ColorStateList.valueOf(
                 ContextCompat.getColor(this, R.color.colorAccent)));
-        mBinding.examCertificateFab.setVisibility(View.INVISIBLE);
     }
 
 
     private void updateUI(EnrolledExam exam) {
         if (exam != null) {
-            mBinding.examCertificateFab.setVisibility(View.VISIBLE);
-
-            mBinding.examLocationTextview.setText(exam.printLocation());
-            mBinding.examDateTextview.setText(exam.printDateTime(this));
-            mBinding.examDescriptionTextview.setText(exam.getDescription());
-            mBinding.examTeachersTextview.setText(exam.printTeachers());
-
             updateMap(exam);
             updateToolbar(exam);
             updateFab(exam);
@@ -186,7 +179,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
 
-        updateMap(mViewModel.getExam());
+        updateMap(mViewModel.getExam().getValue());
     }
 
 
@@ -197,7 +190,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
             case LOADER_CERTIFICATE_ID:
                 toggleLoading(true);
 
-                return new S3Helper.CertificateLoader(this, mViewModel.getExam());
+                return new S3Helper.CertificateLoader(this, mViewModel.getExam().getValue());
 
             default:
                 throw new RuntimeException("Loader Not Implemented: " + id);
@@ -210,7 +203,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
 
         switch (loader.getId()) {
             case LOADER_CERTIFICATE_ID:
-                handleDownloadCertificate(mViewModel.getExam());
+                handleDownloadCertificate(mViewModel.getExam().getValue());
                 break;
 
             default:

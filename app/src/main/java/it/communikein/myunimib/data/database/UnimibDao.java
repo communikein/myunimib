@@ -75,6 +75,10 @@ public interface UnimibDao {
 
     @Query("SELECT * FROM enrolled_exams WHERE adsceId = :adsceId AND appId = :appId " +
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
+    LiveData<EnrolledExam> getObservableEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
+
+    @Query("SELECT * FROM enrolled_exams WHERE adsceId = :adsceId AND appId = :appId " +
+            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     EnrolledExam getEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
 
