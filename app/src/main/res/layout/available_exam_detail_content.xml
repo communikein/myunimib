@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import
+            type="android.arch.lifecycle.LiveData"
+            alias="LiveData"/>
+        <import
+            type="it.communikein.myunimib.data.database.AvailableExam"
+            alias="AvailableExam"/>
+
+        <variable name="examIncluded"
+            type="LiveData&lt;AvailableExam&gt;" />
+    </data>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/activity_vertical_margin"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context=".ui.detail.availableexam.AvailableExamDetailActivity"
+        tools:showIn="@layout/activity_available_exam_details">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.constraint.Guideline
+                android:id="@+id/horizontal_middle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <TextView
+                android:id="@+id/exam_begin_enrollment_label"
+                style="@style/TextLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="@string/label_exam_begin_enrollment"
+                app:layout_constraintEnd_toEndOf="@id/horizontal_middle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/exam_begin_enrollment_textview"
+                style="@style/TextContent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="start"
+                android:text="@{examIncluded.printFriendlyBeginDate(context)}"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toStartOf="@id/horizontal_middle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/exam_begin_enrollment_label"
+                tools:text="@string/holder_exam_begin_enrollment" />
+
+            <TextView
+                android:id="@+id/exam_end_enrollment_label"
+                style="@style/TextLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@string/label_exam_end_enrollment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/horizontal_middle"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/exam_end_enrollment_textview"
+                style="@style/TextContent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="end"
+                android:text="@{examIncluded.printFriendlyEndDate(context)}"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/horizontal_middle"
+                app:layout_constraintTop_toBottomOf="@id/exam_end_enrollment_label"
+                tools:text="@string/holder_exam_end_enrollment" />
+
+            <TextView
+                android:id="@+id/exam_date_label"
+                style="@style/TextLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/label_exam_date"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/exam_begin_enrollment_textview" />
+
+            <TextView
+                android:id="@+id/exam_date_textview"
+                style="@style/TextContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@{examIncluded.printFriendlyDate(context)}"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/exam_date_label"
+                tools:text="@string/holder_exam_date" />
+
+            <TextView
+                android:id="@+id/exam_description_label"
+                style="@style/TextLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/label_exam_description"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/exam_date_textview" />
+
+            <TextView
+                android:id="@+id/exam_description_textview"
+                style="@style/TextContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@{examIncluded.getDescription()}"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/exam_description_label"
+                tools:text="@string/holder_exam_description" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</layout>

@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,10 @@ public class FragmentAppCompatActivity extends FragmentActivity {
 
     public ActionBar getSupportActionBar() {
         return getDelegate().getSupportActionBar();
+    }
+
+    public void setSupportActionBar(Toolbar toolbar) {
+        getDelegate().setSupportActionBar(toolbar);
     }
 
     @Override

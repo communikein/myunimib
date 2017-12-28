@@ -13,7 +13,6 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -56,7 +55,7 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
                 .get(AvailableExamDetailViewModel.class);
 
         mBinding.setLifecycleOwner(this);
-        mBinding.setVariable(BR.viewModel, mViewModel);
+        mBinding.setExam(mViewModel.getExam());
 
         if (examID != null) initUI();
     }
@@ -91,9 +90,9 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
     }
 
     private void initToolbar() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 
@@ -105,11 +104,8 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
     }
 
     private void updateToolbar(AvailableExam exam) {
-        /* Get a reference to the MainActivity ActionBar */
-        ActionBar actionBar = getSupportActionBar();
-        /* If there is an ActionBar, set it's title */
-        if (actionBar != null && exam != null)
-            actionBar.setTitle(exam.getName());
+        if (exam != null)
+            mBinding.toolbarLayout.setTitle(exam.getName());
     }
 
     private void updateFab() {
@@ -163,17 +159,17 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
     public void onEnrollmentUpdate(int status) {
         switch (status) {
             case S3Helper.EnrollLoader.STATUS_STARTED:
-                Snackbar.make(mBinding.examDataLayout,
+                Snackbar.make(mBinding.container,
                         "Enrollment started.", Snackbar.LENGTH_LONG).show();
                 break;
 
             case S3Helper.EnrollLoader.STATUS_ENROLLMENT_OK:
-                Snackbar.make(mBinding.examDataLayout,
+                Snackbar.make(mBinding.container,
                         "Enrollment confirmed.", Snackbar.LENGTH_LONG).show();
                 break;
 
             case S3Helper.EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
-                Snackbar.make(mBinding.examDataLayout,
+                Snackbar.make(mBinding.container,
                         "Certificate downloaded.", Snackbar.LENGTH_LONG)
                         .setAction(R.string.open, v -> showCertificate())
                         .show();
@@ -191,12 +187,12 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
                 break;
 
             case S3Helper.EnrollLoader.STATUS_ERROR_CERTIFICATE:
-                Snackbar.make(mBinding.examDataLayout,
+                Snackbar.make(mBinding.container,
                         "ERROR: certificate not found.", Snackbar.LENGTH_LONG).show();
                 break;
 
             case S3Helper.EnrollLoader.STATUS_ERROR_GENERAL:
-                Snackbar.make(mBinding.examDataLayout,
+                Snackbar.make(mBinding.container,
                         "ERROR: general.", Snackbar.LENGTH_LONG).show();
                 break;
         }

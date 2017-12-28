@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -51,6 +52,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
 
     //* Might be null if Google Play services APK is not available. */
     private GoogleMap mMap = null;
+    private SupportMapFragment mMapFragment = null;
     private ProgressDialog progress;
 
     @Override
@@ -59,16 +61,15 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_enrolled_exam_details);
 
         ExamID examID = loadData();
-
         EnrolledExamViewModelFactory factory = InjectorUtils
                 .provideEnrolledExamViewModelFactory(this, examID);
         mViewModel = ViewModelProviders.of(this, factory)
                 .get(EnrolledExamDetailViewModel.class);
 
         mBinding.setLifecycleOwner(this);
-        mBinding.setVariable(BR.viewModel, mViewModel);
+        mBinding.setExam(mViewModel.getExam());
 
-        if (examID != null) initUI();
+        initUI();
     }
 
     private ExamID loadData() {
@@ -97,15 +98,17 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
 
     private void initMap() {
         // Try to obtain the map from the SupportMapFragment.
-        SupportMapFragment mMap = ((SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.exam_map));
-        mMap.getMapAsync(this);
+        mMapFragment = ((SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map));
+        if (mMapFragment.getView() != null)
+            mMapFragment.getView().setVisibility(View.INVISIBLE);
+        mMapFragment.getMapAsync(this);
     }
 
     private void initToolbar() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void initFab(){
@@ -123,41 +126,44 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
     }
 
     private void updateMap(EnrolledExam exam) {
-        if (mMap != null) {
-            LatLng coords = new LatLng(0, 0);
+        if (mMapFragment.getView() != null) {
 
-            String building = getString(R.string.error_exam_missing_room);
-            int zoom = 0;
-            try {
-                if (exam != null) {
+            if (exam == null ||
+                    (TextUtils.isEmpty(exam.getBuilding()) && TextUtils.isEmpty(exam.getRoom()))) {
+                mMapFragment.getView().setVisibility(View.INVISIBLE);
+            }
+            else if (mMap != null) {
+                mMapFragment.getView().setVisibility(View.VISIBLE);
+
+                LatLng coords;
+                String building;
+                int zoom;
+                try {
                     building = exam.getBuilding().substring(0, exam.getBuilding().indexOf("-")).trim();
 
                     coords = UniversityUtils.getLatLongBuilding(building.toLowerCase());
-                    zoom = 16;
+                    zoom = 14;
+                } catch (Exception ex) {
+                    building = getString(R.string.error_exam_missing_room);
+                    coords = new LatLng(0, 0);
+                    zoom = 0;
                 }
-            } catch (Exception ex) {
-                building = getString(R.string.error_exam_missing_room);
-                coords = new LatLng(0, 0);
-                zoom = 0;
+
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(coords)
+                        .title(building.toUpperCase());
+
+                CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(), zoom);
+
+                mMap.addMarker(markerOptions);
+                mMap.moveCamera(cu);
             }
-
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(coords)
-                    .title(building.toUpperCase());
-
-            CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(), zoom);
-
-            mMap.addMarker(markerOptions);
-            mMap.moveCamera(cu);
         }
     }
 
     private void updateToolbar(EnrolledExam exam) {
-        /* Get a reference to the MainActivity ActionBar */
-        ActionBar actionBar = getSupportActionBar();
-        /* If there is an ActionBar, set it's title */
-        if (actionBar != null && exam != null)
-            actionBar.setTitle(exam.getName());
+        if (exam != null)
+            mBinding.toolbarLayout.setTitle(exam.getName());
     }
 
     private void updateFab(EnrolledExam exam) {

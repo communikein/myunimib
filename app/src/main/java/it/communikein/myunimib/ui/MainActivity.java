@@ -92,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements
         int navId = getNavIdFromFragmentTag(FRAGMENT_SELECTED_TAG);
         mBinding.navigation.setSelectedItemId(navId);
 
+        setSupportActionBar(mBinding.toolbar);
+
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.label_logging_out));
         progressDialog.setCancelable(false);

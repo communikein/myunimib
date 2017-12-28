@@ -6,7 +6,7 @@
     <string name="content_authority" translatable="false">it.communikein.myunimib</string>
     <string name="file_provider_authority" translatable="false">it.communikein.myunimib.fileprovider</string>
     <string name="asset_statements" translatable="false">[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"web\",\n    \"site\": \"https://communikein.github.io\",\n  }\n}]</string>
-    
+
     <string name="channel_booklet_id">it.communikein.myunimib.booklet</string>
     <string name="channel_booklet_name">Booklet</string>
     <string name="channel_booklet_content_changes">Changes in the booklet detected.</string>
@@ -64,6 +64,9 @@
     <string name="error_generic_exception">Error generic.</string>
 
     <string name="terms_not_checked">Please, accept the terms before using this service</string>
+
+    <string name="permissions_granted">Thanks for the trust ;)</string>
+    <string name="error_permission_accounts_necessary">I need this permission to create an account :(</string>
     <!-- END login -->
 
     <!-- Strings related to logout -->
@@ -134,6 +137,9 @@
 
     <string name="label_exam_end_enrollment">ENROLLMENT ENDS</string>
     <string name="holder_exam_end_enrollment">Fri, 16 November</string>
+
+    <string name="error_exam_missing_room">No room info available</string>
+    <string name="error_exam_missing_location">No location info available</string>
     <!-- END exam detail activity -->
 
     <!-- Strings related to misc. -->
@@ -144,6 +150,9 @@
     <string name="action_go">Go</string>
     <string name="action_ok">OK</string>
     <string name="open">Open</string>
+    <string name="retry">Retry</string>
+
+    <string name="error_no_internet">No internet available :(</string>
     <!-- END misc. -->
 
     <!-- Strings related to enrollment -->
@@ -155,18 +164,15 @@
     <string name="enrollment_completed_info">You are enrolled in this exam. To be sure, I\'ve downloaded a certificate of your enrollment, do you want to see it?</string>
     <string name="enrollment_not_completed">Enrollment not completed.</string>
     <string name="enrolled_exam_certificate_downloaded">Certificate downloaded</string>
+
+    <string name="error_enrolled_exam_missing">Enrolled exam\'s info missing</string>
     <!-- END enrollment -->
 
-    <string name="permissions_granted">Thanks for the trust ;)</string>
-    <string name="retry">Retry</string>
-    <string name="error_permission_accounts_necessary">I need this permission to create an account :(</string>
-    <string name="error_no_internet">No internet available :(</string>
 
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
-    <string name="error_exam_missing_room">No room info available</string>
-    <string name="error_enrolled_exam_missing">Enrolled exam\'s info missing</string>
-    <string name="title_activity_maps">Map</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_fake_login">Try the app</string>
+    <string name="title_activity_maps">Map</string>
+
 </resources>

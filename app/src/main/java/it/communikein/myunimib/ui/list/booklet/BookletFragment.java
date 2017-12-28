@@ -167,7 +167,5 @@ public class BookletFragment extends Fragment implements
     }
 
     @Override
-    public void onListItemClick(int adsce_id) {
-        Snackbar.make(mBinding.rvList, "CLICKED", Snackbar.LENGTH_LONG).show();
-    }
+    public void onListItemClick(int adsce_id) {}
 }

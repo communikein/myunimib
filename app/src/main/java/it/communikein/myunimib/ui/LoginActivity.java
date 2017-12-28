@@ -18,6 +18,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -152,9 +153,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
         progress.setMessage(getString(R.string.label_logging_in));
         progress.setCancelable(false);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setTitle(R.string.title_login);
+        mBinding.toolbar.setTitle(R.string.title_login);
+        setSupportActionBar(mBinding.toolbar);
     }
 
     private void handleIntent(Intent intent) {

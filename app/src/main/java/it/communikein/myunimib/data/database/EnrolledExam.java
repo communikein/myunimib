@@ -3,6 +3,8 @@ package it.communikein.myunimib.data.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
+import android.content.Context;
+import android.text.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,6 +13,8 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import it.communikein.myunimib.R;
 
 @Entity(tableName = "enrolled_exams", primaryKeys = {"adsceId", "appId", "attDidEsaId", "cdsEsaId"})
 public class EnrolledExam extends Exam {
@@ -144,20 +148,21 @@ public class EnrolledExam extends Exam {
 
 
     @Ignore
-    public String printLocation(){
-        if (!getRoom().equals("")) {
-            String ris = "Milano, ";
+    public String printLocation(Context context){
+        String ris = "Milano, " + getBuilding();
 
+        if (TextUtils.isEmpty(getBuilding()) && TextUtils.isEmpty(getRoom()))
+            return context.getString(R.string.error_exam_missing_location);
+
+        if (!TextUtils.isEmpty(getRoom())) {
             try {
-                ris = ris + getBuilding() + ", " + getRoom().substring(0, getRoom().indexOf("-"));
+                ris += ", " + getRoom().substring(0, getRoom().indexOf("-"));
             } catch (Exception e) {
-                ris = ris + getBuilding() + ", " + getRoom();
+                ris += ", " + getRoom();
             }
-
-            return ris;
         }
-        else
-            return "";
+
+        return ris;
     }
 
 
