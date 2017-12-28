@@ -19,6 +19,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.crash.FirebaseCrash;
+
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.databinding.ActivityMainBinding;

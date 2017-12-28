@@ -30,6 +30,8 @@ public class UnimibRepository {
     private MutableLiveData<Integer> mModifiedAvailableExamsCount;
     private MutableLiveData<Integer> mModifiedEnrolledExamsCount;
 
+
+
     private UnimibRepository(UnimibDao unimibDao,
                              UnimibNetworkDataSource unimibNetworkDataSource,
                                AppExecutors executors) {
@@ -44,6 +46,11 @@ public class UnimibRepository {
         LiveData<List<BookletEntry>> bookletOnline =
                 mUnimibNetworkDataSource.getOnlineBooklet();
         bookletOnline.observeForever(newOnlineData -> mExecutors.diskIO().execute(() -> {
+            if (newOnlineData != null)
+                Log.d(LOG_TAG, "Repository observer notified. Found " + newOnlineData.size() + " elements.");
+            else
+                Log.d(LOG_TAG, "Repository observer notified. Found NULL elements.");
+
             int newExams = 0;
             if (isBookletEmpty() && newOnlineData != null) {
                 mUnimibDao.bulkInsertBooklet(newOnlineData);
@@ -74,8 +81,12 @@ public class UnimibRepository {
         LiveData<List<AvailableExam>> availableExamsOnline =
                 mUnimibNetworkDataSource.getOnlineAvailableExams();
         availableExamsOnline.observeForever(newOnlineData -> mExecutors.diskIO().execute(() -> {
-            int newExams = 0;
+            if (newOnlineData != null)
+                Log.d(LOG_TAG, "Repository observer notified. Found " + newOnlineData.size() + " elements.");
+            else
+                Log.d(LOG_TAG, "Repository observer notified. Found NULL elements.");
 
+            int newExams = 0;
             if (isAvailableExamsEmpty() && newOnlineData != null) {
                 mUnimibDao.bulkInsertAvailableExams(newOnlineData);
                 newExams = newOnlineData.size();
@@ -109,8 +120,12 @@ public class UnimibRepository {
         LiveData<List<EnrolledExam>> enrolledExamsOnline =
                 mUnimibNetworkDataSource.getOnlineEnrolledExams();
         enrolledExamsOnline.observeForever(newOnlineData -> mExecutors.diskIO().execute(() -> {
-            int newExams = 0;
+            if (newOnlineData != null)
+                Log.d(LOG_TAG, "Repository observer notified. Found " + newOnlineData.size() + " elements.");
+            else
+                Log.d(LOG_TAG, "Repository observer notified. Found NULL elements.");
 
+            int newExams = 0;
             if (isEnrolledExamsEmpty() && newOnlineData != null) {
                 mUnimibDao.bulkInsertEnrolledExams(newOnlineData);
                 newExams = newOnlineData.size();
@@ -214,6 +229,19 @@ public class UnimibRepository {
         initializeData();
 
         return mUnimibDao.getEnrolledExams();
+    }
+
+
+    public LiveData<Boolean> getBookletLoading() {
+        return mUnimibNetworkDataSource.getBookletLoading();
+    }
+
+    public LiveData<Boolean> getAvailableExamsLoading() {
+        return mUnimibNetworkDataSource.getAvailableExamsLoading();
+    }
+
+    public LiveData<Boolean> getEnrolledExamsLoading() {
+        return mUnimibNetworkDataSource.getEnrolledExamsLoading();
     }
 
 

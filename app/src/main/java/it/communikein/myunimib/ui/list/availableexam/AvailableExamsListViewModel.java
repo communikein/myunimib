@@ -16,12 +16,14 @@ class AvailableExamsListViewModel extends ViewModel {
 
     private final LiveData<List<AvailableExam>> mData;
     private final MutableLiveData<Integer> mChanges;
+    private final LiveData<Boolean> mLoading;
 
     public AvailableExamsListViewModel(UnimibRepository repository) {
         mRepository = repository;
 
         mData = repository.getCurrentAvailableExams();
         mChanges = repository.getModifiedAvailableExamsCount();
+        mLoading = repository.getAvailableExamsLoading();
     }
 
     public LiveData<List<AvailableExam>> getAvailableExams() {
@@ -30,6 +32,10 @@ class AvailableExamsListViewModel extends ViewModel {
 
     public LiveData<Integer> getModifiedAvailableExamsCount() {
         return mChanges;
+    }
+
+    public LiveData<Boolean> getAvailableExamsLoading() {
+        return mLoading;
     }
 
     public void clearChanges() {

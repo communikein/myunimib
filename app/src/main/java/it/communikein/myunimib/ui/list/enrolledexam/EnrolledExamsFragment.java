@@ -51,7 +51,7 @@ public class EnrolledExamsFragment extends Fragment implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        /* Inflate the layout for this fragment */
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_exams, container, false);
 
         /*
@@ -75,6 +75,9 @@ public class EnrolledExamsFragment extends Fragment implements
          */
         mBinding.rvList.setHasFixedSize(true);
 
+        /* Show data downloading */
+        mBinding.swipeRefresh.setOnRefreshListener(this);
+
         return mBinding.getRoot();
     }
 
@@ -88,19 +91,20 @@ public class EnrolledExamsFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
+        if (getActivity() != null && !UserUtils.getUser(getActivity()).isFake()) {
             /* Create a new EnrolledExamAdapter. It will be responsible for displaying the list's items */
             final EnrolledExamAdapter mExamsAdapter = new EnrolledExamAdapter(this);
 
             EnrolledExamsViewModelFactory factory = InjectorUtils
-                    .provideEnrolledExamsViewModelFactory(this.getContext());
+                    .provideEnrolledExamsViewModelFactory(getActivity().getApplication());
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(EnrolledExamsListViewModel.class);
 
-            mViewModel.getEnrolledExams().observe(this, list -> {
-                mBinding.swipeRefresh.setRefreshing(true);
-                mExamsAdapter.setList((ArrayList<EnrolledExam>) list);
-            });
+            mViewModel.getEnrolledExamsLoading().observe(this,
+                    loading -> mBinding.swipeRefresh.setRefreshing(loading));
+
+            mViewModel.getEnrolledExams().observe(this,
+                    list -> mExamsAdapter.setList((ArrayList<EnrolledExam>) list));
 
             mViewModel.getModifiedEnrolledExamsCount().observe(this, count -> {
                 if (getActivity() != null && count != null && count > 0) {

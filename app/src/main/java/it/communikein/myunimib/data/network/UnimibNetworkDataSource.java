@@ -81,6 +81,10 @@ public class UnimibNetworkDataSource {
     private final MutableLiveData<List<AvailableExam>> mDownloadedAvailableExams;
     private final MutableLiveData<List<EnrolledExam>> mDownloadedEnrolledExams;
 
+    private final MutableLiveData<Boolean> mBookletLoading;
+    private final MutableLiveData<Boolean> mAvailableExamsLoading;
+    private final MutableLiveData<Boolean> mEnrolledExamsLoading;
+
     private UnimibNetworkDataSource(Context context, AppExecutors executors) {
         mContext = context;
         mExecutors = executors;
@@ -88,6 +92,10 @@ public class UnimibNetworkDataSource {
         mDownloadedBooklet = new MutableLiveData<>();
         mDownloadedAvailableExams = new MutableLiveData<>();
         mDownloadedEnrolledExams = new MutableLiveData<>();
+
+        mBookletLoading = new MutableLiveData<>();
+        mAvailableExamsLoading = new MutableLiveData<>();
+        mEnrolledExamsLoading = new MutableLiveData<>();
     }
 
     /**
@@ -104,6 +112,7 @@ public class UnimibNetworkDataSource {
         return sInstance;
     }
 
+
     public LiveData<List<BookletEntry>> getOnlineBooklet() {
         return mDownloadedBooklet;
     }
@@ -115,6 +124,20 @@ public class UnimibNetworkDataSource {
     public LiveData<List<EnrolledExam>> getOnlineEnrolledExams() {
         return mDownloadedEnrolledExams;
     }
+
+
+    public LiveData<Boolean> getBookletLoading() {
+        return mBookletLoading;
+    }
+
+    public LiveData<Boolean> getAvailableExamsLoading() {
+        return mAvailableExamsLoading;
+    }
+
+    public LiveData<Boolean> getEnrolledExamsLoading() {
+        return mEnrolledExamsLoading;
+    }
+
 
     /**
      * Starts an intent service to fetch the weather.
@@ -186,7 +209,7 @@ public class UnimibNetworkDataSource {
 
         // Schedule the Job with the dispatcher
         dispatcher.schedule(syncSunshineJob);
-        Log.d(LOG_TAG, "Job scheduled");
+        Log.d(LOG_TAG, "Booklet job scheduled");
     }
 
     public void scheduleRecurringFetchAvailableExamsSync() {
@@ -235,7 +258,7 @@ public class UnimibNetworkDataSource {
 
         // Schedule the Job with the dispatcher
         dispatcher.schedule(syncSunshineJob);
-        Log.d(LOG_TAG, "Job scheduled");
+        Log.d(LOG_TAG, "Available exams job scheduled");
     }
 
     public void scheduleRecurringFetchEnrolledExamsSync() {
@@ -284,73 +307,69 @@ public class UnimibNetworkDataSource {
 
         // Schedule the Job with the dispatcher
         dispatcher.schedule(syncSunshineJob);
-        Log.d(LOG_TAG, "Job scheduled");
+        Log.d(LOG_TAG, "Enrolled exams job scheduled");
     }
 
     /**
      * Gets the newest weather
      */
     void fetchBooklet() {
+        mBookletLoading.postValue(true);
         Log.d(LOG_TAG, "Fetch booklet started");
+
         mExecutors.networkIO().execute(() -> {
-            try {
-                ArrayList<BookletEntry> response = downloadBooklet(mContext);
+            ArrayList<BookletEntry> response = downloadBooklet(mContext);
 
-                // As long as there are weather forecasts, update the LiveData storing the most recent
-                // weather forecasts. This will trigger observers of that LiveData, such as the
-                // SunshineRepository.
-                if (response != null && response.size() != 0) {
-                    Log.d(LOG_TAG, "Response not null and has " + response.size() + " values");
+            // As long as there are weather forecasts, update the LiveData storing the most recent
+            // weather forecasts. This will trigger observers of that LiveData, such as the
+            // SunshineRepository.
+            if (response != null && response.size() != 0) {
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " values. Notifying the observers.");
 
-                    mDownloadedBooklet.postValue(response);
-                }
-            } catch (Exception e) {
-                // Server probably invalid
-                e.printStackTrace();
+                mDownloadedBooklet.postValue(response);
             }
+
+            mBookletLoading.postValue(false);
         });
     }
 
     void fetchAvailableExams() {
+        mAvailableExamsLoading.postValue(true);
         Log.d(LOG_TAG, "Fetch available exams started");
+
         mExecutors.networkIO().execute(() -> {
-            try {
-                ArrayList<AvailableExam> response = downloadAvailableExams(mContext);
+            ArrayList<AvailableExam> response = downloadAvailableExams(mContext);
 
-                // As long as there are weather forecasts, update the LiveData storing the most recent
-                // weather forecasts. This will trigger observers of that LiveData, such as the
-                // SunshineRepository.
-                if (response != null && response.size() != 0) {
-                    Log.d(LOG_TAG, "Response not null and has " + response.size() + " values");
+            // As long as there are weather forecasts, update the LiveData storing the most recent
+            // weather forecasts. This will trigger observers of that LiveData, such as the
+            // SunshineRepository.
+            if (response != null && response.size() != 0) {
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " values. Notifying the observers.");
 
-                    mDownloadedAvailableExams.postValue(response);
-                }
-            } catch (Exception e) {
-                // Server probably invalid
-                e.printStackTrace();
+                mDownloadedAvailableExams.postValue(response);
             }
+
+            mAvailableExamsLoading.postValue(false);
         });
     }
 
     void fetchEnrolledExams() {
+        mEnrolledExamsLoading.postValue(true);
         Log.d(LOG_TAG, "Fetch enrolled exams started");
+
         mExecutors.networkIO().execute(() -> {
-            try {
+            ArrayList<EnrolledExam> response = downloadEnrolledExams(mContext);
 
-                ArrayList<EnrolledExam> response = downloadEnrolledExams(mContext);
+            // As long as there are weather forecasts, update the LiveData storing the most recent
+            // weather forecasts. This will trigger observers of that LiveData, such as the
+            // SunshineRepository.
+            if (response != null && response.size() != 0) {
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " values. Notifying the observers.");
 
-                // As long as there are weather forecasts, update the LiveData storing the most recent
-                // weather forecasts. This will trigger observers of that LiveData, such as the
-                // SunshineRepository.
-                if (response != null && response.size() != 0) {
-                    Log.d(LOG_TAG, "Response not null and has " + response.size() + " values");
-
-                    mDownloadedEnrolledExams.postValue(response);
-                }
-            } catch (Exception e) {
-                // Server probably invalid
-                e.printStackTrace();
+                mDownloadedEnrolledExams.postValue(response);
             }
+
+            mEnrolledExamsLoading.postValue(false);
         });
     }
 
@@ -358,6 +377,7 @@ public class UnimibNetworkDataSource {
 
 
     private static ArrayList<BookletEntry> downloadBooklet(Context context) {
+        Log.d(LOG_TAG, "Booklet download started.");
         if (context == null)
             return null;
 
@@ -425,19 +445,30 @@ public class UnimibNetworkDataSource {
                     booklet.add(newExam);
                 }
 
+                Log.d(LOG_TAG, "Booklet download completed. List size: " + booklet.size());
+
                 return booklet;
             }
         } catch (SocketTimeoutException e) {
-            Log.i(LOG_TAG, "SOCKET_TIMEOUT");
+            Log.e(LOG_TAG, "Booklet: SOCKET_TIMEOUT");
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(LOG_TAG, "Booklet index out of bound: " + e.getMessage());
+            Log.e(LOG_TAG, html);
+            Utils.saveBugReport(e, LOG_TAG);
         } catch (Exception e) {
-            Log.e(LOG_TAG, e.getMessage());
+            Log.e(LOG_TAG, "Booklet: " + e.getMessage());
+            Log.e(LOG_TAG, html);
             Utils.saveBugReport(e, LOG_TAG);
         }
+
+        Log.d(LOG_TAG, "Booklet download completed. ERROR.");
 
         return null;
     }
 
     private static ArrayList<AvailableExam> downloadAvailableExams(Context context) {
+        Log.d(LOG_TAG, "Available exams download started.");
+
         if (context == null)
             return null;
 
@@ -489,19 +520,26 @@ public class UnimibNetworkDataSource {
                     exams.add(exam);
                 }
 
+                Log.d(LOG_TAG, "Available exams download completed. List size: " + exams.size());
+
                 return exams;
             }
         } catch (SocketTimeoutException e){
-            Log.i(LOG_TAG, "SOCKET_TIMEOUT");
+            Log.i(LOG_TAG, "Available exams: SOCKET_TIMEOUT");
         } catch (Exception e) {
-            Log.e(LOG_TAG, e.getMessage());
+            Log.e(LOG_TAG, "Available exams: " + e.getMessage());
+            Log.e(LOG_TAG, html);
             Utils.saveBugReport(e, LOG_TAG);
         }
+
+        Log.d(LOG_TAG, "Available exams download completed. ERROR.");
 
         return null;
     }
 
     private static ArrayList<EnrolledExam> downloadEnrolledExams(Context context) {
+        Log.d(LOG_TAG, "Enrolled exams download started.");
+
         if (context == null)
             return null;
 
@@ -552,14 +590,19 @@ public class UnimibNetworkDataSource {
                     exams.add(newExam);
                 }
 
+                Log.d(LOG_TAG, "Enrolled exams download completed. List size: " + exams.size());
+
                 return exams;
             }
         } catch (SocketTimeoutException e){
-            Log.i(LOG_TAG, "SOCKET_TIMEOUT");
+            Log.i(LOG_TAG, "Enrolled exams: SOCKET_TIMEOUT");
         } catch (Exception e) {
-            Log.e(LOG_TAG, e.getMessage());
+            Log.e(LOG_TAG, "Enrolled exams: " + e.getMessage());
+            Log.e(LOG_TAG, html);
             Utils.saveBugReport(e, LOG_TAG);
         }
+
+        Log.d(LOG_TAG, "Enrolled exams download completed. ERROR.");
 
         return null;
     }
@@ -674,9 +717,12 @@ public class UnimibNetworkDataSource {
                 }
             }
 
-            if (html != null)
+            if (!TextUtils.isEmpty(html)) {
                 result.putString(PARAM_KEY_HTML, html);
-            result.putInt(PARAM_KEY_RESPONSE, s3_response);
+                result.putInt(PARAM_KEY_RESPONSE, s3_response);
+            }
+            else
+                result.putInt(PARAM_KEY_RESPONSE, -1);
         }
 
         return result;

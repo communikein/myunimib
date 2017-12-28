@@ -725,33 +725,36 @@ public class S3Helper {
                 int s3_response = result.getInt(UnimibNetworkDataSource.PARAM_KEY_RESPONSE);
                 String html = result.getString(UnimibNetworkDataSource.PARAM_KEY_HTML);
 
-                Document doc = Jsoup.parse(html);
-                Element element = doc.select("#app-text_esito_pren_msg").first();
-                String responseText = element.text().toLowerCase();
-
-                if (!TextUtils.isEmpty(responseText) &&
-                        responseText.contains("non risulta compilato il questionario")) {
-                    mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_QUESTIONNAIRE_TO_FILL);
+                if (s3_response == -1 || html == null) {
+                    return false;
                 }
-                else if (responseText.equals("") && s3_response == HttpURLConnection.HTTP_OK){
-                    mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ENROLLMENT_OK);
+                else {
+                    Document doc = Jsoup.parse(html);
+                    Element element = doc.select("#app-text_esito_pren_msg").first();
+                    String responseText = element.text().toLowerCase();
 
-                    InjectorUtils.provideRepository(context).deleteAvailableExam(mExam);
-                    InjectorUtils.provideNetworkDataSource(context)
-                            .startFetchEnrolledExamsService();
-                    InjectorUtils.provideNetworkDataSource(context)
-                            .startFetchAvailableExamsService();
+                    if (!TextUtils.isEmpty(responseText) &&
+                            responseText.contains("non risulta compilato il questionario")) {
+                        mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_QUESTIONNAIRE_TO_FILL);
+                    } else if (responseText.equals("") && s3_response == HttpURLConnection.HTTP_OK) {
+                        mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ENROLLMENT_OK);
 
-                    boolean downloaded = downloadCertificate(mUser, mExam, context);
-                    if (downloaded) {
-                        boolean certFound = mExam.getCertificatePath().exists();
-                        if (certFound)
-                            mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_CERTIFICATE_DOWNLOADED);
+                        InjectorUtils.provideRepository(context).deleteAvailableExam(mExam);
+                        InjectorUtils.provideNetworkDataSource(context)
+                                .startFetchEnrolledExamsService();
+                        InjectorUtils.provideNetworkDataSource(context)
+                                .startFetchAvailableExamsService();
+
+                        boolean downloaded = downloadCertificate(mUser, mExam, context);
+                        if (downloaded) {
+                            boolean certFound = mExam.getCertificatePath().exists();
+                            if (certFound)
+                                mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_CERTIFICATE_DOWNLOADED);
+                        } else
+                            mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_CERTIFICATE);
+
+                        return true;
                     }
-                    else
-                        mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_CERTIFICATE);
-
-                    return true;
                 }
 
             } catch (SocketTimeoutException e) {

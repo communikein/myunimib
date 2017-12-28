@@ -308,7 +308,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
                     showProgress(true);
 
                     getSupportLoaderManager()
-                            .initLoader(LOADER_LOGIN_ID, null, this)
+                            .restartLoader(LOADER_LOGIN_ID, null, this)
                             .forceLoad();
                 }
             }

@@ -51,9 +51,6 @@ public class BookletFragment extends Fragment implements
         /* Inflate the layout for this fragment */
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_exams, container, false);
 
-        /* Show data downloading */
-        mBinding.swipeRefresh.setRefreshing(true);
-
         /*
          * A LinearLayoutManager is responsible for measuring and positioning item views within a
          * RecyclerView into a linear list. This means that it can produce either a horizontal or
@@ -75,6 +72,9 @@ public class BookletFragment extends Fragment implements
          */
         mBinding.rvList.setHasFixedSize(true);
 
+        /* Show data downloading */
+        mBinding.swipeRefresh.setOnRefreshListener(this);
+
         return mBinding.getRoot();
     }
 
@@ -88,20 +88,21 @@ public class BookletFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
+        if (getActivity() != null && !UserUtils.getUser(getActivity()).isFake()) {
 
             /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
             final BookletAdapter mAdapter = new BookletAdapter(this);
 
             BookletViewModelFactory factory = InjectorUtils
-                    .provideBookletViewModelFactory(this.getContext());
+                    .provideBookletViewModelFactory(getActivity().getApplication());
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(BookletViewModel.class);
 
-            mViewModel.getBooklet().observe(this, list -> {
-                mBinding.swipeRefresh.setRefreshing(false);
-                mAdapter.setList((ArrayList<BookletEntry>) list);
-            });
+            mViewModel.getBookletLoading().observe(this,
+                    loading -> mBinding.swipeRefresh.setRefreshing(loading));
+
+            mViewModel.getBooklet().observe(this,
+                    list -> mAdapter.setList((ArrayList<BookletEntry>) list));
 
             mViewModel.getModifiedBookletEntriesCount().observe(this, count -> {
                 if (getActivity() != null && count != null && count > 0) {

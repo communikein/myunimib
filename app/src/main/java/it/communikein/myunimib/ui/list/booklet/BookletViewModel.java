@@ -16,12 +16,14 @@ class BookletViewModel extends ViewModel {
 
     private final LiveData<List<BookletEntry>> mBooklet;
     private final MutableLiveData<Integer> mChanges;
+    private final LiveData<Boolean> mLoading;
 
     public BookletViewModel(UnimibRepository repository) {
         mRepository = repository;
 
         mBooklet = mRepository.getCurrentBooklet();
         mChanges = mRepository.getModifiedBookletEntriesCount();
+        mLoading = mRepository.getBookletLoading();
     }
 
     public LiveData<List<BookletEntry>> getBooklet() {
@@ -30,6 +32,10 @@ class BookletViewModel extends ViewModel {
 
     public LiveData<Integer> getModifiedBookletEntriesCount() {
         return mChanges;
+    }
+
+    public LiveData<Boolean> getBookletLoading() {
+        return mLoading;
     }
 
     public void clearChanges() {

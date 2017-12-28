@@ -68,11 +68,8 @@ public class AvailableExamsFragment extends Fragment implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        /* Inflate the layout for this fragment */
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_exams, container, false);
-
-        /* Show data downloading */
-        mBinding.swipeRefresh.setRefreshing(true);
 
         /*
          * A LinearLayoutManager is responsible for measuring and positioning item views within a
@@ -95,6 +92,9 @@ public class AvailableExamsFragment extends Fragment implements
          */
         mBinding.rvList.setHasFixedSize(true);
 
+        /* Show data downloading */
+        mBinding.swipeRefresh.setOnRefreshListener(this);
+
         progress = new ProgressDialog(getActivity());
         progress.setCancelable(false);
 
@@ -111,19 +111,20 @@ public class AvailableExamsFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (!UserUtils.getUser(getActivity()).isFake() && getActivity() != null) {
+        if (getActivity() != null && !UserUtils.getUser(getActivity()).isFake()) {
             /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
             final AvailableExamAdapter mExamsAdapter = new AvailableExamAdapter(this);
 
             AvailableExamsViewModelFactory factory = InjectorUtils
-                    .provideAvailableExamsViewModelFactory(getActivity());
+                    .provideAvailableExamsViewModelFactory(getActivity().getApplication());
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(AvailableExamsListViewModel.class);
 
-            mViewModel.getAvailableExams().observe(this, list -> {
-                mBinding.swipeRefresh.setRefreshing(false);
-                mExamsAdapter.setList((ArrayList<AvailableExam>) list);
-            });
+            mViewModel.getAvailableExamsLoading().observe(this,
+                    loading -> mBinding.swipeRefresh.setRefreshing(loading));
+
+            mViewModel.getAvailableExams().observe(this,
+                    list -> mExamsAdapter.setList((ArrayList<AvailableExam>) list));
 
             mViewModel.getModifiedAvailableExamsCount().observe(this, count -> {
                 if (getActivity() != null && count != null && count > 0) {
