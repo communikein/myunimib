@@ -32,11 +32,11 @@ public class FragmentAppCompatActivity extends FragmentActivity {
         return mDelegate;
     }
 
-    public ActionBar getSupportActionBar() {
+    protected ActionBar getSupportActionBar() {
         return getDelegate().getSupportActionBar();
     }
 
-    public void setSupportActionBar(Toolbar toolbar) {
+    protected void setSupportActionBar(Toolbar toolbar) {
         getDelegate().setSupportActionBar(toolbar);
     }
 

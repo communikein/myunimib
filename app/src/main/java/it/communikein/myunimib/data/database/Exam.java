@@ -82,7 +82,7 @@ public class Exam extends ExamID {
         return date;
     }
 
-    public long getMillis() {
+    private long getMillis() {
         if (getDate() == null) return -1;
         else return getDate().getTime();
     }
@@ -100,7 +100,7 @@ public class Exam extends ExamID {
 
     @Ignore
     @Override
-    public JSONObject toJSON() {
+    JSONObject toJSON() {
         JSONObject obj = new JSONObject();
 
         try {
@@ -145,7 +145,7 @@ public class Exam extends ExamID {
     }
 
     @Ignore
-    public String getCertificateName(){
+    private String getCertificateName(){
         return getName() + " - " + MyunimibDateUtils.dateFile.format(getDate()) + ".pdf";
     }
 

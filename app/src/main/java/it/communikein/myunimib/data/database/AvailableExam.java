@@ -7,7 +7,6 @@ import android.content.Context;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.ContentHandler;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -40,7 +39,7 @@ public class AvailableExam extends Exam {
     }
 
     @Ignore
-    public AvailableExam(JSONObject obj) throws JSONException, NullPointerException, ParseException {
+    public AvailableExam(JSONObject obj) throws JSONException, NullPointerException {
         super(obj);
 
         if (obj.has(ARG_BEGIN_ENROLLMENT))
@@ -55,13 +54,13 @@ public class AvailableExam extends Exam {
     }
 
     @Ignore
-    public long getBeginMillis() {
+    private long getBeginMillis() {
         if (getBeginEnrollment() == null) return -1;
         else return getBeginEnrollment().getTime();
     }
 
     @Ignore
-    public long getEndMillis() {
+    private long getEndMillis() {
         if (getEndEnrollment() == null) return -1;
         else return getEndEnrollment().getTime();
     }

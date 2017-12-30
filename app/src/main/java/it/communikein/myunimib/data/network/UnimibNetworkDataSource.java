@@ -2,6 +2,7 @@ package it.communikein.myunimib.data.network;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.persistence.room.Index;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -200,7 +201,7 @@ public class UnimibNetworkDataSource {
                         SYNC_INTERVAL_SECONDS,
                         SYNC_INTERVAL_SECONDS + SYNC_FLEXTIME_SECONDS))
                 /*
-                 * If a Job with the tag with provided already exists, this new job will replace
+                 * If a Job with the tag provided already exists, this new job will replace
                  * the old one.
                  */
                 .setReplaceCurrent(true)
@@ -249,7 +250,7 @@ public class UnimibNetworkDataSource {
                         SYNC_INTERVAL_SECONDS,
                         SYNC_INTERVAL_SECONDS + SYNC_FLEXTIME_SECONDS))
                 /*
-                 * If a Job with the tag with provided already exists, this new job will replace
+                 * If a Job with the tag provided already exists, this new job will replace
                  * the old one.
                  */
                 .setReplaceCurrent(true)
@@ -298,7 +299,7 @@ public class UnimibNetworkDataSource {
                         SYNC_INTERVAL_SECONDS,
                         SYNC_INTERVAL_SECONDS + SYNC_FLEXTIME_SECONDS))
                 /*
-                 * If a Job with the tag with provided already exists, this new job will replace
+                 * If a Job with the tag provided already exists, this new job will replace
                  * the old one.
                  */
                 .setReplaceCurrent(true)
@@ -324,9 +325,12 @@ public class UnimibNetworkDataSource {
             // weather forecasts. This will trigger observers of that LiveData, such as the
             // SunshineRepository.
             if (response != null && response.size() != 0) {
-                Log.d(LOG_TAG, "Response not null and has " + response.size() + " values. Notifying the observers.");
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " booklet entries. Notifying the observers.");
 
                 mDownloadedBooklet.postValue(response);
+            }
+            else {
+                Log.d(LOG_TAG, "Response either null or has 0 booklet entries. NOT notifying the observers.");
             }
 
             mBookletLoading.postValue(false);
@@ -344,9 +348,12 @@ public class UnimibNetworkDataSource {
             // weather forecasts. This will trigger observers of that LiveData, such as the
             // SunshineRepository.
             if (response != null && response.size() != 0) {
-                Log.d(LOG_TAG, "Response not null and has " + response.size() + " values. Notifying the observers.");
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " available exams. Notifying the observers.");
 
                 mDownloadedAvailableExams.postValue(response);
+            }
+            else {
+                Log.d(LOG_TAG, "Response either null or has 0 available exams. NOT notifying the observers.");
             }
 
             mAvailableExamsLoading.postValue(false);
@@ -364,9 +371,12 @@ public class UnimibNetworkDataSource {
             // weather forecasts. This will trigger observers of that LiveData, such as the
             // SunshineRepository.
             if (response != null && response.size() != 0) {
-                Log.d(LOG_TAG, "Response not null and has " + response.size() + " values. Notifying the observers.");
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " enrolled exams. Notifying the observers.");
 
                 mDownloadedEnrolledExams.postValue(response);
+            }
+            else {
+                Log.d(LOG_TAG, "Response either null or has 0 enrolled exams. NOT notifying the observers.");
             }
 
             mEnrolledExamsLoading.postValue(false);
@@ -382,14 +392,23 @@ public class UnimibNetworkDataSource {
             return null;
 
         User user = UserUtils.getUser(context);
-        String html = null;
+        String html;
         try {
-            // Try to get the private page
+            /* Try to get the private page */
             Bundle result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
                     false, context);
 
             html = result.getString(PARAM_KEY_HTML);
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
+
+            /* If it fails the first time, try once again */
+            if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
+                result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
+                        false, context);
+
+                html = result.getString(PARAM_KEY_HTML);
+                s3_response = result.getInt(PARAM_KEY_RESPONSE);
+            }
 
             if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
                 FirebaseCrash.log(html);
@@ -449,15 +468,21 @@ public class UnimibNetworkDataSource {
 
                 return booklet;
             }
+
+            Log.d(LOG_TAG, "Booklet download completed. ERROR S3 response: " + s3_response);
+            if (html == null)
+                Log.d(LOG_TAG, "Booklet download completed. ERROR html NULL.");
+            else if (html.equals(""))
+                Log.d(LOG_TAG, "Booklet download completed. ERROR html empty.");
+            else
+                Log.d(LOG_TAG, "Booklet download completed. ERROR html: " + html);
         } catch (SocketTimeoutException e) {
             Log.e(LOG_TAG, "Booklet: SOCKET_TIMEOUT");
         } catch (IndexOutOfBoundsException e) {
             Log.e(LOG_TAG, "Booklet index out of bound: " + e.getMessage());
-            Log.e(LOG_TAG, html);
             Utils.saveBugReport(e, LOG_TAG);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Booklet: " + e.getMessage());
-            Log.e(LOG_TAG, html);
+            Log.e(LOG_TAG, "Booklet ERROR message: " + e.getMessage());
             Utils.saveBugReport(e, LOG_TAG);
         }
 
@@ -473,16 +498,24 @@ public class UnimibNetworkDataSource {
             return null;
 
         User user = UserUtils.getUser(context);
-        String html = null;
+        String html;
         try {
-            // Try to get the private page
+            /* Try to get the private page */
             Bundle result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
                     false, context);
 
             html = result.getString(PARAM_KEY_HTML);
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
 
-            // Se l'utente è autenticato
+            /* If it fails the first time, try once again */
+            if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
+                result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
+                        false, context);
+
+                html = result.getString(PARAM_KEY_HTML);
+                s3_response = result.getInt(PARAM_KEY_RESPONSE);
+            }
+
             if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
                 FirebaseCrash.log(html);
                 Document doc = Jsoup.parse(html);
@@ -524,11 +557,21 @@ public class UnimibNetworkDataSource {
 
                 return exams;
             }
+
+            Log.d(LOG_TAG, "Available exams download completed. ERROR S3 response: " + s3_response);
+            if (html == null)
+                Log.d(LOG_TAG, "Available exams download completed. ERROR html NULL.");
+            else if (html.equals(""))
+                Log.d(LOG_TAG, "Available exams download completed. ERROR html empty.");
+            else
+                Log.d(LOG_TAG, "Available exams download completed. ERROR html: " + html);
         } catch (SocketTimeoutException e){
             Log.i(LOG_TAG, "Available exams: SOCKET_TIMEOUT");
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(LOG_TAG, "Available exams index out of bound: " + e.getMessage());
+            Utils.saveBugReport(e, LOG_TAG);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Available exams: " + e.getMessage());
-            Log.e(LOG_TAG, html);
+            Log.e(LOG_TAG, "Available exams ERROR message: " + e.getMessage());
             Utils.saveBugReport(e, LOG_TAG);
         }
 
@@ -544,16 +587,24 @@ public class UnimibNetworkDataSource {
             return null;
 
         User user = UserUtils.getUser(context);
-        String html = null;
+        String html;
         try {
-            // Try to get the private page
+            /* Try to get the private page */
             Bundle result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, null,
                     false, context);
 
             html = result.getString(PARAM_KEY_HTML);
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
 
-            // Se l'utente è autenticato
+            /* If it fails the first time, try once again */
+            if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
+                result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, null,
+                        false, context);
+
+                html = result.getString(PARAM_KEY_HTML);
+                s3_response = result.getInt(PARAM_KEY_RESPONSE);
+            }
+
             if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
                 FirebaseCrash.log(html);
                 Document doc = Jsoup.parse(html);
@@ -594,11 +645,21 @@ public class UnimibNetworkDataSource {
 
                 return exams;
             }
+
+            Log.d(LOG_TAG, "Enrolled exams download completed. ERROR S3 response: " + s3_response);
+            if (html == null)
+                Log.d(LOG_TAG, "Enrolled exams download completed. ERROR html NULL.");
+            else if (html.equals(""))
+                Log.d(LOG_TAG, "Enrolled exams download completed. ERROR html empty.");
+            else
+                Log.d(LOG_TAG, "Enrolled exams download completed. ERROR html: " + html);
         } catch (SocketTimeoutException e){
             Log.i(LOG_TAG, "Enrolled exams: SOCKET_TIMEOUT");
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(LOG_TAG, "Enrolled exams index out of bound: " + e.getMessage());
+            Utils.saveBugReport(e, LOG_TAG);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Enrolled exams: " + e.getMessage());
-            Log.e(LOG_TAG, html);
+            Log.e(LOG_TAG, "Enrolled exams ERROR message: " + e.getMessage());
             Utils.saveBugReport(e, LOG_TAG);
         }
 

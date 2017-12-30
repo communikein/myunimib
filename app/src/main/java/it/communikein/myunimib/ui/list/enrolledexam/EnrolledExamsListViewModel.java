@@ -15,14 +15,12 @@ class EnrolledExamsListViewModel extends ViewModel {
     private final UnimibRepository mRepository;
 
     private final LiveData<List<EnrolledExam>> mData;
-    private final MutableLiveData<Integer> mChanges;
     private final LiveData<Boolean> mLoading;
 
     public EnrolledExamsListViewModel(UnimibRepository repository) {
         mRepository = repository;
 
-        mData = mRepository.getCurrentEnrolledExams();
-        mChanges = mRepository.getModifiedEnrolledExamsCount();
+        mData = mRepository.getObservableCurrentEnrolledExams();
         mLoading = mRepository.getEnrolledExamsLoading();
     }
 
@@ -30,16 +28,8 @@ class EnrolledExamsListViewModel extends ViewModel {
         return mData;
     }
 
-    public LiveData<Integer> getModifiedEnrolledExamsCount() {
-        return mChanges;
-    }
-
     public LiveData<Boolean> getEnrolledExamsLoading() {
         return mLoading;
-    }
-
-    public void clearChanges() {
-        mChanges.setValue(0);
     }
 
     public void refreshEnrolledExams() {

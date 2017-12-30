@@ -1,9 +1,7 @@
 package it.communikein.myunimib.ui.list.enrolledexam;
 
 
-import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -13,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,8 +26,8 @@ import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.ui.detail.enrolledexam.EnrolledExamDetailActivity;
+import it.communikein.myunimib.ui.list.booklet.BookletFragment;
 import it.communikein.myunimib.utilities.InjectorUtils;
-import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.utilities.UserUtils;
 
 
@@ -37,6 +36,8 @@ import it.communikein.myunimib.utilities.UserUtils;
  */
 public class EnrolledExamsFragment extends Fragment implements
         EnrolledExamAdapter.ExamClickCallback, SwipeRefreshLayout.OnRefreshListener {
+
+    private static final String LOG_TAG = EnrolledExamsFragment.class.getSimpleName();
 
     /*  */
     private FragmentExamsBinding mBinding;
@@ -100,16 +101,15 @@ public class EnrolledExamsFragment extends Fragment implements
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(EnrolledExamsListViewModel.class);
 
-            mViewModel.getEnrolledExamsLoading().observe(this,
-                    loading -> mBinding.swipeRefresh.setRefreshing(loading));
+            mViewModel.getEnrolledExamsLoading().observe(this, loading -> {
+                if (loading != null)
+                    mBinding.swipeRefresh.setRefreshing(loading);
+            });
 
-            mViewModel.getEnrolledExams().observe(this,
-                    list -> mExamsAdapter.setList((ArrayList<EnrolledExam>) list));
-
-            mViewModel.getModifiedEnrolledExamsCount().observe(this, count -> {
-                if (getActivity() != null && count != null && count > 0) {
-                    createEntriesModifiedNotification(getActivity(), count);
-                    mViewModel.clearChanges();
+            mViewModel.getEnrolledExams().observe(this, list -> {
+                if (list != null) {
+                    Log.d(LOG_TAG, "Updating the enrolled exams list. " + list.size() + " elements.");
+                    mExamsAdapter.setList((ArrayList<EnrolledExam>) list);
                 }
             });
 
@@ -147,27 +147,6 @@ public class EnrolledExamsFragment extends Fragment implements
             if (actionBar != null)
                 actionBar.setTitle(R.string.title_exams_enrolled);
         }
-    }
-
-
-    private void createEntriesModifiedNotification(@NonNull Context context, int count) {
-        String title = context.getString(R.string.channel_enrolled_exams_name);
-        String content = context.getString(R.string.channel_enrolled_exams_content_changes);
-        int notificationId = 2;
-
-        PendingIntent intent = buildPendingIntent();
-        NotificationHelper notificationHelper = new NotificationHelper(getActivity());
-        notificationHelper.notify(notificationId,
-                notificationHelper.getNotificationEnrolled(title, content, intent));
-    }
-
-    private PendingIntent buildPendingIntent() {
-        MainActivity activity = (MainActivity) getActivity();
-
-        if (activity != null)
-            return activity.buildPendingIntent(R.id.navigation_exams_enrolled);
-        else
-            return null;
     }
 
 

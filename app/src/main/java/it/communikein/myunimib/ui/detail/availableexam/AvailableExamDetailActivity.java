@@ -18,8 +18,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
-import it.communikein.myunimib.BR;
-
 import java.io.File;
 
 import it.communikein.myunimib.AppExecutors;
@@ -35,7 +33,7 @@ import it.communikein.myunimib.utilities.InjectorUtils;
 public class AvailableExamDetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks, S3Helper.EnrollLoader.EnrollUpdatesListener {
 
-    final public static int LOADER_ENROLL_ID = 4000;
+    private final static int LOADER_ENROLL_ID = 4000;
 
     private ActivityAvailableExamDetailsBinding mBinding;
     private AvailableExamDetailViewModel mViewModel;

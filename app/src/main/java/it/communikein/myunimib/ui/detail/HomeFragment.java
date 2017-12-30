@@ -41,7 +41,7 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
 
-        if (Utils.user == null)
+        if (Utils.user == null && getActivity() != null)
             Utils.user = UserUtils.getUser(getActivity());
 
         return mBinding.getRoot();

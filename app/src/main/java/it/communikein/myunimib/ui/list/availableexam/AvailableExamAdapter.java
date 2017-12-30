@@ -123,7 +123,7 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHo
      */
     class ExamAdapterViewHolder extends RecyclerView.ViewHolder {
 
-        AvailableExamListItemBinding mBinding;
+        final AvailableExamListItemBinding mBinding;
 
         ExamAdapterViewHolder(AvailableExamListItemBinding binding) {
             super(binding.getRoot());

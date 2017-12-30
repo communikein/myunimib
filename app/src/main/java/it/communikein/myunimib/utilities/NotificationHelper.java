@@ -9,6 +9,7 @@ import android.content.ContextWrapper;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import it.communikein.myunimib.R;
 
@@ -18,18 +19,27 @@ import it.communikein.myunimib.R;
 
 public class NotificationHelper extends ContextWrapper {
 
-    private NotificationManager notificationManager;
+    private static final String LOG_TAG = NotificationHelper.class.getSimpleName();
 
-    public final String CHANNEL_BOOKLET_ID;
-    public final String CHANNEL_BOOKLET_NAME;
-    public final String CHANNEL_AVAILABLE_EXAMS_ID;
-    public final String CHANNEL_AVAILABLE_EXAMS_NAME;
-    public final String CHANNEL_ENROLLED_EXAMS_ID;
-    public final String CHANNEL_ENROLLED_EXAMS_NAME;
+    // For Singleton instantiation
+    private static final Object LOCK = new Object();
+    private static NotificationHelper sInstance;
+
+    private Context mContext;
+    private static NotificationManager notificationManager;
+
+    private final String CHANNEL_BOOKLET_ID;
+    private final String CHANNEL_BOOKLET_NAME;
+    private final String CHANNEL_AVAILABLE_EXAMS_ID;
+    private final String CHANNEL_AVAILABLE_EXAMS_NAME;
+    private final String CHANNEL_ENROLLED_EXAMS_ID;
+    private final String CHANNEL_ENROLLED_EXAMS_NAME;
 
 
-    public NotificationHelper(Context base) {
+    private NotificationHelper(Context base) {
         super(base);
+
+        mContext = base;
 
         CHANNEL_BOOKLET_ID = getString(R.string.channel_booklet_id);
         CHANNEL_BOOKLET_NAME = base.getString(R.string.channel_booklet_name);
@@ -44,8 +54,19 @@ public class NotificationHelper extends ContextWrapper {
             createChannels();
     }
 
+    public synchronized static NotificationHelper getInstance(Context context) {
+        Log.d(LOG_TAG, "Getting the notification helper");
+        if (sInstance == null) {
+            synchronized (LOCK) {
+                sInstance = new NotificationHelper(context);
+                Log.d(LOG_TAG, "Made new notification helper");
+            }
+        }
+        return sInstance;
+    }
+
     @TargetApi(26)
-    public void createChannels() {
+    private void createChannels() {
         NotificationChannel channel = new NotificationChannel(CHANNEL_BOOKLET_ID,
                 CHANNEL_BOOKLET_NAME, NotificationManager.IMPORTANCE_DEFAULT);
         channel.enableLights(true);
@@ -73,52 +94,33 @@ public class NotificationHelper extends ContextWrapper {
     }
 
 
-    public NotificationCompat.Builder getNotificationBooklet(String title, String body,
-                                                             PendingIntent pendingIntent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new NotificationCompat.Builder(getApplicationContext(), CHANNEL_BOOKLET_ID)
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
-        }
-        else {
-            return new NotificationCompat.Builder(getApplicationContext())
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
-        }
+    public NotificationCompat.Builder getNotificationBookletChanges(PendingIntent pendingIntent) {
+        String title = mContext.getString(R.string.channel_booklet_name);
+        String content = mContext.getString(R.string.channel_booklet_content_changes);
+
+        return getNotification(CHANNEL_ENROLLED_EXAMS_ID, title, content, pendingIntent);
     }
 
-    public NotificationCompat.Builder getNotificationAvailable(String title, String body,
-                                                               PendingIntent pendingIntent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new NotificationCompat.Builder(getApplicationContext(), CHANNEL_AVAILABLE_EXAMS_ID)
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
-        }
-        else {
-            return new NotificationCompat.Builder(getApplicationContext())
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
-        }
+    public NotificationCompat.Builder getNotificationAvailableChanges(PendingIntent pendingIntent) {
+        String title = mContext.getString(R.string.channel_available_exams_name);
+        String content = mContext.getString(R.string.channel_available_exams_content_changes);
+
+        return getNotification(CHANNEL_ENROLLED_EXAMS_ID, title, content, pendingIntent);
     }
 
-    public NotificationCompat.Builder getNotificationEnrolled(String title, String body,
+    public NotificationCompat.Builder getNotificationEnrolledChanges(PendingIntent pendingIntent) {
+        String title = mContext.getString(R.string.channel_enrolled_exams_name);
+        String content = mContext.getString(R.string.channel_enrolled_exams_content_changes);
+
+        return getNotification(CHANNEL_ENROLLED_EXAMS_ID, title, content, pendingIntent);
+    }
+
+    private NotificationCompat.Builder getNotification(String channelId, String title, String content,
                                                               PendingIntent pendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ENROLLED_EXAMS_ID)
+            return new NotificationCompat.Builder(getApplicationContext(), channelId)
                     .setContentTitle(title)
-                    .setContentText(body)
+                    .setContentText(content)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
@@ -126,7 +128,7 @@ public class NotificationHelper extends ContextWrapper {
         else {
             return new NotificationCompat.Builder(getApplicationContext())
                     .setContentTitle(title)
-                    .setContentText(body)
+                    .setContentText(content)
                     .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);

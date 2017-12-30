@@ -2,10 +2,8 @@ package it.communikein.myunimib.ui.list.availableexam;
 
 
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -20,6 +18,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,7 +38,6 @@ import it.communikein.myunimib.databinding.FragmentExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.ui.detail.availableexam.AvailableExamDetailActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
-import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.utilities.UserUtils;
 
 
@@ -50,7 +48,9 @@ public class AvailableExamsFragment extends Fragment implements
         AvailableExamAdapter.ExamClickCallback, LoaderManager.LoaderCallbacks,
         S3Helper.EnrollLoader.EnrollUpdatesListener, SwipeRefreshLayout.OnRefreshListener {
 
-    final public static int LOADER_ENROLL_ID = 4001;
+    private static final String LOG_TAG = AvailableExamsFragment.class.getSimpleName();
+
+    private final static int LOADER_ENROLL_ID = 4001;
 
     /*  */
     private FragmentExamsBinding mBinding;
@@ -120,15 +120,15 @@ public class AvailableExamsFragment extends Fragment implements
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(AvailableExamsListViewModel.class);
 
-            mViewModel.getAvailableExamsLoading().observe(this,
-                    loading -> mBinding.swipeRefresh.setRefreshing(loading));
+            mViewModel.getAvailableExamsLoading().observe(this, loading -> {
+                if (loading != null)
+                    mBinding.swipeRefresh.setRefreshing(loading);
+            });
 
-            mViewModel.getAvailableExams().observe(this,
-                    list -> mExamsAdapter.setList((ArrayList<AvailableExam>) list));
-
-            mViewModel.getModifiedAvailableExamsCount().observe(this, count -> {
-                if (getActivity() != null && count != null && count > 0) {
-                    createEntriesModifiedNotification(getActivity(), count);
+            mViewModel.getAvailableExams().observe(this, list -> {
+                if (list != null) {
+                    Log.d(LOG_TAG, "Updating the available exams list. " + list.size() + " elements.");
+                    mExamsAdapter.setList((ArrayList<AvailableExam>) list);
                 }
             });
 
@@ -321,33 +321,15 @@ public class AvailableExamsFragment extends Fragment implements
     }
 
     private void showCertificate() {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        File certificate_file = chosenExam.getCertificatePath();
-        Uri certificate_uri = FileProvider.getUriForFile(getActivity(),
-                getString(R.string.file_provider_authority), certificate_file);
+        if (getActivity() != null) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            File certificate_file = chosenExam.getCertificatePath();
+            Uri certificate_uri = FileProvider.getUriForFile(getActivity(),
+                    getString(R.string.file_provider_authority), certificate_file);
 
-        intent.setDataAndType(certificate_uri, "application/pdf");
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(intent);
-    }
-
-    private void createEntriesModifiedNotification(@NonNull Context context, int count) {
-        String title = context.getString(R.string.channel_available_exams_name);
-        String content = context.getString(R.string.channel_available_exams_content_changes);
-        int notificationId = 3;
-
-        PendingIntent intent = buildPendingIntent();
-        NotificationHelper notificationHelper = new NotificationHelper(getActivity());
-        notificationHelper.notify(notificationId,
-                notificationHelper.getNotificationAvailable(title, content, intent));
-    }
-
-    private PendingIntent buildPendingIntent() {
-        MainActivity activity = (MainActivity) getActivity();
-
-        if (activity != null)
-            return activity.buildPendingIntent(R.id.navigation_exams_available);
-        else
-            return null;
+            intent.setDataAndType(certificate_uri, "application/pdf");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        }
     }
 }

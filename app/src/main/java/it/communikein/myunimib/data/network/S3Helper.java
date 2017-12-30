@@ -61,7 +61,7 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/BachecaPrenotazioni.do;";
     private static final String URL_ENROLLED_EXAM_CERTIFICATE =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/StampaStatinoPDF.do?";
-    static final String URL_ENROLL_TO =
+    private static final String URL_ENROLL_TO =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/EffettuaPrenotazioneAppello.do;";
     static final String URL_UNENROLL_FROM =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/CancellaAppello.do;";
@@ -69,7 +69,7 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/auth/AddressBook/DownloadFoto.do;";
     public static final String URL_CAREER_BASE =
             "https://s3w.si.unimib.it/esse3/auth/studente/SceltaCarrieraStudente.do;";
-    static final String URL_LOGOUT =
+    private static final String URL_LOGOUT =
             "https://s3w.si.unimib.it/esse3/Logout.do;";
 
     private static final int ERROR_GENERIC = -1;

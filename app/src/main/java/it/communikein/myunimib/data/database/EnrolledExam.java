@@ -57,7 +57,7 @@ public class EnrolledExam extends Exam {
     }
 
     @Ignore
-    public EnrolledExam(JSONObject obj) throws JSONException, NullPointerException, ParseException {
+    public EnrolledExam(JSONObject obj) throws JSONException, NullPointerException {
         super(obj);
 
         if (obj.has(ARG_CODE))

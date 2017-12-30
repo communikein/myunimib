@@ -19,8 +19,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.firebase.crash.FirebaseCrash;
-
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
@@ -54,10 +52,10 @@ public class MainActivity extends AppCompatActivity implements
     private static final int INDEX_FRAGMENT_EXAMS_AVAILABLE = 2;
     private static final int INDEX_FRAGMENT_EXAMS_ENROLLED = 3;
 
-    public static final String TAG_FRAGMENT_HOME = "tab-home";
-    public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
-    public static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
-    public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
+    private static final String TAG_FRAGMENT_HOME = "tab-home";
+    private static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
+    private static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
+    private static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
 
     private static final int LOADER_LOGOUT_ID = 2200;
 

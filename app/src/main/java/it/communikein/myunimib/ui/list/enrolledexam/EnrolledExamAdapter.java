@@ -122,7 +122,7 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHol
      */
     class ExamAdapterViewHolder extends RecyclerView.ViewHolder {
 
-        EnrolledExamListItemBinding mBinding;
+        final EnrolledExamListItemBinding mBinding;
 
         ExamAdapterViewHolder(EnrolledExamListItemBinding binding) {
             super(binding.getRoot());

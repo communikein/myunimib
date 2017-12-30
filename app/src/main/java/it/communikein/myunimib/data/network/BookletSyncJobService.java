@@ -1,14 +1,23 @@
 package it.communikein.myunimib.data.network;
 
+import android.util.Log;
+
+import com.crashlytics.android.answers.FirebaseAnalyticsEvent;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.firebase.jobdispatcher.RetryStrategy;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
+import it.communikein.myunimib.R;
 import it.communikein.myunimib.utilities.InjectorUtils;
+import it.communikein.myunimib.utilities.NotificationHelper;
 
 
 public class BookletSyncJobService extends JobService {
+
+    private static final String LOG_TAG = BookletSyncJobService.class.getSimpleName();
 
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
@@ -22,11 +31,16 @@ public class BookletSyncJobService extends JobService {
      */
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
+        Log.d(LOG_TAG, "Scheduled booklet job started.");
+
         UnimibNetworkDataSource unimibNetworkDataSource = InjectorUtils
                 .provideNetworkDataSource(this.getApplicationContext());
         unimibNetworkDataSource.fetchBooklet();
 
         jobFinished(jobParameters, false);
+
+        Log.d(LOG_TAG, "Scheduled booklet job finished.");
+
         return true;
     }
 
@@ -40,6 +54,8 @@ public class BookletSyncJobService extends JobService {
      */
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
+        Log.d(LOG_TAG, "Scheduled booklet job stopped.");
+
         return true;
     }
 

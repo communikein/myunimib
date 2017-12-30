@@ -1,18 +1,16 @@
 package it.communikein.myunimib.ui.list.booklet;
 
 
-import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,11 +19,11 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.database.AvailableExam;
 import it.communikein.myunimib.data.database.BookletEntry;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.InjectorUtils;
-import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.utilities.UserUtils;
 
 
@@ -34,6 +32,8 @@ import it.communikein.myunimib.utilities.UserUtils;
  */
 public class BookletFragment extends Fragment implements
         SwipeRefreshLayout.OnRefreshListener, BookletAdapter.ExamClickCallback {
+
+    private static final String LOG_TAG = BookletFragment.class.getSimpleName();
 
     /*  */
     private FragmentExamsBinding mBinding;
@@ -98,16 +98,15 @@ public class BookletFragment extends Fragment implements
             mViewModel = ViewModelProviders.of(this, factory)
                     .get(BookletViewModel.class);
 
-            mViewModel.getBookletLoading().observe(this,
-                    loading -> mBinding.swipeRefresh.setRefreshing(loading));
+            mViewModel.getBookletLoading().observe(this, loading -> {
+                if (loading != null)
+                    mBinding.swipeRefresh.setRefreshing(loading);
+            });
 
-            mViewModel.getBooklet().observe(this,
-                    list -> mAdapter.setList((ArrayList<BookletEntry>) list));
-
-            mViewModel.getModifiedBookletEntriesCount().observe(this, count -> {
-                if (getActivity() != null && count != null && count > 0) {
-                    createEntriesModifiedNotification(getActivity(), count);
-                    mViewModel.clearChanges();
+            mViewModel.getBooklet().observe(this, list -> {
+                if (list != null) {
+                    Log.d(LOG_TAG, "Updating the booklet list. " + list.size() + " elements.");
+                    mAdapter.setList((ArrayList<BookletEntry>) list);
                 }
             });
 
@@ -122,15 +121,6 @@ public class BookletFragment extends Fragment implements
         mViewModel.refreshBooklet();
     }
 
-    private PendingIntent buildPendingIntent() {
-        MainActivity activity = (MainActivity) getActivity();
-
-        if (activity != null)
-            return activity.buildPendingIntent(R.id.navigation_booklet);
-        else
-            return null;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -141,17 +131,6 @@ public class BookletFragment extends Fragment implements
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void createEntriesModifiedNotification(@NonNull Context context, int count) {
-        String title = context.getString(R.string.channel_booklet_name);
-        String content = context.getString(R.string.channel_booklet_content_changes);
-        int notificationId = 1;
-
-        PendingIntent intent = buildPendingIntent();
-        NotificationHelper notificationHelper = new NotificationHelper(getActivity());
-        notificationHelper.notify(notificationId,
-                notificationHelper.getNotificationBooklet(title, content, intent));
     }
 
     /**

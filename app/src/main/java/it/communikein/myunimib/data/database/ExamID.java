@@ -139,7 +139,7 @@ public class ExamID {
         return examID.getAdsceId() == this.getAdsceId();
     }
 
-    public boolean isIdentic(Object obj) {
+    boolean isIdentic(Object obj) {
         if (! (obj instanceof ExamID)) return false;
 
         ExamID examID = (ExamID) obj;

@@ -8,12 +8,12 @@ import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.ExamID;
 
 
-public class EnrolledExamDetailViewModel extends ViewModel {
+class EnrolledExamDetailViewModel extends ViewModel {
 
     private final LiveData<EnrolledExam> exam;
 
     public EnrolledExamDetailViewModel(UnimibRepository repository, ExamID examID) {
-        exam = repository.getEnrolledExam(examID);
+        exam = repository.getObservableEnrolledExam(examID);
     }
 
     public LiveData<EnrolledExam> getExam() {

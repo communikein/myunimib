@@ -1,7 +1,6 @@
 package it.communikein.myunimib.data.database;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
@@ -43,6 +42,9 @@ public interface UnimibDao {
     void deleteEnrolledExams();
 
 
+    @Query("DELETE FROM booklet WHERE adsceId = :adsceId")
+    void deleteBookletEntry(int adsceId);
+
     @Query("DELETE FROM available_exams WHERE adsceId = :adsceId AND appId = :appId " +
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     void deleteAvailableExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
@@ -53,13 +55,23 @@ public interface UnimibDao {
 
 
     @Query("SELECT * FROM booklet")
-    LiveData<List<BookletEntry>> getBooklet();
+    LiveData<List<BookletEntry>> getObservableBooklet();
 
     @Query("SELECT * FROM available_exams")
-    LiveData<List<AvailableExam>> getAvailableExams();
+    LiveData<List<AvailableExam>> getObservableAvailableExams();
 
     @Query("SELECT * FROM enrolled_exams")
-    LiveData<List<EnrolledExam>> getEnrolledExams();
+    LiveData<List<EnrolledExam>> getObservableEnrolledExams();
+
+
+    @Query("SELECT * FROM booklet")
+    List<BookletEntry> getBooklet();
+
+    @Query("SELECT * FROM available_exams")
+    List<AvailableExam> getAvailableExams();
+
+    @Query("SELECT * FROM enrolled_exams")
+    List<EnrolledExam> getEnrolledExams();
 
 
     @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")

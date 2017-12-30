@@ -5,7 +5,6 @@ import android.content.Context;
 import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.database.ExamID;
-import it.communikein.myunimib.data.database.UnimibDao;
 import it.communikein.myunimib.data.database.UnimibDatabase;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.ui.detail.availableexam.AvailableExamViewModelFactory;
@@ -22,8 +21,10 @@ public class InjectorUtils {
         AppExecutors executors = AppExecutors.getInstance();
         UnimibNetworkDataSource networkDataSource = UnimibNetworkDataSource
                 .getInstance(context.getApplicationContext(), executors);
+        NotificationHelper notificationHelper = NotificationHelper
+                .getInstance(context.getApplicationContext());
 
-        return UnimibRepository.getInstance(database.unimibDao(), networkDataSource, executors);
+        return UnimibRepository.getInstance(database.unimibDao(), networkDataSource, executors, notificationHelper);
     }
 
     public static UnimibNetworkDataSource provideNetworkDataSource(Context context) {
@@ -31,13 +32,6 @@ public class InjectorUtils {
         AppExecutors executors = AppExecutors.getInstance();
 
         return UnimibNetworkDataSource.getInstance(context.getApplicationContext(), executors);
-    }
-
-    public static UnimibDao provideUnimibDao(Context context) {
-        UnimibDatabase database = UnimibDatabase
-                .getInstance(context.getApplicationContext());
-
-        return database.unimibDao();
     }
 
     public static BookletViewModelFactory provideBookletViewModelFactory(Context context) {

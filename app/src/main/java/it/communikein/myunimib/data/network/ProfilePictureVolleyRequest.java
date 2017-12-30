@@ -6,7 +6,6 @@ import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Network;
@@ -20,18 +19,11 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 
-import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.User;
-import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.utilities.UserUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 
 public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
@@ -119,7 +111,7 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
             ProfilePictureRequest request = new ProfilePictureRequest(mUser,
                     response ->
                         onGetImageSuccess(cacheKey, response),
-                    maxWidth, maxHeight, scaleType, Bitmap.Config.RGB_565,
+                    maxWidth, maxHeight, scaleType,
                     error -> {
                         onGetImageError(cacheKey, error);
 
@@ -135,21 +127,21 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
         }
     }
 
-    public final class ProfilePictureRequest extends ImageRequest {
+    final class ProfilePictureRequest extends ImageRequest {
 
         private final User mUser;
 
         ProfilePictureRequest(User user, Response.Listener<Bitmap> listener, int maxWidth,
-                                int maxHeight, ImageView.ScaleType scaleType,
-                                Bitmap.Config decodeConfig, Response.ErrorListener errorListener) {
+                              int maxHeight, ImageView.ScaleType scaleType,
+                              Response.ErrorListener errorListener) {
             super(S3Helper.URL_PROFILE_PICTURE, listener, maxWidth, maxHeight, scaleType,
-                    decodeConfig, errorListener);
+                    Bitmap.Config.RGB_565, errorListener);
 
             this.mUser = user;
         }
 
         @Override
-        public Map<String, String> getHeaders() throws AuthFailureError {
+        public Map<String, String> getHeaders() {
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Basic " + mUser.getAuthToken());
             headers.put("Cookie", "JSESSIONID=" + mUser.getSessionID());

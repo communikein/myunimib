@@ -126,7 +126,7 @@ public class BookletAdapter extends RecyclerView.Adapter<BookletAdapterViewHolde
      */
     class BookletAdapterViewHolder extends RecyclerView.ViewHolder {
 
-        BookletListItemBinding mBinding;
+        final BookletListItemBinding mBinding;
 
         BookletAdapterViewHolder(BookletListItemBinding binding) {
             super(binding.getRoot());

@@ -1,14 +1,20 @@
 package it.communikein.myunimib.data.network;
 
+import android.util.Log;
+
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.firebase.jobdispatcher.RetryStrategy;
 
+import it.communikein.myunimib.R;
 import it.communikein.myunimib.utilities.InjectorUtils;
+import it.communikein.myunimib.utilities.NotificationHelper;
 
 
 public class ExamAvailableSyncJobService extends JobService {
+
+    private static final String LOG_TAG = ExamAvailableSyncJobService.class.getSimpleName();
 
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
@@ -22,11 +28,15 @@ public class ExamAvailableSyncJobService extends JobService {
      */
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
+        Log.d(LOG_TAG, "Scheduled available exams job started.");
+
         UnimibNetworkDataSource unimibNetworkDataSource = InjectorUtils
                 .provideNetworkDataSource(this.getApplicationContext());
         unimibNetworkDataSource.fetchAvailableExams();
 
         jobFinished(jobParameters, false);
+
+        Log.d(LOG_TAG, "Scheduled available exams job finished.");
 
         return true;
     }
@@ -41,6 +51,8 @@ public class ExamAvailableSyncJobService extends JobService {
      */
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
+        Log.d(LOG_TAG, "Scheduled available exams job stopped.");
+
         return true;
     }
 

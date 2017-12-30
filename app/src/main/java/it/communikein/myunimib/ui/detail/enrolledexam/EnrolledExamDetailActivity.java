@@ -13,7 +13,6 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +27,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 
-import it.communikein.myunimib.BR;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.ExamID;
@@ -43,7 +41,7 @@ import it.communikein.myunimib.utilities.UniversityUtils;
 public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
          implements OnMapReadyCallback, LoaderManager.LoaderCallbacks {
 
-    final public static int LOADER_CERTIFICATE_ID = 3000;
+    private final static int LOADER_CERTIFICATE_ID = 3000;
 
     private ActivityEnrolledExamDetailsBinding mBinding;
 
