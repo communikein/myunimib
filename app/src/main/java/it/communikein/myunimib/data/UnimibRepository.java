@@ -90,7 +90,7 @@ public class UnimibRepository {
                 Log.d(LOG_TAG, "There are " + count + " booklet changes.");
 
                 mNotificationHelper.notify(NOTIFICATION_BOOKLET_CHANGES_ID,
-                        mNotificationHelper.getNotificationBookletChanges(null));
+                        mNotificationHelper.getNotificationBookletChanges());
 
                 Log.d(LOG_TAG, "Clearing booklet changes.");
                 mModifiedBookletEntriesCount.postValue(0);
@@ -104,7 +104,7 @@ public class UnimibRepository {
                 Log.d(LOG_TAG, "There are " + count + " available exams changes.");
 
                 mNotificationHelper.notify(NOTIFICATION_AVAILABLE_EXAMS_CHANGES_ID,
-                        mNotificationHelper.getNotificationAvailableChanges(null));
+                        mNotificationHelper.getNotificationAvailableChanges());
 
                 Log.d(LOG_TAG, "Clearing available exams changes.");
                 mModifiedAvailableExamsCount.postValue(0);
@@ -118,7 +118,7 @@ public class UnimibRepository {
                 Log.d(LOG_TAG, "There are " + count + " enrolled exams changes.");
 
                 mNotificationHelper.notify(NOTIFICATION_ENROLLED_EXAMS_CHANGES_ID,
-                        mNotificationHelper.getNotificationEnrolledChanges(null));
+                        mNotificationHelper.getNotificationEnrolledChanges());
 
                 Log.d(LOG_TAG, "Clearing enrolled exams changes.");
                 mModifiedEnrolledExamsCount.postValue(0);

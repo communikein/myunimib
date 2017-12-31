@@ -45,17 +45,17 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
     private static final String SAVE_FRAGMENT_SELECTED = "save-fragment-selected";
-    private String FRAGMENT_SELECTED_TAG;
+    public static String FRAGMENT_SELECTED_TAG;
 
     private static final int INDEX_FRAGMENT_HOME = 0;
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
     private static final int INDEX_FRAGMENT_EXAMS_AVAILABLE = 2;
     private static final int INDEX_FRAGMENT_EXAMS_ENROLLED = 3;
 
-    private static final String TAG_FRAGMENT_HOME = "tab-home";
-    private static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
-    private static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
-    private static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
+    public static final String TAG_FRAGMENT_HOME = "tab-home";
+    public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
+    public static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
+    public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
 
     private static final int LOADER_LOGOUT_ID = 2200;
 

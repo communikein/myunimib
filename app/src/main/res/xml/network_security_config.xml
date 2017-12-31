@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config>
+        <!--
+            For devices running Nougat (API 24) or above, use this file to get the network
+            security configurations
+        -->
+        <domain includeSubdomains="true">s3w.si.unimib.it</domain>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="@raw/terenasslca3"/>
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

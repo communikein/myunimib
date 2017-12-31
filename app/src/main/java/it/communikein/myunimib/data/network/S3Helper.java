@@ -3,6 +3,7 @@ package it.communikein.myunimib.data.network;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
@@ -158,7 +159,10 @@ public class S3Helper {
         if (user.getSessionID() != null)
             con.setRequestProperty("Cookie", "JSESSIONID=" + user.getSessionID());
         con.setConnectTimeout(5000);
-        con.setSSLSocketFactory(getSocketFactory(context));
+
+        /* For devices running Nougat (API 24) or above, use the network_security_config.xml */
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            con.setSSLSocketFactory(getSocketFactory(context));
 
         String cookie = con.getHeaderField("Set-Cookie");
         if (cookie != null && !cookie.isEmpty()) {
