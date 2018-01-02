@@ -1,16 +1,20 @@
-package it.communikein.myunimib.ui.list.enrolledexam;
+package it.communikein.myunimib.viewmodel.factory;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import javax.inject.Inject;
+
 import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.viewmodel.EnrolledExamsListViewModel;
 
 
 public class EnrolledExamsViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
     private final UnimibRepository mRepository;
 
+    @Inject
     public EnrolledExamsViewModelFactory(UnimibRepository repository) {
         this.mRepository = repository;
     }

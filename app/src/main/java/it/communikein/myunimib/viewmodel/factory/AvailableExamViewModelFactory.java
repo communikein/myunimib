@@ -1,11 +1,14 @@
-package it.communikein.myunimib.ui.detail.availableexam;
+package it.communikein.myunimib.viewmodel.factory;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import javax.inject.Inject;
+
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.database.ExamID;
+import it.communikein.myunimib.viewmodel.AvailableExamDetailViewModel;
 
 /**
  * Created by eliam on 12/23/2017.
@@ -15,19 +18,16 @@ public class AvailableExamViewModelFactory extends ViewModelProvider.NewInstance
 
     private final UnimibRepository mRepository;
 
-    private final ExamID examID;
-
-    public AvailableExamViewModelFactory(UnimibRepository repository, ExamID examID) {
+    @Inject
+    public AvailableExamViewModelFactory(UnimibRepository repository) {
         this.mRepository = repository;
-
-        this.examID = examID;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new AvailableExamDetailViewModel(mRepository, examID);
+        return (T) new AvailableExamDetailViewModel(mRepository);
     }
 
 }

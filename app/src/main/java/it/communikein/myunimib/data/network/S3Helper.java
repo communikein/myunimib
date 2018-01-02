@@ -12,9 +12,9 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.Exam;
-import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.data.User;
@@ -701,16 +701,21 @@ public class S3Helper {
         private final Exam mExam;
         private final EnrollUpdatesListener mEnrollUpdatesListener;
 
+        private final UnimibRepository mRepository;
+
         public interface EnrollUpdatesListener {
             void onEnrollmentUpdate(int status);
         }
 
-        public EnrollLoader(Activity activity, Exam exam, EnrollUpdatesListener listener) {
+        public EnrollLoader(Activity activity, Exam exam, UnimibRepository repository,
+                            EnrollUpdatesListener listener) {
             super(activity);
 
             this.mActivity = new WeakReference<>(activity);
             this.mExam = exam;
             this.mEnrollUpdatesListener = listener;
+
+            this.mRepository = repository;
         }
 
         @Override
@@ -743,11 +748,9 @@ public class S3Helper {
                     } else if (responseText.equals("") && s3_response == HttpURLConnection.HTTP_OK) {
                         mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ENROLLMENT_OK);
 
-                        InjectorUtils.provideRepository(context).deleteAvailableExam(mExam);
-                        InjectorUtils.provideNetworkDataSource(context)
-                                .startFetchEnrolledExamsService();
-                        InjectorUtils.provideNetworkDataSource(context)
-                                .startFetchAvailableExamsService();
+                        mRepository.deleteAvailableExam(mExam);
+                        mRepository.startFetchEnrolledExamsService();
+                        mRepository.startFetchAvailableExamsService();
 
                         boolean downloaded = downloadCertificate(mUser, mExam, context);
                         if (downloaded) {

@@ -1,6 +1,8 @@
-package it.communikein.myunimib.ui.detail.enrolledexam;
+package it.communikein.myunimib.ui.detail;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -27,6 +29,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasActivityInjector;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.EnrolledExam;
 import it.communikein.myunimib.data.database.ExamID;
@@ -34,17 +41,28 @@ import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityEnrolledExamDetailsBinding;
 import it.communikein.myunimib.ui.FragmentAppCompatActivity;
-import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.UniversityUtils;
+import it.communikein.myunimib.viewmodel.EnrolledExamDetailViewModel;
+import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
+import it.communikein.myunimib.viewmodel.factory.EnrolledExamViewModelFactory;
 
 @SuppressWarnings("unchecked")
 public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
-         implements OnMapReadyCallback, LoaderManager.LoaderCallbacks {
+         implements OnMapReadyCallback, LoaderManager.LoaderCallbacks, HasActivityInjector {
 
     private final static int LOADER_CERTIFICATE_ID = 3000;
 
+    @Inject
+    DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
+
+    /* */
     private ActivityEnrolledExamDetailsBinding mBinding;
 
+    /* */
+    @Inject
+    EnrolledExamViewModelFactory viewModelFactory;
+
+    /* */
     private EnrolledExamDetailViewModel mViewModel;
 
 
@@ -59,10 +77,11 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_enrolled_exam_details);
 
         ExamID examID = loadData();
-        EnrolledExamViewModelFactory factory = InjectorUtils
-                .provideEnrolledExamViewModelFactory(this, examID);
-        mViewModel = ViewModelProviders.of(this, factory)
+
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
                 .get(EnrolledExamDetailViewModel.class);
+        mViewModel.setExamId(examID);
 
         mBinding.setLifecycleOwner(this);
         mBinding.setExam(mViewModel.getExam());
@@ -253,5 +272,12 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
     private void toggleLoading(final boolean show) {
         if (show) progress.show();
         else if(progress != null && progress.isShowing()) progress.dismiss();
+    }
+
+
+
+    @Override
+    public AndroidInjector<Activity> activityInjector() {
+        return dispatchingAndroidInjector;
     }
 }

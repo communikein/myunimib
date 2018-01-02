@@ -1,23 +1,37 @@
 package it.communikein.myunimib.data.network;
 
+import android.app.Service;
 import android.util.Log;
 
-import com.crashlytics.android.answers.FirebaseAnalyticsEvent;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.firebase.jobdispatcher.RetryStrategy;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
-import it.communikein.myunimib.R;
-import it.communikein.myunimib.utilities.InjectorUtils;
-import it.communikein.myunimib.utilities.NotificationHelper;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasServiceInjector;
 
 
-public class BookletSyncJobService extends JobService {
+public class BookletSyncJobService extends JobService implements HasServiceInjector {
 
     private static final String LOG_TAG = BookletSyncJobService.class.getSimpleName();
+
+    @Inject
+    DispatchingAndroidInjector<Service> dispatchingAndroidInjector;
+
+    @Inject
+    UnimibNetworkDataSource networkDataSource;
+
+
+    @Override
+    public void onCreate() {
+        AndroidInjection.inject(this);
+        super.onCreate();
+    }
 
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
@@ -33,9 +47,7 @@ public class BookletSyncJobService extends JobService {
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.d(LOG_TAG, "Scheduled booklet job started.");
 
-        UnimibNetworkDataSource unimibNetworkDataSource = InjectorUtils
-                .provideNetworkDataSource(this.getApplicationContext());
-        unimibNetworkDataSource.fetchBooklet();
+        networkDataSource.fetchBooklet();
 
         jobFinished(jobParameters, false);
 
@@ -59,4 +71,9 @@ public class BookletSyncJobService extends JobService {
         return true;
     }
 
+
+    @Override
+    public AndroidInjector<Service> serviceInjector() {
+        return dispatchingAndroidInjector;
+    }
 }

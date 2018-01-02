@@ -1,7 +1,9 @@
 package it.communikein.myunimib.ui.list.booklet;
 
 
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,20 +20,25 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.AvailableExam;
 import it.communikein.myunimib.data.database.BookletEntry;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
+import it.communikein.myunimib.di.Injectable;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.utilities.InjectorUtils;
 import it.communikein.myunimib.utilities.UserUtils;
+import it.communikein.myunimib.viewmodel.BookletViewModel;
+import it.communikein.myunimib.viewmodel.factory.BookletViewModelFactory;
 
 
 /**
  * The {@link Fragment} responsible for showing the user's booklet.
  */
 public class BookletFragment extends Fragment implements
-        SwipeRefreshLayout.OnRefreshListener, BookletAdapter.ExamClickCallback {
+        SwipeRefreshLayout.OnRefreshListener, BookletAdapter.ExamClickCallback,
+        Injectable {
 
     private static final String LOG_TAG = BookletFragment.class.getSimpleName();
 
@@ -39,11 +46,21 @@ public class BookletFragment extends Fragment implements
     private FragmentExamsBinding mBinding;
 
     /* */
+    @Inject
+    BookletViewModelFactory viewModelFactory;
+
+    /* */
     private BookletViewModel mViewModel;
 
     /* Required empty public constructor */
     public BookletFragment() {}
 
+
+    @Override
+    public void onAttach(Context context) {
+        AndroidSupportInjection.inject(this);
+        super.onAttach(context);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -93,9 +110,8 @@ public class BookletFragment extends Fragment implements
             /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
             final BookletAdapter mAdapter = new BookletAdapter(this);
 
-            BookletViewModelFactory factory = InjectorUtils
-                    .provideBookletViewModelFactory(getActivity().getApplication());
-            mViewModel = ViewModelProviders.of(this, factory)
+            mViewModel = ViewModelProviders
+                    .of(this, viewModelFactory)
                     .get(BookletViewModel.class);
 
             mViewModel.getBookletLoading().observe(this, loading -> {

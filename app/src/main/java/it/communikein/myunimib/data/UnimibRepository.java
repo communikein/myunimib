@@ -7,6 +7,9 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.AvailableExam;
@@ -17,17 +20,16 @@ import it.communikein.myunimib.data.database.UnimibDao;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.utilities.NotificationHelper;
 
+@Singleton
 public class UnimibRepository {
 
     private static final String LOG_TAG = UnimibRepository.class.getSimpleName();
 
-    // For Singleton instantiation
-    private static final Object LOCK = new Object();
-    private static UnimibRepository sInstance;
     private final UnimibDao mUnimibDao;
     private final UnimibNetworkDataSource mUnimibNetworkDataSource;
     private final AppExecutors mExecutors;
     private final NotificationHelper mNotificationHelper;
+
     private boolean mInitialized = false;
 
     private final MutableLiveData<Integer> mModifiedBookletEntriesCount;
@@ -39,7 +41,8 @@ public class UnimibRepository {
     private static final int NOTIFICATION_ENROLLED_EXAMS_CHANGES_ID = 25;
 
 
-    private UnimibRepository(UnimibDao unimibDao, UnimibNetworkDataSource unimibNetworkDataSource,
+    @Inject
+    public UnimibRepository(UnimibDao unimibDao, UnimibNetworkDataSource unimibNetworkDataSource,
                              AppExecutors executors, NotificationHelper notificationHelper) {
         mUnimibDao = unimibDao;
         mUnimibNetworkDataSource = unimibNetworkDataSource;
@@ -124,20 +127,6 @@ public class UnimibRepository {
                 mModifiedEnrolledExamsCount.postValue(0);
             }
         });
-    }
-
-    public synchronized static UnimibRepository getInstance(
-            UnimibDao unimibDao, UnimibNetworkDataSource unimibNetworkDataSource,
-            AppExecutors executors, NotificationHelper notificationHelper) {
-        Log.d(LOG_TAG, "Getting the repository");
-        if (sInstance == null) {
-            synchronized (LOCK) {
-                sInstance = new UnimibRepository(unimibDao, unimibNetworkDataSource,
-                        executors, notificationHelper);
-                Log.d(LOG_TAG, "Made new repository");
-            }
-        }
-        return sInstance;
     }
 
     /**

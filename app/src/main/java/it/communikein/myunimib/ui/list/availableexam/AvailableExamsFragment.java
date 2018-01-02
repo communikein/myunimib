@@ -3,7 +3,9 @@ package it.communikein.myunimib.ui.list.availableexam;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -27,7 +29,9 @@ import android.view.ViewGroup;
 import java.io.File;
 import java.util.ArrayList;
 
-import it.communikein.myunimib.AppExecutors;
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.AvailableExam;
 import it.communikein.myunimib.data.database.Exam;
@@ -35,10 +39,12 @@ import it.communikein.myunimib.data.database.ExamID;
 import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
+import it.communikein.myunimib.di.Injectable;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.ui.detail.availableexam.AvailableExamDetailActivity;
-import it.communikein.myunimib.utilities.InjectorUtils;
+import it.communikein.myunimib.ui.detail.AvailableExamDetailActivity;
 import it.communikein.myunimib.utilities.UserUtils;
+import it.communikein.myunimib.viewmodel.AvailableExamsListViewModel;
+import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
 
 
 /**
@@ -46,7 +52,8 @@ import it.communikein.myunimib.utilities.UserUtils;
  */
 public class AvailableExamsFragment extends Fragment implements
         AvailableExamAdapter.ExamClickCallback, LoaderManager.LoaderCallbacks,
-        S3Helper.EnrollLoader.EnrollUpdatesListener, SwipeRefreshLayout.OnRefreshListener {
+        S3Helper.EnrollLoader.EnrollUpdatesListener, SwipeRefreshLayout.OnRefreshListener,
+        Injectable {
 
     private static final String LOG_TAG = AvailableExamsFragment.class.getSimpleName();
 
@@ -54,6 +61,10 @@ public class AvailableExamsFragment extends Fragment implements
 
     /*  */
     private FragmentExamsBinding mBinding;
+
+    /* */
+    @Inject
+    AvailableExamsViewModelFactory viewModelFactory;
 
     /* */
     private AvailableExamsListViewModel mViewModel;
@@ -64,6 +75,12 @@ public class AvailableExamsFragment extends Fragment implements
     /* Required empty public constructor */
     public AvailableExamsFragment() {}
 
+
+    @Override
+    public void onAttach(Context context) {
+        AndroidSupportInjection.inject(this);
+        super.onAttach(context);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -115,9 +132,8 @@ public class AvailableExamsFragment extends Fragment implements
             /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
             final AvailableExamAdapter mExamsAdapter = new AvailableExamAdapter(this);
 
-            AvailableExamsViewModelFactory factory = InjectorUtils
-                    .provideAvailableExamsViewModelFactory(getActivity().getApplication());
-            mViewModel = ViewModelProviders.of(this, factory)
+            mViewModel = ViewModelProviders
+                    .of(this, viewModelFactory)
                     .get(AvailableExamsListViewModel.class);
 
             mViewModel.getAvailableExamsLoading().observe(this, loading -> {
@@ -196,7 +212,11 @@ public class AvailableExamsFragment extends Fragment implements
                 if (chosenExam != null) {
                     showProgress(true);
 
-                    return new S3Helper.EnrollLoader(getActivity(), chosenExam, this);
+                    return new S3Helper.EnrollLoader(
+                            getActivity(),
+                            chosenExam,
+                            mViewModel.getRepository(),
+                            this);
                 }
                 else return null;
 
@@ -231,10 +251,8 @@ public class AvailableExamsFragment extends Fragment implements
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
 
-            UnimibNetworkDataSource.getInstance(getActivity(), AppExecutors.getInstance())
-                    .startFetchAvailableExamsService();
-            UnimibNetworkDataSource.getInstance(getActivity(), AppExecutors.getInstance())
-                    .startFetchEnrolledExamsService();
+            mViewModel.refreshAvailableExams();
+            mViewModel.refreshEnrolledExams();
         }
         else {
             new AlertDialog.Builder(getActivity())

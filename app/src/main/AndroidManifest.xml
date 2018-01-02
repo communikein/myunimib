@@ -31,6 +31,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyUnimib"
+        android:name=".UnimibApp"
         android:allowBackup="false"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="n">
@@ -87,14 +88,14 @@
                 android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.detail.availableexam.AvailableExamDetailActivity"
+            android:name=".ui.detail.AvailableExamDetailActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.detail.enrolledexam.EnrolledExamDetailActivity"
+            android:name=".ui.detail.EnrolledExamDetailActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -1,5 +1,6 @@
 package it.communikein.myunimib.data.network;
 
+import android.app.Service;
 import android.util.Log;
 
 import com.firebase.jobdispatcher.Job;
@@ -7,14 +8,30 @@ import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.firebase.jobdispatcher.RetryStrategy;
 
-import it.communikein.myunimib.R;
-import it.communikein.myunimib.utilities.InjectorUtils;
-import it.communikein.myunimib.utilities.NotificationHelper;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasServiceInjector;
 
 
-public class ExamAvailableSyncJobService extends JobService {
+public class ExamAvailableSyncJobService extends JobService implements HasServiceInjector {
 
     private static final String LOG_TAG = ExamAvailableSyncJobService.class.getSimpleName();
+
+    @Inject
+    DispatchingAndroidInjector<Service> dispatchingAndroidInjector;
+
+    @Inject
+    UnimibNetworkDataSource networkDataSource;
+
+
+    @Override
+    public void onCreate() {
+        AndroidInjection.inject(this);
+        super.onCreate();
+    }
 
     /**
      * The entry point to your Job. Implementations should offload work to another thread of
@@ -30,9 +47,7 @@ public class ExamAvailableSyncJobService extends JobService {
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.d(LOG_TAG, "Scheduled available exams job started.");
 
-        UnimibNetworkDataSource unimibNetworkDataSource = InjectorUtils
-                .provideNetworkDataSource(this.getApplicationContext());
-        unimibNetworkDataSource.fetchAvailableExams();
+        networkDataSource.fetchAvailableExams();
 
         jobFinished(jobParameters, false);
 
@@ -56,4 +71,8 @@ public class ExamAvailableSyncJobService extends JobService {
         return true;
     }
 
+    @Override
+    public AndroidInjector<Service> serviceInjector() {
+        return dispatchingAndroidInjector;
+    }
 }

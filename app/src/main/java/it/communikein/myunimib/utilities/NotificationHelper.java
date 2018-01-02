@@ -12,6 +12,9 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.ui.MainActivity;
 
@@ -19,13 +22,10 @@ import it.communikein.myunimib.ui.MainActivity;
  * Created by eliam on 12/22/2017.
  */
 
+@Singleton
 public class NotificationHelper extends ContextWrapper {
 
     private static final String LOG_TAG = NotificationHelper.class.getSimpleName();
-
-    // For Singleton instantiation
-    private static final Object LOCK = new Object();
-    private static NotificationHelper sInstance;
 
     private Context mContext;
     private static NotificationManager notificationManager;
@@ -41,8 +41,8 @@ public class NotificationHelper extends ContextWrapper {
     private static final int AVAILABLE_EXAMS_CHANGES_NOTIFICATION_ID = 88;
     private static final int ENROLLED_EXAMS_CHANGES_NOTIFICATION_ID = 89;
 
-
-    private NotificationHelper(Context base) {
+    @Inject
+    public NotificationHelper(Context base) {
         super(base);
 
         mContext = base;
@@ -58,17 +58,6 @@ public class NotificationHelper extends ContextWrapper {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createChannels();
-    }
-
-    public synchronized static NotificationHelper getInstance(Context context) {
-        Log.d(LOG_TAG, "Getting the notification helper");
-        if (sInstance == null) {
-            synchronized (LOCK) {
-                sInstance = new NotificationHelper(context);
-                Log.d(LOG_TAG, "Made new notification helper");
-            }
-        }
-        return sInstance;
     }
 
     @TargetApi(26)

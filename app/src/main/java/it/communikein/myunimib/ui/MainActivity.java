@@ -19,6 +19,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import dagger.android.AndroidInjection;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.support.HasSupportFragmentInjector;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
@@ -34,10 +37,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class MainActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks {
+        LoaderManager.LoaderCallbacks, HasSupportFragmentInjector {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
 
     private ActivityMainBinding mBinding;
 
@@ -63,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -353,5 +362,11 @@ public class MainActivity extends AppCompatActivity implements
         stackBuilder.addNextIntent(resultIntent);
         // Gets a PendingIntent containing the entire back stack
         return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+
+    @Override
+    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingAndroidInjector;
     }
 }

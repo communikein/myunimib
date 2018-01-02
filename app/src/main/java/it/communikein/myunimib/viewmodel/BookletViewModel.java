@@ -1,21 +1,24 @@
-package it.communikein.myunimib.ui.list.booklet;
+package it.communikein.myunimib.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.database.BookletEntry;
 
 
-class BookletViewModel extends ViewModel {
+public class BookletViewModel extends ViewModel {
 
     private final UnimibRepository mRepository;
 
     private final LiveData<List<BookletEntry>> mBooklet;
     private final LiveData<Boolean> mLoading;
 
+    @Inject
     public BookletViewModel(UnimibRepository repository) {
         mRepository = repository;
 

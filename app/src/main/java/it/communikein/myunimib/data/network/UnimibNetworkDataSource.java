@@ -1,5 +1,6 @@
 package it.communikein.myunimib.data.network;
 
+import android.app.IntentService;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Index;
@@ -32,6 +33,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.net.ssl.HttpsURLConnection;
 
 import it.communikein.myunimib.AppExecutors;
@@ -46,6 +49,7 @@ import it.communikein.myunimib.utilities.Utils;
 
 import static it.communikein.myunimib.data.network.S3Helper.getHTML;
 
+@Singleton
 public class UnimibNetworkDataSource {
 
     private static final String LOG_TAG = UnimibNetworkDataSource.class.getSimpleName();
@@ -71,11 +75,7 @@ public class UnimibNetworkDataSource {
     public static final String APP_ID = "APP_ID";
     public static final String ADSCE_ID = "ADSCE_ID";
 
-    // For Singleton instantiation
-    private static final Object LOCK = new Object();
-    private static UnimibNetworkDataSource sInstance;
     private final Context mContext;
-
     private final AppExecutors mExecutors;
 
     private final MutableLiveData<List<BookletEntry>> mDownloadedBooklet;
@@ -86,7 +86,8 @@ public class UnimibNetworkDataSource {
     private final MutableLiveData<Boolean> mAvailableExamsLoading;
     private final MutableLiveData<Boolean> mEnrolledExamsLoading;
 
-    private UnimibNetworkDataSource(Context context, AppExecutors executors) {
+    @Inject
+    public UnimibNetworkDataSource(Context context, AppExecutors executors) {
         mContext = context;
         mExecutors = executors;
 
@@ -97,20 +98,6 @@ public class UnimibNetworkDataSource {
         mBookletLoading = new MutableLiveData<>();
         mAvailableExamsLoading = new MutableLiveData<>();
         mEnrolledExamsLoading = new MutableLiveData<>();
-    }
-
-    /**
-     * Get the singleton for this class
-     */
-    public static UnimibNetworkDataSource getInstance(Context context, AppExecutors executors) {
-        Log.d(LOG_TAG, "Getting the network data source");
-        if (sInstance == null) {
-            synchronized (LOCK) {
-                sInstance = new UnimibNetworkDataSource(context.getApplicationContext(), executors);
-                Log.d(LOG_TAG, "Made new network data source");
-            }
-        }
-        return sInstance;
     }
 
 

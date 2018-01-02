@@ -1,17 +1,21 @@
-package it.communikein.myunimib.ui.list.booklet;
+package it.communikein.myunimib.viewmodel.factory;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import javax.inject.Inject;
+
 import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.viewmodel.AvailableExamsListViewModel;
 
 
-public class BookletViewModelFactory extends ViewModelProvider.NewInstanceFactory {
+public class AvailableExamsViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
     private final UnimibRepository mRepository;
 
-    public BookletViewModelFactory(UnimibRepository repository) {
+    @Inject
+    public AvailableExamsViewModelFactory(UnimibRepository repository) {
         this.mRepository = repository;
     }
 
@@ -19,7 +23,7 @@ public class BookletViewModelFactory extends ViewModelProvider.NewInstanceFactor
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new BookletViewModel(mRepository);
+        return (T) new AvailableExamsListViewModel(mRepository);
     }
 
 }

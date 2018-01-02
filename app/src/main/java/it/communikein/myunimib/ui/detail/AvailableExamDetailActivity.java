@@ -1,7 +1,9 @@
-package it.communikein.myunimib.ui.detail.availableexam;
+package it.communikein.myunimib.ui.detail;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -20,42 +22,61 @@ import android.view.View;
 
 import java.io.File;
 
-import it.communikein.myunimib.AppExecutors;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasActivityInjector;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.AvailableExam;
 import it.communikein.myunimib.data.database.ExamID;
 import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityAvailableExamDetailsBinding;
-import it.communikein.myunimib.utilities.InjectorUtils;
+import it.communikein.myunimib.viewmodel.AvailableExamDetailViewModel;
+import it.communikein.myunimib.viewmodel.factory.AvailableExamViewModelFactory;
+import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
 
 
 public class AvailableExamDetailActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks, S3Helper.EnrollLoader.EnrollUpdatesListener {
+        LoaderManager.LoaderCallbacks, S3Helper.EnrollLoader.EnrollUpdatesListener,
+        HasActivityInjector {
 
     private final static int LOADER_ENROLL_ID = 4000;
 
+    @Inject
+    DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
+
+    /* */
     private ActivityAvailableExamDetailsBinding mBinding;
+
+    /* */
+    @Inject
+    AvailableExamViewModelFactory viewModelFactory;
+
+    /* */
     private AvailableExamDetailViewModel mViewModel;
 
     private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_available_exam_details);
 
         ExamID examID = loadData();
 
-        AvailableExamViewModelFactory factory = InjectorUtils
-                .provideAvailableExamViewModelFactory(this, examID);
-        mViewModel = ViewModelProviders.of(this, factory)
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
                 .get(AvailableExamDetailViewModel.class);
+        mViewModel.setExamId(examID);
 
         mBinding.setLifecycleOwner(this);
         mBinding.setExam(mViewModel.getExam());
 
-        if (examID != null) initUI();
+        initUI();
     }
 
     private ExamID loadData() {
@@ -129,7 +150,11 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
             case LOADER_ENROLL_ID:
                 showProgress(true);
 
-                return new S3Helper.EnrollLoader(this, mViewModel.getExam().getValue(), this);
+                return new S3Helper.EnrollLoader(
+                        this,
+                        mViewModel.getExam().getValue(),
+                        mViewModel.getRepository(),
+                        this);
 
             default:
                 throw new RuntimeException("Loader Not Implemented: " + id);
@@ -229,10 +254,8 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
 
-            UnimibNetworkDataSource.getInstance(this, AppExecutors.getInstance())
-                    .startFetchAvailableExamsService();
-            UnimibNetworkDataSource.getInstance(this, AppExecutors.getInstance())
-                    .startFetchEnrolledExamsService();
+            mViewModel.refreshAvailableExams();
+            mViewModel.refreshEnrolledExams();
         }
         else {
             new AlertDialog.Builder(this)
@@ -265,5 +288,12 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
         if (show) progress.show();
         else
         if(progress != null && progress.isShowing()) progress.dismiss();
+    }
+
+
+
+    @Override
+    public AndroidInjector<Activity> activityInjector() {
+        return dispatchingAndroidInjector;
     }
 }

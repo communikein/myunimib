@@ -1,4 +1,4 @@
-package it.communikein.myunimib.ui.list.availableexam;
+package it.communikein.myunimib.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
@@ -6,17 +6,20 @@ import android.arch.lifecycle.ViewModel;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.database.AvailableExam;
 
 
-class AvailableExamsListViewModel extends ViewModel {
+public class AvailableExamsListViewModel extends ViewModel {
 
     private final UnimibRepository mRepository;
 
     private final LiveData<List<AvailableExam>> mData;
     private final LiveData<Boolean> mLoading;
 
+    @Inject
     public AvailableExamsListViewModel(UnimibRepository repository) {
         mRepository = repository;
 
@@ -32,8 +35,17 @@ class AvailableExamsListViewModel extends ViewModel {
         return mLoading;
     }
 
+    public UnimibRepository getRepository() {
+        return mRepository;
+    }
+
+
     public void refreshAvailableExams() {
         mRepository.startFetchAvailableExamsService();
+    }
+
+    public void refreshEnrolledExams() {
+        mRepository.startFetchEnrolledExamsService();
     }
 
 }
