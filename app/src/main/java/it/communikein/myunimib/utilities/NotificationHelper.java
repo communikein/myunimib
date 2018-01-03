@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,7 +26,7 @@ public class NotificationHelper extends ContextWrapper {
 
     private static final String LOG_TAG = NotificationHelper.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
     private static NotificationManager notificationManager;
 
     private final String CHANNEL_BOOKLET_ID;
@@ -140,6 +139,7 @@ public class NotificationHelper extends ContextWrapper {
         return getNotification(CHANNEL_ENROLLED_EXAMS_ID, title, content, pendingIntent);
     }
 
+    @SuppressWarnings("deprecation")
     private NotificationCompat.Builder getNotification(String channelId, String title,
                                                        String content, PendingIntent pendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

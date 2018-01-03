@@ -1,11 +1,8 @@
 package it.communikein.myunimib.data.database;
 
 import android.arch.persistence.room.Database;
-import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
-import android.arch.persistence.room.migration.Migration;
-import android.content.Context;
 
 
 @Database(entities = {BookletEntry.class, EnrolledExam.class, AvailableExam.class},

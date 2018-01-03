@@ -1,7 +1,6 @@
 package it.communikein.myunimib.ui.list.booklet;
 
 
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.databinding.DataBindingUtil;

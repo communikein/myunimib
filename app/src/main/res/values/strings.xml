@@ -174,5 +174,6 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_fake_login">Try the app</string>
     <string name="title_activity_maps">Map</string>
+    <string name="action_enroll_exam">Enroll exam</string>
 
 </resources>

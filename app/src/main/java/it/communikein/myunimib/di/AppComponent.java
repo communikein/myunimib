@@ -1,7 +1,6 @@
 package it.communikein.myunimib.di;
 
 import android.app.Application;
-import android.app.IntentService;
 
 import javax.inject.Singleton;
 

@@ -79,14 +79,16 @@
 
             </android.support.constraint.ConstraintLayout>
 
-            <Button
+            <ImageButton
                 android:id="@+id/enroll_button"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
-                android:text="+"
                 android:onClick="@{() -> callback.onEnrollmentClicked(exam)}"
                 android:gravity="center"
-                android:theme="@style/MyButton"/>
+                android:tint="@color/colorAccentDark"
+                app:srcCompat="@drawable/ic_add_black"
+                android:contentDescription="@string/action_enroll_exam"
+                style="?android:attr/borderlessButtonStyle"/>
 
         </LinearLayout>
 

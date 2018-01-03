@@ -1,7 +1,6 @@
 package it.communikein.myunimib.ui.detail;
 
 
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,7 +13,6 @@ import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
 
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;

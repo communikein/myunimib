@@ -2,7 +2,6 @@ package it.communikein.myunimib.ui.detail;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -43,7 +42,6 @@ import it.communikein.myunimib.databinding.ActivityEnrolledExamDetailsBinding;
 import it.communikein.myunimib.ui.FragmentAppCompatActivity;
 import it.communikein.myunimib.utilities.UniversityUtils;
 import it.communikein.myunimib.viewmodel.EnrolledExamDetailViewModel;
-import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
 import it.communikein.myunimib.viewmodel.factory.EnrolledExamViewModelFactory;
 
 @SuppressWarnings("unchecked")

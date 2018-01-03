@@ -1,9 +1,7 @@
 package it.communikein.myunimib.data.network;
 
-import android.app.IntentService;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.persistence.room.Index;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;

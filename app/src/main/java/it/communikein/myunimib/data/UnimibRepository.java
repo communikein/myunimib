@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import it.communikein.myunimib.AppExecutors;
-import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.database.AvailableExam;
 import it.communikein.myunimib.data.database.BookletEntry;
 import it.communikein.myunimib.data.database.EnrolledExam;

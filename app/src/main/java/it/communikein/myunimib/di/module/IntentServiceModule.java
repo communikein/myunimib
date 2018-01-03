@@ -8,7 +8,6 @@ import it.communikein.myunimib.data.network.ExamAvailableSyncIntentService;
 import it.communikein.myunimib.data.network.ExamAvailableSyncJobService;
 import it.communikein.myunimib.data.network.ExamEnrolledSyncIntentService;
 import it.communikein.myunimib.data.network.ExamEnrolledSyncJobService;
-import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 
 @Module
 public abstract class IntentServiceModule {

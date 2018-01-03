@@ -3,7 +3,6 @@ package it.communikein.myunimib.ui.detail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -36,7 +35,6 @@ import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityAvailableExamDetailsBinding;
 import it.communikein.myunimib.viewmodel.AvailableExamDetailViewModel;
 import it.communikein.myunimib.viewmodel.factory.AvailableExamViewModelFactory;
-import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
 
 
 public class AvailableExamDetailActivity extends AppCompatActivity implements

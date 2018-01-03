@@ -1,7 +1,6 @@
 package it.communikein.myunimib.ui.list.enrolledexam;
 
 
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +33,6 @@ import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.ui.detail.EnrolledExamDetailActivity;
 import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.viewmodel.EnrolledExamsListViewModel;
-import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
 import it.communikein.myunimib.viewmodel.factory.EnrolledExamsViewModelFactory;
 
 

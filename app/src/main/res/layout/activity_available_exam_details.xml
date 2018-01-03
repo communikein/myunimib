@@ -60,7 +60,7 @@
             android:layout_margin="@dimen/fab_margin"
             app:layout_anchor="@id/exam_data_view"
             app:layout_anchorGravity="bottom|end"
-            app:srcCompat="@drawable/ic_add_black_24dp"
+            app:srcCompat="@drawable/ic_add_black"
             app:fabSize="normal"/>
 
     </android.support.design.widget.CoordinatorLayout>
