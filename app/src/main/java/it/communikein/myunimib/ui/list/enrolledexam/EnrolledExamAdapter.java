@@ -10,10 +10,10 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.EnrolledExam;
-import it.communikein.myunimib.data.database.ExamID;
+import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.databinding.EnrolledExamListItemBinding;
-import it.communikein.myunimib.utilities.MyunimibDateUtils;
+import it.communikein.myunimib.utilities.DateHelper;
 
 import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamAdapter.ExamAdapterViewHolder;
 
@@ -132,7 +132,7 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHol
 
         void bindToData() {
             EnrolledExam entry = mBinding.getExam();
-            String friendly_date = MyunimibDateUtils.getFriendlyDateString(
+            String friendly_date = DateHelper.getFriendlyDateString(
                     mBinding.horizontalMiddle.getContext(),
                     entry.getDate().getTime(),
                     false,

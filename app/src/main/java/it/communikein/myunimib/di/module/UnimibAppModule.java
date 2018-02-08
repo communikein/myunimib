@@ -9,30 +9,50 @@ import dagger.Module;
 import dagger.Provides;
 import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.UniversityUtils;
+import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.database.UnimibDao;
 import it.communikein.myunimib.data.database.UnimibDatabase;
+import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.utilities.NotificationHelper;
 
 @Module
 public class UnimibAppModule {
 
-    @Singleton
-    @Provides
-    UnimibRepository provideRepository(UnimibDao dao, UnimibNetworkDataSource networkDataSource,
-                                       AppExecutors executors, NotificationHelper notificationHelper) {
-        return new UnimibRepository(dao, networkDataSource, executors, notificationHelper);
+    private final Application application;
+
+    public UnimibAppModule(Application application) {
+        this.application = application;
     }
 
-    @Singleton
     @Provides
-    UnimibNetworkDataSource provideNetworkDataSource(Application app, AppExecutors executors) {
-        return new UnimibNetworkDataSource(app.getApplicationContext(), executors);
+    Application provideApplication() {
+        return application;
+    }
+
+
+
+    @Singleton @Provides
+    UnimibRepository provideRepository(Application application, UnimibDao dao,
+                                       UnimibNetworkDataSource networkDataSource,
+                                       UniversityUtils universityHelper, AppExecutors executors,
+                                       UserHelper userHelper, NotificationHelper notificationHelper) {
+        return new UnimibRepository(application, dao, networkDataSource, universityHelper,
+                userHelper, executors, notificationHelper);
     }
 
     @Singleton @Provides
-    UnimibDatabase provideDatabase(Application app) {
-        return Room.databaseBuilder(app, UnimibDatabase.class, UnimibDatabase.NAME).build();
+    UnimibNetworkDataSource provideNetworkDataSource(Application application,
+                                                     AppExecutors executors) {
+        return new UnimibNetworkDataSource(application.getApplicationContext(), executors);
+    }
+
+    @Singleton @Provides
+    UnimibDatabase provideDatabase(Application application) {
+        return Room.databaseBuilder(application, UnimibDatabase.class, UnimibDatabase.NAME)
+                .fallbackToDestructiveMigration()
+                .build();
     }
 
     @Singleton @Provides
@@ -41,8 +61,24 @@ public class UnimibAppModule {
     }
 
     @Singleton @Provides
-    NotificationHelper provideNotificationHelper(Application app) {
-        return new NotificationHelper(app.getApplicationContext());
+    NotificationHelper provideNotificationHelper(Application application) {
+        return new NotificationHelper(application.getApplicationContext());
+    }
+
+    @Singleton @Provides
+    UniversityUtils provideUniversityHelper() {
+        return new UniversityUtils();
+    }
+
+    @Singleton @Provides
+    ProfilePictureVolleyRequest provideProfilePictureRequest(UnimibRepository repository,
+                                                             Application application) {
+        return new ProfilePictureVolleyRequest(repository, application);
+    }
+
+    @Singleton @Provides
+    UserHelper provideUserHelper(Application application) {
+        return new UserHelper(application);
     }
 
 }

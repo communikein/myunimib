@@ -4,10 +4,12 @@ import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -22,22 +24,29 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import dagger.android.AndroidInjection;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.User;
+import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.accountmanager.AccountUtils;
+import it.communikein.myunimib.data.network.loaders.S3Helper;
 import it.communikein.myunimib.databinding.ActivityLoginBinding;
-import it.communikein.myunimib.data.network.S3Helper;
-import it.communikein.myunimib.utilities.NetworkUtils;
-import it.communikein.myunimib.utilities.UserUtils;
+import it.communikein.myunimib.utilities.NetworkHelper;
 import it.communikein.myunimib.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import it.communikein.myunimib.viewmodel.LoginViewModel;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
+import it.communikein.myunimib.viewmodel.factory.LoginViewModelFactory;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -45,6 +54,13 @@ public class LoginActivity extends AuthAppCompatActivity implements
         LoaderManager.LoaderCallbacks, EasyPermissions.PermissionCallbacks {
 
     private ActivityLoginBinding mBinding;
+
+    /* */
+    @Inject
+    LoginViewModelFactory viewModelFactory;
+
+    /* */
+    private LoginViewModel mViewModel;
 
     private AccountManager mAccountManager;
     private String username;
@@ -62,7 +78,14 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
+                .get(LoginViewModel .class);
 
         initUI();
         handleIntent(getIntent());
@@ -123,10 +146,20 @@ public class LoginActivity extends AuthAppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public void onBackPressed() {}
 
     private void initUI() {
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+        setSupportActionBar(mBinding.toolbar);
+
+        Window w = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
 
         showMainLoginView();
         hideFacultyChoiceView();
@@ -152,7 +185,6 @@ public class LoginActivity extends AuthAppCompatActivity implements
         progress.setCancelable(false);
 
         mBinding.toolbar.setTitle(R.string.title_login);
-        setSupportActionBar(mBinding.toolbar);
     }
 
     private void handleIntent(Intent intent) {
@@ -220,7 +252,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
             case S3Helper.OK_LOGGED_IN:
             case S3Helper.OK_UPDATED:
                 /* Finalize login process */
-                finishLogin(user);
+                finishLogin();
                 break;
 
             /* If S3 is not available */
@@ -253,13 +285,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
         }
     }
 
-    private void finishLogin(User user) {
-        /* Create a new UNIMIB account to save on the device */
-        final Account account = new Account(user.getUsername(), AccountUtils.ACCOUNT_TYPE);
-
-        /* Save the account on the device via Account Manager */
-        mAccountManager.addAccountExplicitly(account, user.getPassword(), null);
-
+    private void finishLogin() {
         /* Since the user is logged in, start the Main Activity */
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
@@ -272,7 +298,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
         if (mBinding.termsCheck.isChecked()) {
 
             /* If the device is online */
-            if (NetworkUtils.isDeviceOnline(this)) {
+            if (NetworkHelper.isDeviceOnline(this)) {
                 Utils.hideKeyboard(this);
 
                 /* Reset errors. */
@@ -412,24 +438,15 @@ public class LoginActivity extends AuthAppCompatActivity implements
                  */
                 username = mBinding.usernameTextInputLayout.getEditText().getText().toString();
                 String password = mBinding.passwordTextInputLayout.getEditText().getText().toString();
-                User temp_user = new User(username, password);
-                temp_user.setFake(false);
-
-                return new S3Helper.LoginLoader(this, temp_user);
+                return mViewModel.doLogin(this, username, password);
 
             case LOADER_FAKE_LOGIN_ID:
                 /* Create a fake user and start the fake login process. */
-                temp_user = new User("fake", "fake");
-                temp_user.setFake(true);
-
-                return new S3Helper.LoginLoader(this, temp_user);
+                return mViewModel.doFakeLogin(this);
 
             case LOADER_CONFIRM_FACULTY_ID:
                 /* Get the user, save the chosen faculty, then complete the login process. */
-                Utils.user = UserUtils.getUser(this);
-                Utils.user.setSelectedFaculty(selectedFaculty);
-
-                return new S3Helper.UserDataLoader(this, Utils.user);
+                return mViewModel.downloadUserData(this, selectedFaculty);
 
             default:
                 return null;

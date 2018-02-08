@@ -13,7 +13,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 
-public class MyunimibDateUtils {
+public class DateHelper {
 
     public static final DateFormat date =
             new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -156,7 +156,7 @@ public class MyunimibDateUtils {
                 /*
                  * Since there is no localized format that returns "Today" or "Tomorrow" in the API
                  * levels we have to support, we take the name of the day (from SimpleDateFormat)
-                 * and use it to replace the date from MyunimibDateUtils. This isn't guaranteed to work,
+                 * and use it to replace the date from DateHelper. This isn't guaranteed to work,
                  * but our testing so far has been conclusively positive.
                  *
                  * For information on a simpler API to use (on API > 18), please check out the
@@ -177,11 +177,15 @@ public class MyunimibDateUtils {
         }
     }
 
+    public static String getFriendlyDateShort(Context context, long normalizedUtcMidnight) {
+        return getFriendlyDateString(context, normalizedUtcMidnight, false, false);
+    }
+
     /**
      * Returns a date string in the format specified, which shows an abbreviated date without a
      * year.
      *
-     * @param context      Used by MyunimibDateUtils to format the date in the current locale
+     * @param context      Used by DateHelper to format the date in the current locale
      * @param timeInMillis Time in milliseconds since the epoch (local time)
      *
      * @return The formatted date string

@@ -20,7 +20,7 @@
     <string name="channel_enrolled_exams_content_changes">Changes in the enrolled exams detected.</string>
     <!-- END -->
 
-    <!-- Strings related to navigation  -->
+    <!-- Strings related to bottom_navigation  -->
     <string name="nav_home">@string/title_home</string>
     <string name="nav_timetable">@string/title_timetable</string>
     <string name="nav_booklet">@string/title_booklet</string>
@@ -175,5 +175,18 @@
     <string name="action_fake_login">Try the app</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_enroll_exam">Enroll exam</string>
+
+
+    <string name="holder_user_name">Brambilla Fumagalli</string>
+    <string name="holder_user_email">brambilla.fumagalli@gmail.com</string>
+    <string name="profile_picture_description">User\'s profile picture</string>
+    <string name="close">close</string>
+    <string name="title_share">Share</string>
+    <string name="title_logout">Logout</string>
+    <string name="milan">Milan</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_buildings">Buildings</string>
 
 </resources>

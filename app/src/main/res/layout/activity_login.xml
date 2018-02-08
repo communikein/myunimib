@@ -7,7 +7,8 @@
         android:id="@+id/loginView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".ui.MainActivity">
+        tools:context=".ui.MainActivity"
+        android:fitsSystemWindows="true">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/appbar"
@@ -19,7 +20,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?android:actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@color/colorPrimary"
                 app:layout_scrollFlags="scroll|enterAlways"
                 app:popupTheme="@style/Theme.MyUnimib.PopupOverlay"/>
 

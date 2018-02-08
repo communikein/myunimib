@@ -14,6 +14,9 @@ import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasServiceInjector;
+import it.communikein.myunimib.AppExecutors;
+import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.model.User;
 
 
 public class ExamEnrolledSyncJobService extends JobService implements HasServiceInjector {
@@ -24,7 +27,7 @@ public class ExamEnrolledSyncJobService extends JobService implements HasService
     DispatchingAndroidInjector<Service> dispatchingAndroidInjector;
 
     @Inject
-    UnimibNetworkDataSource networkDataSource;
+    UnimibRepository repository;
 
 
     @Override
@@ -47,7 +50,7 @@ public class ExamEnrolledSyncJobService extends JobService implements HasService
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.d(LOG_TAG, "Scheduled enrolled exams job started.");
 
-        networkDataSource.fetchEnrolledExams();
+        repository.fetchEnrolledExams();
 
         jobFinished(jobParameters, false);
 

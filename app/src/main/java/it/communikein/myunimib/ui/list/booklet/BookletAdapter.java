@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.BookletEntry;
+import it.communikein.myunimib.data.model.BookletEntry;
 import it.communikein.myunimib.databinding.BookletListItemBinding;
 import it.communikein.myunimib.ui.list.booklet.BookletAdapter.BookletAdapterViewHolder;
 

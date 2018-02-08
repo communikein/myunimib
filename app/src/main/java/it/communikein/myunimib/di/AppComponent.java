@@ -4,11 +4,13 @@ import android.app.Application;
 
 import javax.inject.Singleton;
 
-import dagger.BindsInstance;
 import dagger.Component;
 import dagger.android.support.AndroidSupportInjectionModule;
 import it.communikein.myunimib.UnimibApp;
-import it.communikein.myunimib.di.module.ActivityModule;
+import it.communikein.myunimib.di.module.AvailableExamDetailActivityModule;
+import it.communikein.myunimib.di.module.EnrolledExamDetailActivityModule;
+import it.communikein.myunimib.di.module.LoginActivityModule;
+import it.communikein.myunimib.di.module.MainActivityModule;
 import it.communikein.myunimib.di.module.IntentServiceModule;
 import it.communikein.myunimib.di.module.UnimibAppModule;
 
@@ -16,18 +18,15 @@ import it.communikein.myunimib.di.module.UnimibAppModule;
 @Component(modules = {
         AndroidSupportInjectionModule.class,
         UnimibAppModule.class,
-        ActivityModule.class,
+        LoginActivityModule.class,
+        MainActivityModule.class,
+        AvailableExamDetailActivityModule.class,
+        EnrolledExamDetailActivityModule.class,
         IntentServiceModule.class})
 public interface AppComponent {
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        Builder application(Application application);
-
-        AppComponent build();
-    }
-
     void inject(UnimibApp app);
+
+    Application getApplication();
 
 }

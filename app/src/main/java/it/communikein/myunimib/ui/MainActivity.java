@@ -1,53 +1,67 @@
 package it.communikein.myunimib.ui;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.Loader;
+import android.support.v4.view.GravityCompat;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
+
+import com.android.volley.toolbox.NetworkImageView;
 
 import dagger.android.AndroidInjection;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
-import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.ui.detail.HomeFragment;
 import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
 import it.communikein.myunimib.ui.list.booklet.BookletFragment;
+import it.communikein.myunimib.ui.list.building.BuildingsFragment;
 import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
-import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.utilities.Utils;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
+import it.communikein.myunimib.viewmodel.factory.MainActivityViewModelFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks, HasSupportFragmentInjector {
+        HasSupportFragmentInjector, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private ActivityMainBinding mBinding;
 
     @Inject
     DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
 
-    private ActivityMainBinding mBinding;
+    /* */
+    @Inject
+    MainActivityViewModelFactory viewModelFactory;
+
+    /* */
+    private MainActivityViewModel mViewModel;
 
     private final List<Fragment> fragments = new ArrayList<>();
 
@@ -59,13 +73,19 @@ public class MainActivity extends AppCompatActivity implements
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
     private static final int INDEX_FRAGMENT_EXAMS_AVAILABLE = 2;
     private static final int INDEX_FRAGMENT_EXAMS_ENROLLED = 3;
+    private static final int INDEX_FRAGMENT_BUILDINGS = 4;
 
     public static final String TAG_FRAGMENT_HOME = "tab-home";
     public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
     public static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
     public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
+    public static final String TAG_FRAGMENT_BUILDINGS = "tab-buildings";
 
-    private static final int LOADER_LOGOUT_ID = 2200;
+    private static final long DRAWER_CLOSE_DELAY_MS = 250;
+    protected ActionBarDrawerToggle mDrawerToggle;
+    private final Handler mDrawerActionHandler = new Handler();
+    private final String DRAWER_ITEM_SELECTED = "drawer-item-selected";
+    private int drawerItemSelectedId = R.id.navigation_home;
 
     private ProgressDialog progressDialog;
 
@@ -76,9 +96,26 @@ public class MainActivity extends AppCompatActivity implements
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
+                .get(MainActivityViewModel.class);
+
         parseIntent();
         restoreInstanceState(savedInstanceState);
-        initUI();
+        initUI(savedInstanceState);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -93,19 +130,96 @@ public class MainActivity extends AppCompatActivity implements
             FRAGMENT_SELECTED_TAG = savedInstanceState.getString(SAVE_FRAGMENT_SELECTED);
     }
 
-    private void initUI(){
+    private void initUI(Bundle savedInstanceState){
         buildFragmentsList();
 
-        mBinding.navigation.setOnNavigationItemSelectedListener(item ->
-                switchFragment(item.getItemId()));
-        int navId = getNavIdFromFragmentTag(FRAGMENT_SELECTED_TAG);
-        mBinding.navigation.setSelectedItemId(navId);
+        initBottomNavigation();
+        initProgressDialog();
 
         setSupportActionBar(mBinding.toolbar);
 
+        initDrawerNavigation(savedInstanceState);
+
+        Window w = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
+
+    private void initProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.label_logging_out));
         progressDialog.setCancelable(false);
+    }
+
+    private void initBottomNavigation() {
+        mBinding.bottomNavigation.setOnNavigationItemSelectedListener(item ->
+                navigate(item.getItemId()));
+        int navId = getNavIdFromFragmentTag(FRAGMENT_SELECTED_TAG);
+        mBinding.bottomNavigation.setSelectedItemId(navId);
+    }
+
+    protected void initDrawerNavigation(Bundle savedInstanceState) {
+        initDrawerHeader();
+        updateDrawerHeader();
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mBinding.drawerLayout,
+                mBinding.toolbar, R.string.open, R.string.close);
+        mBinding.drawerLayout.addDrawerListener(mDrawerToggle);
+        mBinding.drawerNavigation.setNavigationItemSelectedListener(this);
+
+        if (savedInstanceState != null) {
+            /* Get the last selected drawer menu item ID */
+            drawerItemSelectedId = savedInstanceState.getInt(DRAWER_ITEM_SELECTED);
+
+            /* Remove this entry to avoid problems further */
+            savedInstanceState.remove(DRAWER_ITEM_SELECTED);
+            if (savedInstanceState.size() == 0)
+                savedInstanceState = null;
+
+            mBinding.drawerNavigation.getMenu()
+                    .findItem(drawerItemSelectedId)
+                    .setChecked(true);
+        }
+
+        /*
+         * If the savedInstanceState is not null, it means we don't need to display the fragment,
+         * since it has already been saved and will be restored by the system
+         */
+        if (savedInstanceState == null) {
+            navigate(R.id.navigation_home);
+
+            mBinding.drawerNavigation.getMenu()
+                    .findItem(R.id.navigation_home)
+                    .setChecked(true);
+        }
+    }
+
+    public void initDrawerHeader() {
+        updateDrawerHeader();
+    }
+
+    protected void updateDrawerHeader() {
+        View header = mBinding.drawerNavigation.getHeaderView(0);
+        NetworkImageView userImageView = header.findViewById(R.id.circleView);
+        TextView userNameTextView = header.findViewById(R.id.user_name_textview);
+        TextView userEmailTextView = header.findViewById(R.id.user_email_textview);
+
+        userImageView.setVisibility(View.VISIBLE);
+        userNameTextView.setVisibility(View.VISIBLE);
+        userEmailTextView.setVisibility(View.VISIBLE);
+
+        if (Utils.user == null)
+            Utils.user = mViewModel.getUser();
+
+        userNameTextView.setText(Utils.user.getName());
+        userEmailTextView.setText(Utils.user.getUniversityMail());
+
+        mViewModel.loadProfilePicture(userImageView);
     }
 
     private int getNavIdFromFragmentTag(String tag) {
@@ -152,9 +266,91 @@ public class MainActivity extends AppCompatActivity implements
         fragments.add(INDEX_FRAGMENT_BOOKLET, new BookletFragment());
         fragments.add(INDEX_FRAGMENT_EXAMS_AVAILABLE, new AvailableExamsFragment());
         fragments.add(INDEX_FRAGMENT_EXAMS_ENROLLED, new EnrolledExamsFragment());
+        fragments.add(INDEX_FRAGMENT_BUILDINGS, new BuildingsFragment());
     }
 
-    private boolean switchFragment(int tab_id) {
+
+    public void hideTabsLayout() {
+        mBinding.tabs.setVisibility(View.GONE);
+    }
+
+    public void showTabsLayout(ArrayList<String> tabs) {
+        mBinding.tabs.setVisibility(View.VISIBLE);
+        mBinding.tabs.removeAllTabs();
+
+        for (String title : tabs)
+            mBinding.tabs.addTab(mBinding.tabs.newTab().setText(title));
+    }
+
+    public TabLayout getTabsLayout() {
+        return mBinding.tabs;
+    }
+
+    public void hideBottomNavigation() {
+        mBinding.bottomNavigation.setVisibility(View.GONE);
+    }
+
+    public void showBottomNavigation() {
+        mBinding.bottomNavigation.setVisibility(View.VISIBLE);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.settings_menu, menu);
+        return true;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_logout:
+                return tryLogout();
+
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+        }
+
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.START))
+            mBinding.drawerLayout.closeDrawer(GravityCompat.START);
+
+        if (getSupportFragmentManager().findFragmentByTag(TAG_FRAGMENT_HOME) == null)
+            navigate(R.id.navigation_home);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull final MenuItem menuItem) {
+        /* Update highlighted item in the bottom_navigation menu */
+        drawerItemSelectedId = menuItem.getItemId();
+        uncheckNavigationDrawersItems();
+        menuItem.setChecked(true);
+
+        /*
+         * Allow some time after closing the drawer before performing real bottom_navigation
+         * so the user can see what is happening.
+         */
+        mBinding.drawerLayout.closeDrawer(GravityCompat.START);
+        mDrawerActionHandler.postDelayed(() -> navigate(menuItem.getItemId()),
+                DRAWER_CLOSE_DELAY_MS);
+
+        return true;
+    }
+
+    private void uncheckNavigationDrawersItems() {
+        int size = mBinding.drawerNavigation.getMenu().size();
+
+        for (int i=0; i<size; i++)
+            mBinding.drawerNavigation.getMenu().getItem(i).setChecked(false);
+    }
+
+    private boolean navigate(int tab_id) {
         int index;
 
         switch (tab_id) {
@@ -174,6 +370,15 @@ public class MainActivity extends AppCompatActivity implements
                 index = INDEX_FRAGMENT_EXAMS_ENROLLED;
                 FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_EXAMS_ENROLLED;
                 break;
+            case R.id.navigation_buildings:
+                index = INDEX_FRAGMENT_BUILDINGS;
+                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_BUILDINGS;
+                break;
+            case R.id.navigation_logout:
+                return tryLogout();
+            case R.id.navigation_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
             default:
                 return false;
         }
@@ -187,139 +392,27 @@ public class MainActivity extends AppCompatActivity implements
 
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.settings_menu, menu);
+    private boolean tryLogout() {
+        showProgress(true);
+
+        mViewModel.logout(this,
+                (removed) -> {
+                    showProgress(false);
+
+                    if (removed) {
+                        showLogoutCompletedDialog();
+                    }
+                    else {
+                        String error = getString(R.string.error_logout_user_not_removed);
+                        showLogoutErrorDialog(error);
+                    }
+                },
+                (error) -> {
+                    showProgress(false);
+
+                    showLogoutErrorDialog(error);
+                });
         return true;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.action_logout:
-                showProgress(true);
-
-                getSupportLoaderManager()
-                        .initLoader(LOADER_LOGOUT_ID, null, this)
-                        .forceLoad();
-                return true;
-
-            case R.id.action_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
-
-    @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case LOADER_LOGOUT_ID:
-                Utils.user = UserUtils.getUser(this);
-                return new S3Helper.LogoutLoader(this, Utils.user);
-
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader loader, Object data) {
-        int loader_id = loader.getId();
-
-        switch (loader_id) {
-            case LOADER_LOGOUT_ID:
-                if (data != null)
-                    finishLogout();
-                else
-                    showLogoutErrorDialog(null);
-
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader loader) {}
-
-
-
-    private void finishLogout() {
-        final AccountManager accountManager = AccountManager.get(this);
-        final Account account = accountManager
-                .getAccountsByType(AccountUtils.ACCOUNT_TYPE)[0];
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            /*
-             * Trying to call this on an older Android version results in a
-             * NoSuchMethodError exception. There is no AppCompat version of the
-             * AccountManager API to avoid the need for this version check at runtime.
-             */
-            accountManager.removeAccount(account, MainActivity.this,
-                    accountManagerFuture -> {
-                        showProgress(false);
-
-                        boolean isRemoved = false;
-                        try {
-                            Bundle data = accountManagerFuture.getResult();
-                            isRemoved = data.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
-                        } catch (IOException e) {
-                            Utils.saveBugReport(e, TAG);
-                            showLogoutErrorDialog(null);
-                        } catch (OperationCanceledException e) {
-                            Utils.saveBugReport(e, TAG);
-
-                            String error = getString(R.string.error_logout_cancelled);
-                            showLogoutErrorDialog(error);
-                        } catch (AuthenticatorException e) {
-                            Utils.saveBugReport(e, TAG);
-                            showLogoutErrorDialog(null);
-                        }
-
-                        if (isRemoved) {
-                            showLogoutCompletedDialog();
-                        }
-                        else {
-                            String error = getString(R.string.error_logout_user_not_removed);
-                            showLogoutErrorDialog(error);
-                        }
-                    }, null);
-        } else {
-            /* Note that this needs the MANAGE_ACCOUNT permission on SDK <= 22. */
-            accountManager.removeAccount(account, accountManagerFuture -> {
-                showProgress(false);
-
-                boolean isRemoved = false;
-                try {
-                    isRemoved = accountManagerFuture.getResult();
-                } catch (IOException e) {
-                    Utils.saveBugReport(e, TAG);
-                    showLogoutErrorDialog(null);
-                } catch (OperationCanceledException e) {
-                    Utils.saveBugReport(e, TAG);
-
-                    String error = getString(R.string.error_logout_cancelled);
-                    showLogoutErrorDialog(error);
-                } catch (AuthenticatorException e) {
-                    Utils.saveBugReport(e, TAG);
-                    showLogoutErrorDialog(null);
-                }
-
-                if (isRemoved) {
-                    showLogoutCompletedDialog();
-                }
-                else {
-                    String error = getString(R.string.error_logout_user_not_removed);
-                    showLogoutErrorDialog(error);
-                }
-            }, null);
-        }
     }
 
     private void showLogoutCompletedDialog() {

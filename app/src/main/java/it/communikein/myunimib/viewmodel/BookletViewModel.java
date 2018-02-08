@@ -1,14 +1,19 @@
 package it.communikein.myunimib.viewmodel;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.data.UnimibRepository;
-import it.communikein.myunimib.data.database.BookletEntry;
+import it.communikein.myunimib.data.model.BookletEntry;
+import it.communikein.myunimib.data.model.User;
 
 
 public class BookletViewModel extends ViewModel {
@@ -36,6 +41,10 @@ public class BookletViewModel extends ViewModel {
 
     public void refreshBooklet() {
         mRepository.startFetchBookletService();
+    }
+
+    public User getUser() {
+        return mRepository.getUser();
     }
 
 }

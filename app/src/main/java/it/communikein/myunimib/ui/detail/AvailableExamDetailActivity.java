@@ -28,9 +28,10 @@ import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.AvailableExam;
-import it.communikein.myunimib.data.database.ExamID;
-import it.communikein.myunimib.data.network.S3Helper;
+import it.communikein.myunimib.data.model.AvailableExam;
+import it.communikein.myunimib.data.model.ExamID;
+import it.communikein.myunimib.data.network.loaders.EnrollLoader;
+import it.communikein.myunimib.data.network.loaders.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityAvailableExamDetailsBinding;
 import it.communikein.myunimib.viewmodel.AvailableExamDetailViewModel;
@@ -38,7 +39,7 @@ import it.communikein.myunimib.viewmodel.factory.AvailableExamViewModelFactory;
 
 
 public class AvailableExamDetailActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks, S3Helper.EnrollLoader.EnrollUpdatesListener,
+        LoaderManager.LoaderCallbacks, EnrollLoader.EnrollUpdatesListener,
         HasActivityInjector {
 
     private final static int LOADER_ENROLL_ID = 4000;
@@ -148,11 +149,7 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
             case LOADER_ENROLL_ID:
                 showProgress(true);
 
-                return new S3Helper.EnrollLoader(
-                        this,
-                        mViewModel.getExam().getValue(),
-                        mViewModel.getRepository(),
-                        this);
+                return mViewModel.enroll(this, this);
 
             default:
                 throw new RuntimeException("Loader Not Implemented: " + id);
@@ -179,24 +176,24 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
     @Override
     public void onEnrollmentUpdate(int status) {
         switch (status) {
-            case S3Helper.EnrollLoader.STATUS_STARTED:
+            case EnrollLoader.STATUS_STARTED:
                 Snackbar.make(mBinding.container,
                         "Enrollment started.", Snackbar.LENGTH_LONG).show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ENROLLMENT_OK:
+            case EnrollLoader.STATUS_ENROLLMENT_OK:
                 Snackbar.make(mBinding.container,
                         "Enrollment confirmed.", Snackbar.LENGTH_LONG).show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
+            case EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
                 Snackbar.make(mBinding.container,
                         "Certificate downloaded.", Snackbar.LENGTH_LONG)
                         .setAction(R.string.open, v -> showCertificate())
                         .show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ERROR_QUESTIONNAIRE_TO_FILL:
+            case EnrollLoader.STATUS_ERROR_QUESTIONNAIRE_TO_FILL:
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.title_questionnaire)
                         .setMessage(R.string.error_questionnaire_to_fill)
@@ -207,12 +204,12 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
                         .show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ERROR_CERTIFICATE:
+            case EnrollLoader.STATUS_ERROR_CERTIFICATE:
                 Snackbar.make(mBinding.container,
                         "ERROR: certificate not found.", Snackbar.LENGTH_LONG).show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ERROR_GENERAL:
+            case EnrollLoader.STATUS_ERROR_GENERAL:
                 Snackbar.make(mBinding.container,
                         "ERROR: general.", Snackbar.LENGTH_LONG).show();
                 break;

@@ -5,7 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 @SuppressWarnings("unused")
-public class NetworkUtils {
+public class NetworkHelper {
     private static final int TYPE_CONNECTION_ERROR = -1;
 
     private static int getNetworkAvailableType(Context context){

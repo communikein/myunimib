@@ -1,21 +1,12 @@
-package it.communikein.myunimib.data.database;
+package it.communikein.myunimib.data.model;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
-import android.content.Context;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Date;
 
-import it.communikein.myunimib.utilities.MyunimibDateUtils;
-
 @Entity(tableName = "available_exams", primaryKeys = {"adsceId", "appId", "attDidEsaId", "cdsEsaId"})
 public class AvailableExam extends Exam {
-
-    private static final String ARG_BEGIN_ENROLLMENT = "ARG_BEGIN_ENROLLMENT";
-    private static final String ARG_END_ENROLLMENT = "ARG_END_ENROLLMENT";
 
     private Date beginEnrollment;
     private Date endEnrollment;
@@ -37,29 +28,19 @@ public class AvailableExam extends Exam {
         setEndEnrollment(end_enrollment);
     }
 
-    @Ignore
-    public AvailableExam(JSONObject obj) throws JSONException, NullPointerException {
-        super(obj);
-
-        if (obj.has(ARG_BEGIN_ENROLLMENT))
-            setBeginEnrollment(obj.getLong(ARG_BEGIN_ENROLLMENT));
-        if (obj.has(ARG_END_ENROLLMENT))
-            setEndEnrollment(obj.getLong(ARG_END_ENROLLMENT));
-    }
-
 
     public Date getBeginEnrollment() {
         return beginEnrollment;
     }
 
     @Ignore
-    private long getBeginMillis() {
+    public long getBeginMillis() {
         if (getBeginEnrollment() == null) return -1;
         else return getBeginEnrollment().getTime();
     }
 
     @Ignore
-    private long getEndMillis() {
+    public long getEndMillis() {
         if (getEndEnrollment() == null) return -1;
         else return getEndEnrollment().getTime();
     }
@@ -86,48 +67,6 @@ public class AvailableExam extends Exam {
     private void setEndEnrollment(long millis) {
         if (millis < 0) setEndEnrollment(null);
         else setEndEnrollment(new Date(millis));
-    }
-
-
-
-    public String printFriendlyBeginDate(Context context) {
-        return MyunimibDateUtils.getFriendlyDateString(
-                context,
-                getBeginEnrollment().getTime(),
-                false,
-                false);
-    }
-
-    public String printFriendlyEndDate(Context context) {
-        return MyunimibDateUtils.getFriendlyDateString(
-                context,
-                getEndEnrollment().getTime(),
-                false,
-                false);
-    }
-
-
-
-    @Ignore
-    public JSONObject toJSON() {
-        JSONObject obj;
-
-        try {
-            obj = super.toJSON();
-
-            obj.put(ARG_BEGIN_ENROLLMENT, getBeginMillis());
-            obj.put(ARG_END_ENROLLMENT, getEndMillis());
-        } catch (JSONException e){
-            obj = new JSONObject();
-        }
-
-        return obj;
-    }
-
-    @Ignore
-    @Override
-    public String toString() {
-        return toJSON().toString();
     }
 
 

@@ -24,14 +24,12 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.EnrolledExam;
-import it.communikein.myunimib.data.database.ExamID;
+import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
-import it.communikein.myunimib.di.Injectable;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.ui.detail.EnrolledExamDetailActivity;
-import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.viewmodel.EnrolledExamsListViewModel;
 import it.communikein.myunimib.viewmodel.factory.EnrolledExamsViewModelFactory;
 
@@ -40,8 +38,7 @@ import it.communikein.myunimib.viewmodel.factory.EnrolledExamsViewModelFactory;
  * The {@link Fragment} responsible for showing the user's Enrolled Exams.
  */
 public class EnrolledExamsFragment extends Fragment implements
-        EnrolledExamAdapter.ExamClickCallback, SwipeRefreshLayout.OnRefreshListener,
-        Injectable {
+        EnrolledExamAdapter.ExamClickCallback, SwipeRefreshLayout.OnRefreshListener {
 
     private static final String LOG_TAG = EnrolledExamsFragment.class.getSimpleName();
 
@@ -103,18 +100,13 @@ public class EnrolledExamsFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
-        /*
-         * Ensures a loader is initialized and active and shows the loading view.
-         * If the loader doesn't already exist, one is created and (if the activity/fragment is
-         * currently started) starts the loader. Otherwise the last created loader is re-used.
-         */
-        if (getActivity() != null && !UserUtils.getUser(getActivity()).isFake()) {
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
+                .get(EnrolledExamsListViewModel.class);
+
+        if (!mViewModel.getUser().isFake()) {
             /* Create a new EnrolledExamAdapter. It will be responsible for displaying the list's items */
             final EnrolledExamAdapter mExamsAdapter = new EnrolledExamAdapter(this);
-
-            mViewModel = ViewModelProviders
-                    .of(this, viewModelFactory)
-                    .get(EnrolledExamsListViewModel.class);
 
             mViewModel.getEnrolledExamsLoading().observe(this, loading -> {
                 if (loading != null)

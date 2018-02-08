@@ -19,39 +19,32 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 
-import it.communikein.myunimib.data.User;
-import it.communikein.myunimib.utilities.UserUtils;
+import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.model.User;
+import it.communikein.myunimib.data.network.loaders.S3Helper;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
 
-    // For Singleton instantiation
-    private static final Object LOCK = new Object();
-    private static ProfilePictureVolleyRequest sInstance;
-    private final Context mContext;
+    private final UnimibRepository mRepository;
 
     private RequestQueue mRequestQueue;
     private final ProfilePictureLoader mImageLoader;
 
     private final LruCache<String, Bitmap> cache = new LruCache<>(1);
 
-    private ProfilePictureVolleyRequest(Context context, User user) {
-        this.mContext = context;
-        this.mRequestQueue = getRequestQueue();
+    @Inject
+    public ProfilePictureVolleyRequest(UnimibRepository repository, Context context) {
+        this.mRepository = repository;
+        this.mRequestQueue = getRequestQueue(context);
 
-        mImageLoader = new ProfilePictureLoader(user, mRequestQueue, this);
-    }
-
-    public static ProfilePictureVolleyRequest getInstance(Context context, User user) {
-        if (sInstance == null) {
-            synchronized (LOCK) {
-                sInstance = new ProfilePictureVolleyRequest(context, user);
-            }
-        }
-        return sInstance;
+        mImageLoader = new ProfilePictureLoader(mRepository.getUser(), mRequestQueue, this);
     }
 
 
@@ -71,11 +64,11 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
     }
 
 
-    private RequestQueue getRequestQueue() {
+    private RequestQueue getRequestQueue(Context context) {
         if (mRequestQueue == null) {
-            Cache cache = new DiskBasedCache(mContext.getCacheDir(), 1024 * 1024);
+            Cache cache = new DiskBasedCache(context.getCacheDir(), 1024 * 1024);
             Network network = new BasicNetwork(
-                    new HurlStack(null, S3Helper.getSocketFactory(mContext)));
+                    new HurlStack(null, S3Helper.getSocketFactory(context)));
             mRequestQueue = new RequestQueue(cache, network);
             mRequestQueue.start();
         }
@@ -116,7 +109,13 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
                         onGetImageError(cacheKey, error);
 
                         String cookie = error.networkResponse.headers.get("Set-Cookie");
-                        mUser = UserUtils.updateSessionId(mUser, cookie, mContext);
+                        if (cookie != null && cookie.contains("JSESSIONID")) {
+                            // Save it
+                            cookie = cookie.substring(cookie.indexOf("JSESSIONID=") + 11);
+                            cookie = cookie.substring(0, cookie.indexOf(";"));
+                            mUser.setSessionID(cookie);
+                            mRepository.updateUserSessionId(cookie);
+                        }
                     });
             request.setRetryPolicy(new DefaultRetryPolicy(
                     0,

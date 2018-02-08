@@ -5,7 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
-import it.communikein.myunimib.data.User;
+import it.communikein.myunimib.data.model.User;
 import com.google.firebase.crash.FirebaseCrash;
 
 import java.text.DecimalFormat;

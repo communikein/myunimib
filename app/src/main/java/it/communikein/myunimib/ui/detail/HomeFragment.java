@@ -1,6 +1,8 @@
 package it.communikein.myunimib.ui.detail;
 
 
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,15 +13,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.volley.toolbox.ImageLoader;
+import javax.inject.Inject;
 
+import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
-import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
-import it.communikein.myunimib.data.network.S3Helper;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.utilities.Utils;
+import it.communikein.myunimib.viewmodel.BookletViewModel;
+import it.communikein.myunimib.viewmodel.HomeViewModel;
+import it.communikein.myunimib.viewmodel.factory.HomeViewModelFactory;
 
 
 /**
@@ -31,9 +35,22 @@ public class HomeFragment extends Fragment {
     /*  */
     private FragmentHomeBinding mBinding;
 
+    /* */
+    @Inject
+    HomeViewModelFactory viewModelFactory;
+
+    /* */
+    private HomeViewModel mViewModel;
+
     /* Required empty public constructor */
     public HomeFragment() {}
 
+
+    @Override
+    public void onAttach(Context context) {
+        AndroidSupportInjection.inject(this);
+        super.onAttach(context);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -41,23 +58,28 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
 
-        if (Utils.user == null && getActivity() != null)
-            Utils.user = UserUtils.getUser(getActivity());
-
         return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
+                .get(HomeViewModel.class);
+
         setTitle();
+        hideTabs();
+        showBottomNavigation();
 
-        mBinding.userNameTextView.setText(Utils.user.getName());
-        mBinding.matricolaTextView.setText(Utils.user.getMatricola());
-        mBinding.averageMarkTextView.setText(Utils.markFormat.format(Utils.user.getAverageMark()));
-        mBinding.cfuTextView.setText(String.valueOf(Utils.user.getTotalCFU()));
+        User user = mViewModel.getUser();
+        mBinding.userNameTextView.setText(user.getName());
+        mBinding.matricolaTextView.setText(user.getMatricola());
+        mBinding.averageMarkTextView.setText(Utils.markFormat.format(user.getAverageMark()));
+        mBinding.cfuTextView.setText(String.valueOf(user.getTotalCFU()));
 
-        loadProfilePicture();
+        mViewModel.loadProfilePicture(mBinding.userImageView);
     }
 
     /**
@@ -73,24 +95,15 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void loadProfilePicture(){
-        if (Utils.user.isFake()) {
-            mBinding.userImageView.setDefaultImageResId(R.drawable.ic_person_black_24dp);
+    private void hideTabs() {
+        if (getActivity() != null) {
+            ((MainActivity) getActivity()).hideTabsLayout();
         }
-        else {
-            ProfilePictureVolleyRequest.ProfilePictureLoader imageLoader =
-                    ProfilePictureVolleyRequest
-                            .getInstance(getActivity(), Utils.user)
-                            .getImageLoader();
+    }
 
-            imageLoader.get(S3Helper.URL_PROFILE_PICTURE,
-                    ImageLoader.getImageListener(
-                            mBinding.userImageView,
-                            R.drawable.ic_person_black_24dp,
-                            android.R.drawable.ic_dialog_alert)
-            );
-
-            mBinding.userImageView.setImageUrl(S3Helper.URL_PROFILE_PICTURE, imageLoader);
+    private void showBottomNavigation() {
+        if (getActivity() != null) {
+            ((MainActivity) getActivity()).showBottomNavigation();
         }
     }
 }

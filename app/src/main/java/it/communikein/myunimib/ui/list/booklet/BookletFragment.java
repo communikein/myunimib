@@ -23,11 +23,9 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.BookletEntry;
+import it.communikein.myunimib.data.model.BookletEntry;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
-import it.communikein.myunimib.di.Injectable;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.viewmodel.BookletViewModel;
 import it.communikein.myunimib.viewmodel.factory.BookletViewModelFactory;
 
@@ -36,8 +34,7 @@ import it.communikein.myunimib.viewmodel.factory.BookletViewModelFactory;
  * The {@link Fragment} responsible for showing the user's booklet.
  */
 public class BookletFragment extends Fragment implements
-        SwipeRefreshLayout.OnRefreshListener, BookletAdapter.ExamClickCallback,
-        Injectable {
+        SwipeRefreshLayout.OnRefreshListener, BookletAdapter.ExamClickCallback {
 
     private static final String LOG_TAG = BookletFragment.class.getSimpleName();
 
@@ -99,19 +96,19 @@ public class BookletFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
+                .get(BookletViewModel.class);
+
         /*
          * Ensures a loader is initialized and active and shows the loading view.
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (getActivity() != null && !UserUtils.getUser(getActivity()).isFake()) {
+        if (getActivity() != null && !mViewModel.getUser().isFake()) {
 
             /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
             final BookletAdapter mAdapter = new BookletAdapter(this);
-
-            mViewModel = ViewModelProviders
-                    .of(this, viewModelFactory)
-                    .get(BookletViewModel.class);
 
             mViewModel.getBookletLoading().observe(this, loading -> {
                 if (loading != null)

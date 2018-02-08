@@ -11,11 +11,11 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.AvailableExam;
-import it.communikein.myunimib.data.database.Exam;
-import it.communikein.myunimib.data.database.ExamID;
+import it.communikein.myunimib.data.model.AvailableExam;
+import it.communikein.myunimib.data.model.Exam;
+import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.databinding.AvailableExamListItemBinding;
-import it.communikein.myunimib.utilities.MyunimibDateUtils;
+import it.communikein.myunimib.utilities.DateHelper;
 
 import it.communikein.myunimib.ui.list.availableexam.AvailableExamAdapter.ExamAdapterViewHolder;
 
@@ -135,12 +135,12 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHo
             AvailableExam entry = mBinding.getExam();
             Context context = mBinding.dataContainer.getContext();
 
-            String friendly_date_begin = MyunimibDateUtils.getFriendlyDateString(
+            String friendly_date_begin = DateHelper.getFriendlyDateString(
                     context,
                     entry.getBeginEnrollment().getTime(),
                     false,
                     false);
-            String friendly_date_end = MyunimibDateUtils.getFriendlyDateString(
+            String friendly_date_end = DateHelper.getFriendlyDateString(
                     context,
                     entry.getEndEnrollment().getTime(),
                     false,

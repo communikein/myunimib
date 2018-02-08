@@ -1,22 +1,15 @@
-package it.communikein.myunimib.data.database;
+package it.communikein.myunimib.data.model;
 
 import android.arch.persistence.room.Ignore;
 import android.content.Context;
 import android.os.Environment;
 
-import it.communikein.myunimib.utilities.MyunimibDateUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import it.communikein.myunimib.utilities.DateHelper;
 
 import java.io.File;
 import java.util.Date;
 
 public class Exam extends ExamID {
-
-    private static final String ARG_NAME = "ARG_NAME";
-    private static final String ARG_DATE = "ARG_DATE";
-    private static final String ARG_DESCRIPTION = "ARG_DESCRIPTION";
 
     private String name;
     private Date date;
@@ -39,18 +32,6 @@ public class Exam extends ExamID {
         setName(name);
         setDate(date);
         setDescription(description);
-    }
-
-    @Ignore
-    Exam(JSONObject obj) throws JSONException, NullPointerException {
-        super(obj);
-
-        if (obj.has(ARG_DESCRIPTION))
-            setDescription(obj.getString(ARG_DESCRIPTION));
-        if (obj.has(ARG_NAME))
-            setName(obj.getString(ARG_NAME));
-        if (obj.has(ARG_DATE))
-            setDate(obj.getLong(ARG_DATE));
     }
 
 
@@ -82,45 +63,20 @@ public class Exam extends ExamID {
         return date;
     }
 
-    private long getMillis() {
+    public long getDateMillis() {
         if (getDate() == null) return -1;
         else return getDate().getTime();
     }
 
     @Ignore
     public String printDateTime(Context context) {
-        return MyunimibDateUtils.getFriendlyDateString(context, getDate().getTime(), true, true);
+        return DateHelper.getFriendlyDateString(context, getDate().getTime(), true, true);
     }
 
     public String getDescription() {
         return description;
     }
 
-
-
-    @Ignore
-    @Override
-    JSONObject toJSON() {
-        JSONObject obj = new JSONObject();
-
-        try {
-            obj.put(ExamID.EXAM_ID, super.toJSON());
-
-            obj.put(ARG_NAME, getName());
-            obj.put(ARG_DATE, getMillis());
-            obj.put(ARG_DESCRIPTION, getDescription());
-        } catch (JSONException e){
-            obj = new JSONObject();
-        }
-
-        return obj;
-    }
-
-    @Ignore
-    @Override
-    public String toString() {
-        return toJSON().toString();
-    }
 
 
 
@@ -132,12 +88,12 @@ public class Exam extends ExamID {
         return super.isIdentic(exam) &&
                 exam.getName().equals(getName()) &&
                 exam.getDescription().equals(getDescription()) &&
-                exam.getMillis() == getMillis();
+                exam.getDateMillis() == getDateMillis();
     }
 
 
     public String printFriendlyDate(Context context) {
-        return MyunimibDateUtils.getFriendlyDateString(
+        return DateHelper.getFriendlyDateString(
                 context,
                 getDate().getTime(),
                 false,
@@ -146,7 +102,7 @@ public class Exam extends ExamID {
 
     @Ignore
     private String getCertificateName(){
-        return getName() + " - " + MyunimibDateUtils.dateFile.format(getDate()) + ".pdf";
+        return getName() + " - " + DateHelper.dateFile.format(getDate()) + ".pdf";
     }
 
     @Ignore

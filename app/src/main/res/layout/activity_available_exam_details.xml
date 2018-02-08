@@ -9,7 +9,7 @@
             type="android.arch.lifecycle.LiveData"
             alias="LiveData"/>
         <import
-            type="it.communikein.myunimib.data.database.AvailableExam"
+            type="it.communikein.myunimib.data.model.AvailableExam"
             alias="AvailableExam"/>
 
         <variable name="exam"
@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fitsSystemWindows="true"
-                app:contentScrim="?attr/colorPrimary"
+                app:contentScrim="@color/colorPrimary"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
                 app:toolbarId="@+id/toolbar">
 

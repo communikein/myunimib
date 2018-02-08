@@ -32,16 +32,15 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.AvailableExam;
-import it.communikein.myunimib.data.database.Exam;
-import it.communikein.myunimib.data.database.ExamID;
-import it.communikein.myunimib.data.network.S3Helper;
+import it.communikein.myunimib.data.model.AvailableExam;
+import it.communikein.myunimib.data.model.Exam;
+import it.communikein.myunimib.data.model.ExamID;
+import it.communikein.myunimib.data.network.loaders.EnrollLoader;
+import it.communikein.myunimib.data.network.loaders.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
-import it.communikein.myunimib.di.Injectable;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.ui.detail.AvailableExamDetailActivity;
-import it.communikein.myunimib.utilities.UserUtils;
 import it.communikein.myunimib.viewmodel.AvailableExamsListViewModel;
 import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
 
@@ -51,8 +50,7 @@ import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
  */
 public class AvailableExamsFragment extends Fragment implements
         AvailableExamAdapter.ExamClickCallback, LoaderManager.LoaderCallbacks,
-        S3Helper.EnrollLoader.EnrollUpdatesListener, SwipeRefreshLayout.OnRefreshListener,
-        Injectable {
+        EnrollLoader.EnrollUpdatesListener, SwipeRefreshLayout.OnRefreshListener {
 
     private static final String LOG_TAG = AvailableExamsFragment.class.getSimpleName();
 
@@ -122,18 +120,18 @@ public class AvailableExamsFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
+        mViewModel = ViewModelProviders
+                .of(this, viewModelFactory)
+                .get(AvailableExamsListViewModel.class);
+
         /*
          * Ensures a loader is initialized and active and shows the loading view.
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (getActivity() != null && !UserUtils.getUser(getActivity()).isFake()) {
+        if (getActivity() != null && !mViewModel.getUser().isFake()) {
             /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
             final AvailableExamAdapter mExamsAdapter = new AvailableExamAdapter(this);
-
-            mViewModel = ViewModelProviders
-                    .of(this, viewModelFactory)
-                    .get(AvailableExamsListViewModel.class);
 
             mViewModel.getAvailableExamsLoading().observe(this, loading -> {
                 if (loading != null)
@@ -211,11 +209,7 @@ public class AvailableExamsFragment extends Fragment implements
                 if (chosenExam != null) {
                     showProgress(true);
 
-                    return new S3Helper.EnrollLoader(
-                            getActivity(),
-                            chosenExam,
-                            mViewModel.getRepository(),
-                            this);
+                    return mViewModel.enrollExam(chosenExam, getActivity(), this);
                 }
                 else return null;
 
@@ -269,24 +263,24 @@ public class AvailableExamsFragment extends Fragment implements
     @Override
     public void onEnrollmentUpdate(int status) {
         switch (status) {
-            case S3Helper.EnrollLoader.STATUS_STARTED:
+            case EnrollLoader.STATUS_STARTED:
                 Snackbar.make(mBinding.rvList,
                         "Enrollment started.", Snackbar.LENGTH_LONG).show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ENROLLMENT_OK:
+            case EnrollLoader.STATUS_ENROLLMENT_OK:
                 Snackbar.make(mBinding.rvList,
                         "Enrollment confirmed.", Snackbar.LENGTH_LONG).show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
+            case EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
                 Snackbar.make(mBinding.rvList,
                         "Certificate downloaded.", Snackbar.LENGTH_LONG)
                         .setAction(R.string.open, v -> showCertificate())
                         .show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ERROR_QUESTIONNAIRE_TO_FILL:
+            case EnrollLoader.STATUS_ERROR_QUESTIONNAIRE_TO_FILL:
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.title_questionnaire)
                         .setMessage(R.string.error_questionnaire_to_fill)
@@ -297,12 +291,12 @@ public class AvailableExamsFragment extends Fragment implements
                         .show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ERROR_CERTIFICATE:
+            case EnrollLoader.STATUS_ERROR_CERTIFICATE:
                 Snackbar.make(mBinding.rvList,
                         "ERROR: certificate not found.", Snackbar.LENGTH_LONG).show();
                 break;
 
-            case S3Helper.EnrollLoader.STATUS_ERROR_GENERAL:
+            case EnrollLoader.STATUS_ERROR_GENERAL:
                 Snackbar.make(mBinding.rvList,
                         "ERROR: general.", Snackbar.LENGTH_LONG).show();
                 break;

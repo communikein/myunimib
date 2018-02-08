@@ -1,25 +1,13 @@
-package it.communikein.myunimib.data.database;
+package it.communikein.myunimib.data.model;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import android.util.Log;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Date;
 
 @Entity(tableName = "booklet")
 public class BookletEntry {
-
-    private final static String ARG_NAME = "ARG_NAME";
-    private final static String ARG_CFU = "ARG_CFU";
-    private final static String ARG_SCORE = "ARG_SCORE";
-    private final static String ARG_DATE = "ARG_DATE";
-    private final static String ARG_STATE = "ARG_STATE";
-    private final static String ARG_CODE = "ARG_CODE";
-    private final static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
 
     @PrimaryKey
     private int adsceId;
@@ -41,26 +29,6 @@ public class BookletEntry {
         setCode(code);
     }
 
-    @Ignore
-    public BookletEntry(JSONObject json) throws JSONException {
-        if (json == null) throw new IllegalArgumentException();
-
-        if (json.has(ARG_CFU))
-            setCfu(json.getInt(ARG_CFU));
-        if (json.has(ARG_SCORE))
-            setScore(json.getString(ARG_SCORE));
-        if (json.has(ARG_NAME))
-            setName(json.getString(ARG_NAME));
-        if (json.has(ARG_STATE))
-            setState(json.getString(ARG_STATE));
-        if (json.has(ARG_CODE))
-            setCode(json.getString(ARG_CODE));
-        if (json.has(ARG_ADSCE_ID))
-            setAdsceId(json.getInt(ARG_ADSCE_ID));
-        if (json.has(ARG_DATE)) {
-            setDate(json.getLong(ARG_DATE));
-        }
-    }
 
     public int getAdsceId() {
         return adsceId;
@@ -142,39 +110,6 @@ public class BookletEntry {
             passed = true;
 
         return passed;
-    }
-
-
-    @Ignore
-    private JSONObject toJSON() {
-        JSONObject json = new JSONObject();
-
-        try {
-            json.put(ARG_CFU, getCfu());
-            json.put(ARG_SCORE, getScore());
-            json.put(ARG_CFU, getCfu());
-            json.put(ARG_SCORE, getScore());
-            json.put(ARG_NAME, getName());
-            json.put(ARG_ADSCE_ID, getAdsceId());
-            json.put(ARG_CODE, getCode());
-            json.put(ARG_DATE, getMillis());
-            json.put(ARG_STATE, getState());
-        } catch (JSONException e){
-            Log.e("JSON", e.getMessage());
-            return null;
-        }
-
-        return json;
-    }
-
-    @Ignore
-    @Override
-    public String toString() {
-        JSONObject obj = toJSON();
-        if (obj != null)
-            return obj.toString();
-        else
-            return null;
     }
 
 

@@ -12,6 +12,9 @@ import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasServiceInjector;
+import it.communikein.myunimib.AppExecutors;
+import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.model.User;
 
 
 public class BookletSyncIntentService extends IntentService implements HasServiceInjector {
@@ -22,7 +25,7 @@ public class BookletSyncIntentService extends IntentService implements HasServic
     DispatchingAndroidInjector<Service> dispatchingAndroidInjector;
 
     @Inject
-    UnimibNetworkDataSource networkDataSource;
+    UnimibRepository repository;
 
     public BookletSyncIntentService() {
         super("BookletSyncIntentService");
@@ -38,7 +41,7 @@ public class BookletSyncIntentService extends IntentService implements HasServic
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.d(LOG_TAG, "Intent service started");
 
-        networkDataSource.fetchBooklet();
+        repository.fetchBooklet();
     }
 
     @Override

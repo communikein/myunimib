@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
+import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.viewmodel.AvailableExamDetailViewModel;
 

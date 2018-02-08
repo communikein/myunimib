@@ -6,14 +6,20 @@
 
     <data>
         <import
+            type="it.communikein.myunimib.utilities.DateHelper"
+            alias="DateHelper" />
+        <import
+            type="it.communikein.myunimib.utilities.LocationHelper"
+            alias="LocationHelper" />
+        <import
             type="android.arch.lifecycle.LiveData"
             alias="LiveData"/>
         <import
-            type="it.communikein.myunimib.data.database.EnrolledExam"
+            type="it.communikein.myunimib.data.model.EnrolledExam"
             alias="EnrolledExam"/>
 
         <variable name="examIncluded"
-            type="LiveData&lt;EnrolledExam&gt;" />
+            type="it.communikein.myunimib.data.model.EnrolledExam" />
     </data>
 
     <android.support.v4.widget.NestedScrollView
@@ -57,7 +63,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 tools:text="@string/holder_exam_location"
-                android:text="@{examIncluded.printLocation(context)}"
+                android:text="@{LocationHelper.printLocation(examIncluded, context)}"
                 style="@style/TextContent"/>
 
             <TextView
@@ -80,7 +86,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
                 tools:text="@string/holder_exam_date"
-                android:text="@{examIncluded.printFriendlyDate(context)}"
+                android:text="@{DateHelper.getFriendlyDateShort(context, examIncluded.getDateMillis())}"
                 android:gravity="end"
                 style="@style/TextContent"/>
 

@@ -12,6 +12,9 @@ import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasServiceInjector;
+import it.communikein.myunimib.AppExecutors;
+import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.model.User;
 
 
 public class ExamEnrolledSyncIntentService extends IntentService implements HasServiceInjector {
@@ -22,7 +25,8 @@ public class ExamEnrolledSyncIntentService extends IntentService implements HasS
     DispatchingAndroidInjector<Service> dispatchingAndroidInjector;
 
     @Inject
-    UnimibNetworkDataSource networkDataSource;
+    UnimibRepository repository;
+
 
     public ExamEnrolledSyncIntentService() {
         super("ExamEnrolledSyncIntentService");
@@ -38,7 +42,7 @@ public class ExamEnrolledSyncIntentService extends IntentService implements HasS
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.d(LOG_TAG, "Intent service started");
 
-        networkDataSource.fetchEnrolledExams();
+        repository.fetchEnrolledExams();
     }
 
 

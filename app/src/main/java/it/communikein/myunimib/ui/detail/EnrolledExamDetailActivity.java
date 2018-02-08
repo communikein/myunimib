@@ -34,13 +34,11 @@ import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.database.EnrolledExam;
-import it.communikein.myunimib.data.database.ExamID;
-import it.communikein.myunimib.data.network.S3Helper;
+import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityEnrolledExamDetailsBinding;
 import it.communikein.myunimib.ui.FragmentAppCompatActivity;
-import it.communikein.myunimib.utilities.UniversityUtils;
 import it.communikein.myunimib.viewmodel.EnrolledExamDetailViewModel;
 import it.communikein.myunimib.viewmodel.factory.EnrolledExamViewModelFactory;
 
@@ -64,7 +62,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
     private EnrolledExamDetailViewModel mViewModel;
 
 
-    //* Might be null if Google Play services APK is not available. */
+    /* Might be null if Google Play services APK is not available. */
     private GoogleMap mMap = null;
     private SupportMapFragment mMapFragment = null;
     private ProgressDialog progress;
@@ -156,7 +154,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
                 try {
                     building = exam.getBuilding().substring(0, exam.getBuilding().indexOf("-")).trim();
 
-                    coords = UniversityUtils.getLatLongBuilding(building.toLowerCase());
+                    coords = mViewModel.getBuilding(building.toLowerCase()).getCoordinates();
                     zoom = 14;
                 } catch (Exception ex) {
                     building = getString(R.string.error_exam_missing_room);
@@ -211,7 +209,7 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity
             case LOADER_CERTIFICATE_ID:
                 toggleLoading(true);
 
-                return new S3Helper.CertificateLoader(this, mViewModel.getExam().getValue());
+                return mViewModel.loadCertificate(this);
 
             default:
                 throw new RuntimeException("Loader Not Implemented: " + id);

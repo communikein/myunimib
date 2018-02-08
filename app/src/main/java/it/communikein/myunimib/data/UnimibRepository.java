@@ -1,7 +1,9 @@
 package it.communikein.myunimib.data;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -11,21 +13,33 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import it.communikein.myunimib.AppExecutors;
-import it.communikein.myunimib.data.database.AvailableExam;
-import it.communikein.myunimib.data.database.BookletEntry;
-import it.communikein.myunimib.data.database.EnrolledExam;
-import it.communikein.myunimib.data.database.ExamID;
+import it.communikein.myunimib.data.model.AvailableExam;
+import it.communikein.myunimib.data.model.BookletEntry;
+import it.communikein.myunimib.data.model.Building;
+import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.Exam;
+import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.database.UnimibDao;
+import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
+import it.communikein.myunimib.data.network.loaders.CertificateLoader;
+import it.communikein.myunimib.data.network.loaders.EnrollLoader;
+import it.communikein.myunimib.data.network.loaders.LoginLoader;
+import it.communikein.myunimib.data.network.loaders.UserDataLoader;
 import it.communikein.myunimib.utilities.NotificationHelper;
+import it.communikein.myunimib.data.UserHelper.AccountRemoveErrorListener;
+import it.communikein.myunimib.data.UserHelper.AccountRemovedListener;
 
 @Singleton
 public class UnimibRepository {
 
     private static final String LOG_TAG = UnimibRepository.class.getSimpleName();
 
+    private final Context mContext;
     private final UnimibDao mUnimibDao;
     private final UnimibNetworkDataSource mUnimibNetworkDataSource;
+    private final UniversityUtils mUniversityHelper;
+    private final UserHelper mUserHelper;
     private final AppExecutors mExecutors;
     private final NotificationHelper mNotificationHelper;
 
@@ -41,10 +55,15 @@ public class UnimibRepository {
 
 
     @Inject
-    public UnimibRepository(UnimibDao unimibDao, UnimibNetworkDataSource unimibNetworkDataSource,
-                             AppExecutors executors, NotificationHelper notificationHelper) {
+    public UnimibRepository(Context application, UnimibDao unimibDao,
+                            UnimibNetworkDataSource unimibNetworkDataSource,
+                            UniversityUtils universityHelper, UserHelper userHelper,
+                            AppExecutors executors, NotificationHelper notificationHelper) {
+        mContext = application;
         mUnimibDao = unimibDao;
         mUnimibNetworkDataSource = unimibNetworkDataSource;
+        mUniversityHelper = universityHelper;
+        mUserHelper = userHelper;
         mExecutors = executors;
         mNotificationHelper = notificationHelper;
 
@@ -149,8 +168,6 @@ public class UnimibRepository {
             startFetchEnrolledExamsService();
         });
     }
-
-
 
     private void handleBookletReceived(ArrayList<BookletEntry> newOnlineData) {
         int changes = 0;
@@ -305,22 +322,14 @@ public class UnimibRepository {
 
 
 
+    /***************
+     * BOOKLET *****
+     ***************/
+
     public LiveData<List<BookletEntry>> getObservableCurrentBooklet() {
         initializeData();
 
         return mUnimibDao.getObservableBooklet();
-    }
-
-    public LiveData<List<AvailableExam>> getObservableCurrentAvailableExams() {
-        initializeData();
-
-        return mUnimibDao.getObservableAvailableExams();
-    }
-
-    public LiveData<List<EnrolledExam>> getObservableCurrentEnrolledExams() {
-        initializeData();
-
-        return mUnimibDao.getObservableEnrolledExams();
     }
 
     public ArrayList<BookletEntry> getCurrentBooklet() {
@@ -329,31 +338,9 @@ public class UnimibRepository {
         return (ArrayList<BookletEntry>) mUnimibDao.getBooklet();
     }
 
-    public ArrayList<AvailableExam> getCurrentAvailableExams() {
-        initializeData();
-
-        return (ArrayList<AvailableExam>) mUnimibDao.getAvailableExams();
-    }
-
-    public ArrayList<EnrolledExam> getCurrentEnrolledExams() {
-        initializeData();
-
-        return (ArrayList<EnrolledExam>) mUnimibDao.getEnrolledExams();
-    }
-
-
     public LiveData<Boolean> getBookletLoading() {
         return mUnimibNetworkDataSource.getBookletLoading();
     }
-
-    public LiveData<Boolean> getAvailableExamsLoading() {
-        return mUnimibNetworkDataSource.getAvailableExamsLoading();
-    }
-
-    public LiveData<Boolean> getEnrolledExamsLoading() {
-        return mUnimibNetworkDataSource.getEnrolledExamsLoading();
-    }
-
 
     public BookletEntry getBookletEntry(int adsceId) {
         initializeData();
@@ -361,18 +348,59 @@ public class UnimibRepository {
         return mUnimibDao.getBookletEntry(adsceId);
     }
 
-
-    public EnrolledExam getEnrolledExam(ExamID examID) {
-        initializeData();
-
-        return mUnimibDao.getEnrolledExam(examID.getAdsceId(), examID.getAppId(),
-                examID.getAttDidEsaId(), examID.getCdsEsaId());
+    public boolean isBookletEmpty() {
+        return mUnimibDao.getBookletSize() == 0;
     }
 
-    public LiveData<EnrolledExam> getObservableEnrolledExam(ExamID examID) {
+    private void deleteBooklet() {
+        mUnimibDao.deleteBooklet();
+    }
+
+    public void deleteBookletEntry(int adsce_id) {
+        mUnimibDao.deleteBookletEntry(adsce_id);
+    }
+
+    public void deleteBookletEntries(ArrayList<BookletEntry> exams) {
+        for (BookletEntry exam : exams)
+            deleteBookletEntry(exam.getAdsceId());
+    }
+
+
+    public void startFetchBookletService() {
+        mUnimibNetworkDataSource.startFetchBookletService();
+    }
+
+    public void fetchBooklet() {
+        mUnimibNetworkDataSource.fetchBooklet(getUser(),
+                sessionID -> mExecutors.diskIO().execute(() -> updateUserSessionId(sessionID)));
+    }
+
+
+
+    /***********************
+     * AVAILABLE EXAMS *****
+     ***********************/
+
+    public LiveData<List<AvailableExam>> getObservableCurrentAvailableExams() {
         initializeData();
 
-        return mUnimibDao.getObservableEnrolledExam(examID.getAdsceId(), examID.getAppId(),
+        return mUnimibDao.getObservableAvailableExams();
+    }
+
+    public ArrayList<AvailableExam> getCurrentAvailableExams() {
+        initializeData();
+
+        return (ArrayList<AvailableExam>) mUnimibDao.getAvailableExams();
+    }
+
+    public LiveData<Boolean> getAvailableExamsLoading() {
+        return mUnimibNetworkDataSource.getAvailableExamsLoading();
+    }
+
+    public LiveData<AvailableExam> getObservableAvailableExam(ExamID examID) {
+        initializeData();
+
+        return mUnimibDao.getObservableAvailableExam(examID.getAdsceId(), examID.getAppId(),
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
@@ -383,47 +411,12 @@ public class UnimibRepository {
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
-    public LiveData<AvailableExam> getObservableAvailableExam(ExamID examID) {
-        initializeData();
-
-        return mUnimibDao.getObservableAvailableExam(examID.getAdsceId(), examID.getAppId(),
-                examID.getAttDidEsaId(), examID.getCdsEsaId());
-    }
-
-
-    /* */
-    private boolean isBookletEmpty() {
-        return mUnimibDao.getBookletSize() == 0;
-    }
-
     private boolean isAvailableExamsEmpty() {
         return mUnimibDao.getAvailableExamsSize() == 0;
     }
 
-    private boolean isEnrolledExamsEmpty() {
-        return mUnimibDao.getEnrolledExamsSize() == 0;
-    }
-
-
-    /**
-     * Deletes old weather data because we don't need to keep multiple days' data
-     */
-    private void deleteBooklet() {
-        mUnimibDao.deleteBooklet();
-    }
-
     private void deleteAvailableExams() {
         mUnimibDao.deleteAvailableExams();
-    }
-
-    private void deleteEnrolledExams() {
-        mUnimibDao.deleteEnrolledExams();
-    }
-
-
-    /** */
-    public void deleteBookletEntry(int adsce_id) {
-        mUnimibDao.deleteBookletEntry(adsce_id);
     }
 
     public void deleteAvailableExam(ExamID examId) {
@@ -431,42 +424,173 @@ public class UnimibRepository {
                 examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
 
+    public void deleteAvailableExams(ArrayList<AvailableExam> exams) {
+        for (AvailableExam exam : exams)
+            deleteAvailableExam(exam);
+    }
+
+
+    public void startFetchAvailableExamsService() {
+        mUnimibNetworkDataSource.startFetchAvailableExamsService();
+    }
+
+    public void fetchAvailableExams() {
+        mUnimibNetworkDataSource.fetchAvailableExams(getUser(),
+                sessionID -> mExecutors.diskIO().execute(() -> updateUserSessionId(sessionID)));
+    }
+
+    public EnrollLoader enrollExam(Exam exam, Activity activity,
+                                   EnrollLoader.EnrollUpdatesListener enrollUpdatesListener) {
+        return mUnimibNetworkDataSource.enrollExam(exam, activity,
+                (/*Enrollment complete*/) -> {
+                    mExecutors.diskIO().execute(() -> deleteAvailableExam(exam));
+                    startFetchEnrolledExamsService();
+                    startFetchAvailableExamsService();
+                },
+                enrollUpdatesListener);
+    }
+
+
+
+
+    /**********************
+     * ENROLLED EXAMS *****
+     **********************/
+
+    public LiveData<List<EnrolledExam>> getObservableCurrentEnrolledExams() {
+        initializeData();
+
+        return mUnimibDao.getObservableEnrolledExams();
+    }
+
+    public ArrayList<EnrolledExam> getCurrentEnrolledExams() {
+        initializeData();
+
+        return (ArrayList<EnrolledExam>) mUnimibDao.getEnrolledExams();
+    }
+
+    public LiveData<Boolean> getEnrolledExamsLoading() {
+        return mUnimibNetworkDataSource.getEnrolledExamsLoading();
+    }
+
+    public LiveData<EnrolledExam> getObservableEnrolledExam(ExamID examID) {
+        initializeData();
+
+        return mUnimibDao.getObservableEnrolledExam(examID.getAdsceId(), examID.getAppId(),
+                examID.getAttDidEsaId(), examID.getCdsEsaId());
+    }
+
+    public EnrolledExam getEnrolledExam(ExamID examID) {
+        initializeData();
+
+        return mUnimibDao.getEnrolledExam(examID.getAdsceId(), examID.getAppId(),
+                examID.getAttDidEsaId(), examID.getCdsEsaId());
+    }
+
+    private boolean isEnrolledExamsEmpty() {
+        return mUnimibDao.getEnrolledExamsSize() == 0;
+    }
+
+    private void deleteEnrolledExams() {
+        mUnimibDao.deleteEnrolledExams();
+    }
+
     public void deleteEnrolledExam(ExamID examId) {
         mUnimibDao.deleteAvailableExam(examId.getAdsceId(), examId.getAppId(),
                 examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
-
 
     public void deleteEnrolledExams(ArrayList<EnrolledExam> exams) {
         for (EnrolledExam exam : exams)
             deleteEnrolledExam(exam);
     }
 
-    public void deleteAvailableExams(ArrayList<AvailableExam> exams) {
-        for (AvailableExam exam : exams)
-            deleteAvailableExam(exam);
-    }
-
-    public void deleteBookletEntries(ArrayList<BookletEntry> exams) {
-        for (BookletEntry exam : exams)
-            deleteBookletEntry(exam.getAdsceId());
-    }
-
-
-
-
-    /**
-     * Network related operation
-     */
-    public void startFetchBookletService() {
-        mUnimibNetworkDataSource.startFetchBookletService();
-    }
-
-    public void startFetchAvailableExamsService() {
-        mUnimibNetworkDataSource.startFetchAvailableExamsService();
-    }
 
     public void startFetchEnrolledExamsService() {
         mUnimibNetworkDataSource.startFetchEnrolledExamsService();
+    }
+
+    public void fetchEnrolledExams() {
+        mUnimibNetworkDataSource.fetchEnrolledExams(getUser(),
+                sessionID -> mExecutors.diskIO().execute(() -> updateUserSessionId(sessionID)));
+    }
+
+    public CertificateLoader loadCertificate(EnrolledExam exam, Activity activity) {
+        return mUnimibNetworkDataSource.loadCertificate(exam, activity);
+    }
+
+
+
+    /*****************
+     * BUILDINGS *****
+     *****************/
+
+    public List<Building> getCurrentBuildings() {
+        return mUniversityHelper.getBuildings();
+    }
+
+    public Building getBuilding(String name) {
+        return mUniversityHelper.getBuilding(name);
+    }
+
+
+
+    /*************
+     * USERS *****
+     *************/
+
+    public void saveUser(User user) {
+        mUserHelper.saveUser(user);
+    }
+
+    public void updateUserSessionId(String sessionID) {
+        mUserHelper.updateSessionId(sessionID);
+    }
+
+    public void updateChosenFaculty(int chosenFaculty) {
+        mUserHelper.updateChosenFaculty(chosenFaculty);
+    }
+
+    public User getUser() {
+        return mUserHelper.getUser();
+    }
+
+    public LiveData<User> getObservableUser() {
+        return mUserHelper.getObservableUser();
+    }
+
+    public void deleteUser(Activity activity, AccountRemovedListener accountRemovedListener,
+                           AccountRemoveErrorListener accountRemoveErrorListener) {
+        mUserHelper.deleteUser(activity, accountRemovedListener, accountRemoveErrorListener);
+    }
+
+
+    public LoginLoader loginUser(User userToLogin, Activity activity) {
+        return mUnimibNetworkDataSource.loginUser(userToLogin, activity);
+    }
+
+    public UserDataLoader updateUserData(int selectedFaculty, Activity activity) {
+        updateChosenFaculty(selectedFaculty);
+
+        return mUnimibNetworkDataSource.downloadUserData(activity);
+    }
+
+
+
+
+    /***************
+     * VARIOUS *****
+     ***************/
+
+    public void clearData() {
+        mExecutors.diskIO().execute(() -> {
+            deleteBooklet();
+            deleteAvailableExams();
+            deleteEnrolledExams();
+        });
+    }
+
+    public Context getContext() {
+        return mContext;
     }
 }

@@ -1,11 +1,8 @@
-package it.communikein.myunimib.data.database;
+package it.communikein.myunimib.data.model;
 
 import android.arch.persistence.room.Ignore;
 
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -15,31 +12,11 @@ public class ExamID {
     @Ignore
     final static String EXAM_ID = "EXAM_ID";
 
-    private final static String ARG_CDS_ESA_ID = "ARG_CDS_ESA_ID";
-    private final static String ARG_ATT_DID_ESA_ID = "ARG_ATT_DID_ESA_ID";
-    private final static String ARG_APP_ID = "ARG_APP_ID";
-    private final static String ARG_ADSCE_ID = "ARG_ADSCE_ID";
-
     private int cdsEsaId;
     private int attDidEsaId;
     private int appId;
     private int adsceId;
 
-
-    @Ignore
-    ExamID(JSONObject obj) throws JSONException, NullPointerException {
-        if (obj == null) throw new NullPointerException();
-        if (obj.has(EXAM_ID)) obj = obj.getJSONObject(EXAM_ID);
-
-        if (obj.has(ARG_ATT_DID_ESA_ID))
-            setAttDidEsaId(obj.getInt(ARG_ATT_DID_ESA_ID));
-        if (obj.has(ARG_CDS_ESA_ID))
-            setCdsEsaId(obj.getInt(ARG_CDS_ESA_ID));
-        if (obj.has(ARG_APP_ID))
-            setAppId(obj.getInt(ARG_APP_ID));
-        if (obj.has(ARG_ADSCE_ID))
-            setAdsceId(obj.getInt(ARG_ADSCE_ID));
-    }
 
     public ExamID(int cdsEsaId, int attDidEsaId, int appId, int adsceId) {
         this.cdsEsaId = cdsEsaId;
@@ -107,28 +84,6 @@ public class ExamID {
     }
 
 
-    @Ignore
-    JSONObject toJSON() {
-        JSONObject obj = new JSONObject();
-
-        try {
-            obj.put(ARG_CDS_ESA_ID, getCdsEsaId());
-            obj.put(ARG_APP_ID, getAppId());
-            obj.put(ARG_ADSCE_ID, getAdsceId());
-            obj.put(ARG_ATT_DID_ESA_ID, getAttDidEsaId());
-        } catch (JSONException e){
-            obj = new JSONObject();
-        }
-
-        return obj;
-    }
-
-
-    @Ignore
-    @Override
-    public String toString() {
-        return toJSON().toString();
-    }
 
     @Ignore
     @Override

@@ -1,5 +1,6 @@
 package it.communikein.myunimib.data.network;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -36,16 +37,22 @@ import javax.inject.Singleton;
 import javax.net.ssl.HttpsURLConnection;
 
 import it.communikein.myunimib.AppExecutors;
-import it.communikein.myunimib.data.User;
-import it.communikein.myunimib.data.database.AvailableExam;
-import it.communikein.myunimib.data.database.BookletEntry;
-import it.communikein.myunimib.data.database.EnrolledExam;
-import it.communikein.myunimib.data.database.ExamID;
-import it.communikein.myunimib.utilities.MyunimibDateUtils;
-import it.communikein.myunimib.utilities.UserUtils;
+import it.communikein.myunimib.data.model.Exam;
+import it.communikein.myunimib.data.model.User;
+import it.communikein.myunimib.data.model.AvailableExam;
+import it.communikein.myunimib.data.model.BookletEntry;
+import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.ExamID;
+import it.communikein.myunimib.data.model.UserAuthentication;
+import it.communikein.myunimib.data.network.loaders.CertificateLoader;
+import it.communikein.myunimib.data.network.loaders.EnrollLoader;
+import it.communikein.myunimib.data.network.loaders.LoginLoader;
+import it.communikein.myunimib.data.network.loaders.S3Helper;
+import it.communikein.myunimib.data.network.loaders.UserDataLoader;
+import it.communikein.myunimib.utilities.DateHelper;
 import it.communikein.myunimib.utilities.Utils;
 
-import static it.communikein.myunimib.data.network.S3Helper.getHTML;
+import static it.communikein.myunimib.data.network.loaders.S3Helper.getHTML;
 
 @Singleton
 public class UnimibNetworkDataSource {
@@ -76,10 +83,12 @@ public class UnimibNetworkDataSource {
     private final Context mContext;
     private final AppExecutors mExecutors;
 
+    private final MutableLiveData<User> mUser;
     private final MutableLiveData<List<BookletEntry>> mDownloadedBooklet;
     private final MutableLiveData<List<AvailableExam>> mDownloadedAvailableExams;
     private final MutableLiveData<List<EnrolledExam>> mDownloadedEnrolledExams;
 
+    private final MutableLiveData<Boolean> mUserLoading;
     private final MutableLiveData<Boolean> mBookletLoading;
     private final MutableLiveData<Boolean> mAvailableExamsLoading;
     private final MutableLiveData<Boolean> mEnrolledExamsLoading;
@@ -92,63 +101,34 @@ public class UnimibNetworkDataSource {
         mDownloadedBooklet = new MutableLiveData<>();
         mDownloadedAvailableExams = new MutableLiveData<>();
         mDownloadedEnrolledExams = new MutableLiveData<>();
+        mUser = new MutableLiveData<>();
 
         mBookletLoading = new MutableLiveData<>();
         mAvailableExamsLoading = new MutableLiveData<>();
         mEnrolledExamsLoading = new MutableLiveData<>();
+        mUserLoading = new MutableLiveData<>();
     }
 
+
+
+    /***************
+     * BOOKLET *****
+     ***************/
 
     public LiveData<List<BookletEntry>> getOnlineBooklet() {
         return mDownloadedBooklet;
     }
 
-    public LiveData<List<AvailableExam>> getOnlineAvailableExams() {
-        return mDownloadedAvailableExams;
-    }
-
-    public LiveData<List<EnrolledExam>> getOnlineEnrolledExams() {
-        return mDownloadedEnrolledExams;
-    }
-
-
     public LiveData<Boolean> getBookletLoading() {
         return mBookletLoading;
     }
 
-    public LiveData<Boolean> getAvailableExamsLoading() {
-        return mAvailableExamsLoading;
-    }
-
-    public LiveData<Boolean> getEnrolledExamsLoading() {
-        return mEnrolledExamsLoading;
-    }
-
-
-    /**
-     * Starts an intent service to fetch the weather.
-     */
     public void startFetchBookletService() {
         Intent intentToFetch = new Intent(mContext, BookletSyncIntentService.class);
         mContext.startService(intentToFetch);
         Log.d(LOG_TAG, "Booklet service created");
     }
 
-    public void startFetchAvailableExamsService() {
-        Intent intentToFetch = new Intent(mContext, ExamAvailableSyncIntentService.class);
-        mContext.startService(intentToFetch);
-        Log.d(LOG_TAG, "Available exams service created");
-    }
-
-    public void startFetchEnrolledExamsService() {
-        Intent intentToFetch = new Intent(mContext, ExamEnrolledSyncIntentService.class);
-        mContext.startService(intentToFetch);
-        Log.d(LOG_TAG, "Enrolled exams service created");
-    }
-
-    /**
-     * Schedules a repeating job service which fetches the weather.
-     */
     public void scheduleRecurringFetchBookletSync() {
         Driver driver = new GooglePlayDriver(mContext);
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(driver);
@@ -196,6 +176,154 @@ public class UnimibNetworkDataSource {
         // Schedule the Job with the dispatcher
         dispatcher.schedule(syncSunshineJob);
         Log.d(LOG_TAG, "Booklet job scheduled");
+    }
+
+    public void fetchBooklet(final User user, S3Helper.NewSessionIdListener listener) {
+        mBookletLoading.postValue(true);
+        Log.d(LOG_TAG, "Fetch booklet started");
+
+        mExecutors.networkIO().execute(() -> {
+            ArrayList<BookletEntry> response = downloadBooklet(user, mContext, listener);
+
+            // As long as there are weather forecasts, update the LiveData storing the most recent
+            // weather forecasts. This will trigger observers of that LiveData, such as the
+            // SunshineRepository.
+            if (response != null && response.size() != 0) {
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " booklet entries. Notifying the observers.");
+
+                mDownloadedBooklet.postValue(response);
+            }
+            else {
+                Log.d(LOG_TAG, "Response either null or has 0 booklet entries. NOT notifying the observers.");
+            }
+
+            mBookletLoading.postValue(false);
+        });
+    }
+
+    private static ArrayList<BookletEntry> downloadBooklet(User user, Context context,
+                                                           S3Helper.NewSessionIdListener listener) {
+        Log.d(LOG_TAG, "Booklet download started.");
+        if (context == null)
+            return null;
+
+        String html;
+        try {
+            /* Try to get the private page */
+            Bundle result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
+                    false, context, listener);
+
+            html = result.getString(PARAM_KEY_HTML);
+            int s3_response = result.getInt(PARAM_KEY_RESPONSE);
+
+            /* If it fails the first time, try once again */
+            if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
+                result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
+                        false, context, listener);
+
+                html = result.getString(PARAM_KEY_HTML);
+                s3_response = result.getInt(PARAM_KEY_RESPONSE);
+            }
+
+            if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
+                FirebaseCrash.log(html);
+                Document doc = Jsoup.parse(html);
+                Elements els = doc.select("div#esse3old table.detail_table tr");
+                // Rimuovi la riga dell'intestazione
+                els.remove(0);
+
+                ArrayList<BookletEntry> booklet = new ArrayList<>();
+                for (int i = 0; i < els.size(); i++) {
+                    Element el = els.get(i);
+
+                    int index;
+                    if (el.child(1).children().size() > 0)
+                        index = 0;
+                    else
+                        index = 1;
+
+                    String exam_name = el.child(1 - index).child(index).text();
+                    String adsce_id_txt = el.child(1 - index).child(index).attr("href");
+                    adsce_id_txt = adsce_id_txt.substring(
+                            adsce_id_txt.indexOf("?adsce_id=") + 10,
+                            adsce_id_txt.indexOf("&"));
+                    int adsce_id = Integer.parseInt(adsce_id_txt);
+                    String code;
+                    // TODO: can CFU be floats and not integer???! O.o
+                    int cfu = 0;
+                    if (!el.child(6 - index).text().equals(""))
+                        // TODO: found a user with value '5.5'
+                        cfu = Integer.parseInt(el.child(6 - index).text());
+                    String state = el.child(7 - index).child(0).attr("src");
+                    String mark = el.child(9 - index).text();
+                    String date = el.child(9 - index).text();
+                    Date dateStart = null;
+
+                    code = exam_name.substring(0, exam_name.indexOf(" - "));
+                    exam_name = exam_name.substring(exam_name.indexOf(" - ") + 3);
+                    if (!date.equals("")) {
+                        date = date.substring(date.indexOf(" - ") + 3);
+                        dateStart = DateHelper.date.parse(date);
+                    }
+                    if (!mark.equals("")) {
+                        mark = mark.toLowerCase();
+                        mark = mark.substring(0, mark.indexOf(" - "));
+                    }
+                    if (!state.equals(""))
+                        state = state.substring(
+                                state.lastIndexOf("/") + 1,
+                                state.indexOf("."));
+
+                    BookletEntry newExam = new BookletEntry(adsce_id, exam_name, dateStart,
+                            cfu, state, mark, code);
+                    booklet.add(newExam);
+                }
+
+                Log.d(LOG_TAG, "Booklet download completed. List size: " + booklet.size());
+
+                return booklet;
+            }
+
+            Log.d(LOG_TAG, "Booklet download completed. ERROR S3 response: " + s3_response);
+            if (html == null)
+                Log.d(LOG_TAG, "Booklet download completed. ERROR html NULL.");
+            else if (html.equals(""))
+                Log.d(LOG_TAG, "Booklet download completed. ERROR html empty.");
+            else
+                Log.d(LOG_TAG, "Booklet download completed. ERROR html: " + html);
+        } catch (SocketTimeoutException e) {
+            Log.e(LOG_TAG, "Booklet: SOCKET_TIMEOUT");
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(LOG_TAG, "Booklet index out of bound: " + e.getMessage());
+            Utils.saveBugReport(e, LOG_TAG);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Booklet ERROR message: " + e.getMessage());
+            Utils.saveBugReport(e, LOG_TAG);
+        }
+
+        Log.d(LOG_TAG, "Booklet download completed. ERROR.");
+
+        return null;
+    }
+
+
+
+    /***********************
+     * AVAILABLE EXAMS *****
+     ***********************/
+
+    public LiveData<List<AvailableExam>> getOnlineAvailableExams() {
+        return mDownloadedAvailableExams;
+    }
+
+    public LiveData<Boolean> getAvailableExamsLoading() {
+        return mAvailableExamsLoading;
+    }
+
+    public void startFetchAvailableExamsService() {
+        Intent intentToFetch = new Intent(mContext, ExamAvailableSyncIntentService.class);
+        mContext.startService(intentToFetch);
+        Log.d(LOG_TAG, "Available exams service created");
     }
 
     public void scheduleRecurringFetchAvailableExamsSync() {
@@ -247,6 +375,145 @@ public class UnimibNetworkDataSource {
         Log.d(LOG_TAG, "Available exams job scheduled");
     }
 
+    public void fetchAvailableExams(final User user, S3Helper.NewSessionIdListener listener) {
+        mAvailableExamsLoading.postValue(true);
+        Log.d(LOG_TAG, "Fetch available exams started");
+
+        mExecutors.networkIO().execute(() -> {
+            ArrayList<AvailableExam> response = downloadAvailableExams(user, mContext, listener);
+
+            // As long as there are weather forecasts, update the LiveData storing the most recent
+            // weather forecasts. This will trigger observers of that LiveData, such as the
+            // SunshineRepository.
+            if (response != null && response.size() != 0) {
+                Log.d(LOG_TAG, "Response not null and has " + response.size() + " available exams. Notifying the observers.");
+
+                mDownloadedAvailableExams.postValue(response);
+            }
+            else {
+                Log.d(LOG_TAG, "Response either null or has 0 available exams. NOT notifying the observers.");
+            }
+
+            mAvailableExamsLoading.postValue(false);
+        });
+    }
+
+    private static ArrayList<AvailableExam> downloadAvailableExams(User user, Context context,
+                                                                   S3Helper.NewSessionIdListener listener) {
+        Log.d(LOG_TAG, "Available exams download started.");
+
+        if (context == null)
+            return null;
+
+        String html;
+        try {
+            /* Try to get the private page */
+            Bundle result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
+                    false, context, listener);
+
+            html = result.getString(PARAM_KEY_HTML);
+            int s3_response = result.getInt(PARAM_KEY_RESPONSE);
+
+            /* If it fails the first time, try once again */
+            if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
+                result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
+                        false, context, listener);
+
+                html = result.getString(PARAM_KEY_HTML);
+                s3_response = result.getInt(PARAM_KEY_RESPONSE);
+            }
+
+            if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
+                FirebaseCrash.log(html);
+                Document doc = Jsoup.parse(html);
+                Elements rows = doc.select("table#app-tabella_appelli tbody tr");
+
+                // If there's at least one exam available
+                ArrayList<AvailableExam> exams = new ArrayList<>();
+                for (Element el : rows) {
+                    String extraInfoString = el
+                            .child(0)
+                            .select("a#app-toolbarTipoAppello")
+                            .first()
+                            .attr("href");
+                    ExamID examID = getExamIdFromUrl(extraInfoString);
+
+                    String name = el.child(1).text();
+                    String date_str = el.child(2).text();
+                    String[] enrollment_window_str = el.child(3).text().split(" ");
+                    String description = el.child(4).text();
+
+                    Date date = DateHelper.date.parse(date_str);
+                    Date enrollment_window_begin = DateHelper.date
+                            .parse(enrollment_window_str[0]);
+                    Date enrollment_window_end = DateHelper.date
+                            .parse(enrollment_window_str[1]);
+
+                    AvailableExam exam = new AvailableExam(
+                            examID,
+                            name,
+                            date,
+                            description,
+                            enrollment_window_begin,
+                            enrollment_window_end);
+
+                    exams.add(exam);
+                }
+
+                Log.d(LOG_TAG, "Available exams download completed. List size: " + exams.size());
+
+                return exams;
+            }
+
+            Log.d(LOG_TAG, "Available exams download completed. ERROR S3 response: " + s3_response);
+            if (html == null)
+                Log.d(LOG_TAG, "Available exams download completed. ERROR html NULL.");
+            else if (html.equals(""))
+                Log.d(LOG_TAG, "Available exams download completed. ERROR html empty.");
+            else
+                Log.d(LOG_TAG, "Available exams download completed. ERROR html: " + html);
+        } catch (SocketTimeoutException e){
+            Log.i(LOG_TAG, "Available exams: SOCKET_TIMEOUT");
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(LOG_TAG, "Available exams index out of bound: " + e.getMessage());
+            Utils.saveBugReport(e, LOG_TAG);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Available exams ERROR message: " + e.getMessage());
+            Utils.saveBugReport(e, LOG_TAG);
+        }
+
+        Log.d(LOG_TAG, "Available exams download completed. ERROR.");
+
+        return null;
+    }
+
+    public EnrollLoader enrollExam(Exam exam, Activity activity,
+                                   EnrollLoader.EnrollCompleteListener enrollCompleteListener,
+                                   EnrollLoader.EnrollUpdatesListener enrollUpdatesListener) {
+        return S3Helper.createEnrollLoader(exam, activity,
+                enrollCompleteListener, enrollUpdatesListener);
+    }
+
+
+
+    /**********************
+     * ENROLLED EXAMS *****
+     **********************/
+
+    public LiveData<List<EnrolledExam>> getOnlineEnrolledExams() {
+        return mDownloadedEnrolledExams;
+    }
+
+    public LiveData<Boolean> getEnrolledExamsLoading() {
+        return mEnrolledExamsLoading;
+    }
+
+    public void startFetchEnrolledExamsService() {
+        Intent intentToFetch = new Intent(mContext, ExamEnrolledSyncIntentService.class);
+        mContext.startService(intentToFetch);
+        Log.d(LOG_TAG, "Enrolled exams service created");
+    }
+
     public void scheduleRecurringFetchEnrolledExamsSync() {
         Driver driver = new GooglePlayDriver(mContext);
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(driver);
@@ -296,61 +563,12 @@ public class UnimibNetworkDataSource {
         Log.d(LOG_TAG, "Enrolled exams job scheduled");
     }
 
-    /**
-     * Gets the newest weather
-     */
-    void fetchBooklet() {
-        mBookletLoading.postValue(true);
-        Log.d(LOG_TAG, "Fetch booklet started");
-
-        mExecutors.networkIO().execute(() -> {
-            ArrayList<BookletEntry> response = downloadBooklet(mContext);
-
-            // As long as there are weather forecasts, update the LiveData storing the most recent
-            // weather forecasts. This will trigger observers of that LiveData, such as the
-            // SunshineRepository.
-            if (response != null && response.size() != 0) {
-                Log.d(LOG_TAG, "Response not null and has " + response.size() + " booklet entries. Notifying the observers.");
-
-                mDownloadedBooklet.postValue(response);
-            }
-            else {
-                Log.d(LOG_TAG, "Response either null or has 0 booklet entries. NOT notifying the observers.");
-            }
-
-            mBookletLoading.postValue(false);
-        });
-    }
-
-    void fetchAvailableExams() {
-        mAvailableExamsLoading.postValue(true);
-        Log.d(LOG_TAG, "Fetch available exams started");
-
-        mExecutors.networkIO().execute(() -> {
-            ArrayList<AvailableExam> response = downloadAvailableExams(mContext);
-
-            // As long as there are weather forecasts, update the LiveData storing the most recent
-            // weather forecasts. This will trigger observers of that LiveData, such as the
-            // SunshineRepository.
-            if (response != null && response.size() != 0) {
-                Log.d(LOG_TAG, "Response not null and has " + response.size() + " available exams. Notifying the observers.");
-
-                mDownloadedAvailableExams.postValue(response);
-            }
-            else {
-                Log.d(LOG_TAG, "Response either null or has 0 available exams. NOT notifying the observers.");
-            }
-
-            mAvailableExamsLoading.postValue(false);
-        });
-    }
-
-    void fetchEnrolledExams() {
+    public void fetchEnrolledExams(final User user, S3Helper.NewSessionIdListener listener) {
         mEnrolledExamsLoading.postValue(true);
         Log.d(LOG_TAG, "Fetch enrolled exams started");
 
         mExecutors.networkIO().execute(() -> {
-            ArrayList<EnrolledExam> response = downloadEnrolledExams(mContext);
+            ArrayList<EnrolledExam> response = downloadEnrolledExams(user, mContext, listener);
 
             // As long as there are weather forecasts, update the LiveData storing the most recent
             // weather forecasts. This will trigger observers of that LiveData, such as the
@@ -368,215 +586,18 @@ public class UnimibNetworkDataSource {
         });
     }
 
-
-
-
-    private static ArrayList<BookletEntry> downloadBooklet(Context context) {
-        Log.d(LOG_TAG, "Booklet download started.");
-        if (context == null)
-            return null;
-
-        User user = UserUtils.getUser(context);
-        String html;
-        try {
-            /* Try to get the private page */
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
-                    false, context);
-
-            html = result.getString(PARAM_KEY_HTML);
-            int s3_response = result.getInt(PARAM_KEY_RESPONSE);
-
-            /* If it fails the first time, try once again */
-            if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
-                result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
-                        false, context);
-
-                html = result.getString(PARAM_KEY_HTML);
-                s3_response = result.getInt(PARAM_KEY_RESPONSE);
-            }
-
-            if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
-                FirebaseCrash.log(html);
-                Document doc = Jsoup.parse(html);
-                Elements els = doc.select("div#esse3old table.detail_table tr");
-                // Rimuovi la riga dell'intestazione
-                els.remove(0);
-
-                ArrayList<BookletEntry> booklet = new ArrayList<>();
-                for (int i = 0; i < els.size(); i++) {
-                    Element el = els.get(i);
-
-                    int index;
-                    if (el.child(1).children().size() > 0)
-                        index = 0;
-                    else
-                        index = 1;
-
-                    String exam_name = el.child(1 - index).child(index).text();
-                    String adsce_id_txt = el.child(1 - index).child(index).attr("href");
-                    adsce_id_txt = adsce_id_txt.substring(
-                            adsce_id_txt.indexOf("?adsce_id=") + 10,
-                            adsce_id_txt.indexOf("&"));
-                    int adsce_id = Integer.parseInt(adsce_id_txt);
-                    String code;
-                    // TODO: can CFU be floats and not integer???! O.o
-                    int cfu = 0;
-                    if (!el.child(6 - index).text().equals(""))
-                        // TODO: found a user with value '5.5'
-                        cfu = Integer.parseInt(el.child(6 - index).text());
-                    String state = el.child(7 - index).child(0).attr("src");
-                    String mark = el.child(9 - index).text();
-                    String date = el.child(9 - index).text();
-                    Date dateStart = null;
-
-                    code = exam_name.substring(0, exam_name.indexOf(" - "));
-                    exam_name = exam_name.substring(exam_name.indexOf(" - ") + 3);
-                    if (!date.equals("")) {
-                        date = date.substring(date.indexOf(" - ") + 3);
-                        dateStart = MyunimibDateUtils.date.parse(date);
-                    }
-                    if (!mark.equals("")) {
-                        mark = mark.toLowerCase();
-                        mark = mark.substring(0, mark.indexOf(" - "));
-                    }
-                    if (!state.equals(""))
-                        state = state.substring(
-                                state.lastIndexOf("/") + 1,
-                                state.indexOf("."));
-
-                    BookletEntry newExam = new BookletEntry(adsce_id, exam_name, dateStart,
-                            cfu, state, mark, code);
-                    booklet.add(newExam);
-                }
-
-                Log.d(LOG_TAG, "Booklet download completed. List size: " + booklet.size());
-
-                return booklet;
-            }
-
-            Log.d(LOG_TAG, "Booklet download completed. ERROR S3 response: " + s3_response);
-            if (html == null)
-                Log.d(LOG_TAG, "Booklet download completed. ERROR html NULL.");
-            else if (html.equals(""))
-                Log.d(LOG_TAG, "Booklet download completed. ERROR html empty.");
-            else
-                Log.d(LOG_TAG, "Booklet download completed. ERROR html: " + html);
-        } catch (SocketTimeoutException e) {
-            Log.e(LOG_TAG, "Booklet: SOCKET_TIMEOUT");
-        } catch (IndexOutOfBoundsException e) {
-            Log.e(LOG_TAG, "Booklet index out of bound: " + e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Booklet ERROR message: " + e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG);
-        }
-
-        Log.d(LOG_TAG, "Booklet download completed. ERROR.");
-
-        return null;
-    }
-
-    private static ArrayList<AvailableExam> downloadAvailableExams(Context context) {
-        Log.d(LOG_TAG, "Available exams download started.");
-
-        if (context == null)
-            return null;
-
-        User user = UserUtils.getUser(context);
-        String html;
-        try {
-            /* Try to get the private page */
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
-                    false, context);
-
-            html = result.getString(PARAM_KEY_HTML);
-            int s3_response = result.getInt(PARAM_KEY_RESPONSE);
-
-            /* If it fails the first time, try once again */
-            if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
-                result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
-                        false, context);
-
-                html = result.getString(PARAM_KEY_HTML);
-                s3_response = result.getInt(PARAM_KEY_RESPONSE);
-            }
-
-            if (html != null && s3_response == HttpURLConnection.HTTP_OK) {
-                FirebaseCrash.log(html);
-                Document doc = Jsoup.parse(html);
-                Elements rows = doc.select("table#app-tabella_appelli tbody tr");
-
-                // If there's at least one exam available
-                ArrayList<AvailableExam> exams = new ArrayList<>();
-                for (Element el : rows) {
-                    String extraInfoString = el
-                            .child(0)
-                            .select("a#app-toolbarTipoAppello")
-                            .first()
-                            .attr("href");
-                    ExamID examID = getExamIdFromUrl(extraInfoString);
-
-                    String name = el.child(1).text();
-                    String date_str = el.child(2).text();
-                    String[] enrollment_window_str = el.child(3).text().split(" ");
-                    String description = el.child(4).text();
-
-                    Date date = MyunimibDateUtils.date.parse(date_str);
-                    Date enrollment_window_begin = MyunimibDateUtils.date
-                            .parse(enrollment_window_str[0]);
-                    Date enrollment_window_end = MyunimibDateUtils.date
-                            .parse(enrollment_window_str[1]);
-
-                    AvailableExam exam = new AvailableExam(
-                            examID,
-                            name,
-                            date,
-                            description,
-                            enrollment_window_begin,
-                            enrollment_window_end);
-
-                    exams.add(exam);
-                }
-
-                Log.d(LOG_TAG, "Available exams download completed. List size: " + exams.size());
-
-                return exams;
-            }
-
-            Log.d(LOG_TAG, "Available exams download completed. ERROR S3 response: " + s3_response);
-            if (html == null)
-                Log.d(LOG_TAG, "Available exams download completed. ERROR html NULL.");
-            else if (html.equals(""))
-                Log.d(LOG_TAG, "Available exams download completed. ERROR html empty.");
-            else
-                Log.d(LOG_TAG, "Available exams download completed. ERROR html: " + html);
-        } catch (SocketTimeoutException e){
-            Log.i(LOG_TAG, "Available exams: SOCKET_TIMEOUT");
-        } catch (IndexOutOfBoundsException e) {
-            Log.e(LOG_TAG, "Available exams index out of bound: " + e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Available exams ERROR message: " + e.getMessage());
-            Utils.saveBugReport(e, LOG_TAG);
-        }
-
-        Log.d(LOG_TAG, "Available exams download completed. ERROR.");
-
-        return null;
-    }
-
-    private static ArrayList<EnrolledExam> downloadEnrolledExams(Context context) {
+    private static ArrayList<EnrolledExam> downloadEnrolledExams(User user, Context context,
+                                                                 S3Helper.NewSessionIdListener listener) {
         Log.d(LOG_TAG, "Enrolled exams download started.");
 
         if (context == null)
             return null;
 
-        User user = UserUtils.getUser(context);
         String html;
         try {
             /* Try to get the private page */
             Bundle result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, null,
-                    false, context);
+                    false, context, listener);
 
             html = result.getString(PARAM_KEY_HTML);
             int s3_response = result.getInt(PARAM_KEY_RESPONSE);
@@ -584,7 +605,7 @@ public class UnimibNetworkDataSource {
             /* If it fails the first time, try once again */
             if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
                 result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, null,
-                        false, context);
+                        false, context, listener);
 
                 html = result.getString(PARAM_KEY_HTML);
                 s3_response = result.getInt(PARAM_KEY_RESPONSE);
@@ -615,7 +636,7 @@ public class UnimibNetworkDataSource {
                     String dateTimeTmp = date;
                     if (!time.isEmpty()) dateTimeTmp += " " + time;
                     dateTimeTmp = dateTimeTmp.replaceAll("\\s+", " ");
-                    Date dateStart = MyunimibDateUtils.dateTime.parse(dateTimeTmp);
+                    Date dateStart = DateHelper.dateTime.parse(dateTimeTmp);
 
                     // Save the exams ID
                     ExamID examID = getExamIdFromDocument(exam_data);
@@ -652,6 +673,36 @@ public class UnimibNetworkDataSource {
 
         return null;
     }
+
+    public CertificateLoader loadCertificate(EnrolledExam exam, Activity activity) {
+        return S3Helper.createCertificateLoader(exam, activity);
+    }
+
+
+
+    /*************
+     * USERS *****
+     *************/
+
+    public LiveData<User> getOnlineUser() { return mUser; }
+
+    public LiveData<Boolean> getUserLoading() {
+        return mUserLoading;
+    }
+
+    public LoginLoader loginUser(User userToLogin, Activity activity) {
+        return S3Helper.createLoginLoader(userToLogin, activity);
+    }
+
+    public UserDataLoader downloadUserData(Activity activity) {
+        return S3Helper.createUserDataLoader(activity);
+    }
+
+
+
+    /***************
+     * VARIOUS *****
+     ***************/
 
     private static ArrayList<String> getTeachers(Elements rows) {
         ArrayList<String> teachers = new ArrayList<>();
@@ -745,12 +796,13 @@ public class UnimibNetworkDataSource {
     }
 
 
-    public static Bundle tryGetUrlWithLogin(String url, User user, String params,
-                                            boolean queryOperator, Context context) throws IOException {
+    public static Bundle tryGetUrlWithLogin(String url, UserAuthentication user, String params,
+                                            boolean queryOperator, Context context,
+                                            S3Helper.NewSessionIdListener listener) throws IOException {
         Bundle result = new Bundle();
 
         // Try to get the private page
-        HttpsURLConnection response = S3Helper.getPage(user, url, params, queryOperator, context);
+        HttpsURLConnection response = S3Helper.getPage(user, url, params, queryOperator, context, listener);
 
         if (response != null) {
             int s3_response = response.getResponseCode();

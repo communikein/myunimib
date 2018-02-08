@@ -8,6 +8,11 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+import it.communikein.myunimib.data.model.AvailableExam;
+import it.communikein.myunimib.data.model.BookletEntry;
+import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.User;
+
 
 @Dao
 public interface UnimibDao {
@@ -20,6 +25,9 @@ public interface UnimibDao {
 
     @Insert
     void addEnrolledExam(EnrolledExam entry);
+
+    @Insert
+    void addUser(User user);
 
 
     @Insert
@@ -40,6 +48,9 @@ public interface UnimibDao {
 
     @Query("DELETE FROM enrolled_exams")
     void deleteEnrolledExams();
+
+    @Query("DELETE FROM user")
+    void deleteUser();
 
 
     @Query("DELETE FROM booklet WHERE adsceId = :adsceId")
@@ -93,6 +104,12 @@ public interface UnimibDao {
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     EnrolledExam getEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
+    @Query("SELECT * FROM user WHERE username = :username")
+    User getUser(String username);
+
+    @Query("SELECT * FROM user WHERE username = :username")
+    LiveData<User> getObservableUser(String username);
+
 
     @Query("SELECT COUNT(adsceId) FROM booklet")
     int getBookletSize();
@@ -102,6 +119,9 @@ public interface UnimibDao {
 
     @Query("SELECT COUNT(adsceId) FROM enrolled_exams")
     int getEnrolledExamsSize();
+
+    @Query("SELECT COUNT(username) FROM user")
+    int getUsersCount();
 
 
     @Query("SELECT UPPER(name) FROM booklet WHERE UPPER(name) LIKE UPPER(:name)")
@@ -116,4 +136,7 @@ public interface UnimibDao {
 
     @Update
     int updateEnrolledExam(EnrolledExam entry);
+
+    @Update
+    int updateUser(User user);
 }

@@ -6,7 +6,7 @@
 
     <data>
         <variable name="exam"
-            type="it.communikein.myunimib.data.database.EnrolledExam"/>
+            type="it.communikein.myunimib.data.model.EnrolledExam"/>
         <variable name="callback"
             type="it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamAdapter.ExamClickCallback"/>
     </data>

@@ -7,15 +7,9 @@ import it.communikein.myunimib.ui.detail.AvailableExamDetailActivity;
 import it.communikein.myunimib.ui.detail.EnrolledExamDetailActivity;
 
 @Module
-public abstract class ActivityModule {
+public abstract class MainActivityModule {
 
     @ContributesAndroidInjector(modules = FragmentsBuilderModule.class)
     abstract MainActivity contributeMainActivity();
-
-    @ContributesAndroidInjector
-    abstract EnrolledExamDetailActivity contributeEnrolledExamDetailActivity();
-
-    @ContributesAndroidInjector
-    abstract AvailableExamDetailActivity contributeAvailableExamDetailActivity();
 
 }

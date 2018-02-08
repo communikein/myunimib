@@ -6,7 +6,7 @@
 
     <data>
         <variable name="bookletEntry"
-            type="it.communikein.myunimib.data.database.BookletEntry"/>
+            type="it.communikein.myunimib.data.model.BookletEntry"/>
         <variable name="callback"
             type="it.communikein.myunimib.ui.list.booklet.BookletAdapter.ExamClickCallback"/>
     </data>

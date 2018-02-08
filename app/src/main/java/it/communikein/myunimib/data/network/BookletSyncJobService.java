@@ -14,6 +14,9 @@ import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasServiceInjector;
+import it.communikein.myunimib.AppExecutors;
+import it.communikein.myunimib.data.UnimibRepository;
+import it.communikein.myunimib.data.model.User;
 
 
 public class BookletSyncJobService extends JobService implements HasServiceInjector {
@@ -24,8 +27,7 @@ public class BookletSyncJobService extends JobService implements HasServiceInjec
     DispatchingAndroidInjector<Service> dispatchingAndroidInjector;
 
     @Inject
-    UnimibNetworkDataSource networkDataSource;
-
+    UnimibRepository repository;
 
     @Override
     public void onCreate() {
@@ -47,7 +49,7 @@ public class BookletSyncJobService extends JobService implements HasServiceInjec
     public boolean onStartJob(final JobParameters jobParameters) {
         Log.d(LOG_TAG, "Scheduled booklet job started.");
 
-        networkDataSource.fetchBooklet();
+        repository.fetchBooklet();
 
         jobFinished(jobParameters, false);
 

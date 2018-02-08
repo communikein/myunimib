@@ -1,5 +1,6 @@
 package it.communikein.myunimib.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
@@ -8,7 +9,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import it.communikein.myunimib.data.UnimibRepository;
-import it.communikein.myunimib.data.database.AvailableExam;
+import it.communikein.myunimib.data.model.AvailableExam;
+import it.communikein.myunimib.data.model.Exam;
+import it.communikein.myunimib.data.model.User;
+import it.communikein.myunimib.data.network.loaders.EnrollLoader;
 
 
 public class AvailableExamsListViewModel extends ViewModel {
@@ -45,6 +49,16 @@ public class AvailableExamsListViewModel extends ViewModel {
 
     public void refreshEnrolledExams() {
         mRepository.startFetchEnrolledExamsService();
+    }
+
+    public EnrollLoader enrollExam(Exam exam, Activity activity,
+                                   EnrollLoader.EnrollUpdatesListener enrollUpdatesListener) {
+        return mRepository.enrollExam(exam, activity, enrollUpdatesListener);
+    }
+
+
+    public User getUser() {
+        return mRepository.getUser();
     }
 
 }
