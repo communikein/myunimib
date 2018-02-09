@@ -8,11 +8,12 @@ import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.BookletEntry;
 import it.communikein.myunimib.data.model.Building;
 import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
 
 
 @Database(entities = {User.class, BookletEntry.class, EnrolledExam.class, AvailableExam.class,
-        Building.class}, version = 25, exportSchema = false)
+        Building.class, Lesson.class}, version = 26, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class UnimibDatabase extends RoomDatabase {
 

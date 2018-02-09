@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -20,12 +21,14 @@ import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.Exam;
 import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.database.UnimibDao;
+import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.data.network.loaders.CertificateLoader;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
 import it.communikein.myunimib.data.network.loaders.LoginLoader;
 import it.communikein.myunimib.data.network.loaders.UserDataLoader;
+import it.communikein.myunimib.ui.list.timetable.AddLessonActivity;
 import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.data.UserHelper.AccountRemoveErrorListener;
 import it.communikein.myunimib.data.UserHelper.AccountRemovedListener;
@@ -326,6 +329,7 @@ public class UnimibRepository {
      * BOOKLET *****
      ***************/
 
+    @WorkerThread
     public LiveData<List<BookletEntry>> getObservableCurrentBooklet() {
         initializeData();
 
@@ -517,6 +521,68 @@ public class UnimibRepository {
 
     public CertificateLoader loadCertificate(EnrolledExam exam, Activity activity) {
         return mUnimibNetworkDataSource.loadCertificate(exam, activity);
+    }
+
+
+
+    /*****************
+     * LESSONS *******
+     *****************/
+
+    public void addLesson(Lesson lesson, AddLessonActivity.AddLessonListener listener) {
+        mExecutors.diskIO().execute(() -> {
+            mUnimibDao.addLesson(lesson);
+            listener.onLessonAddComplete();
+        });
+    }
+
+    public LiveData<List<Lesson>> getObservableTimetable() {
+        return mUnimibDao.getObservableTimetable();
+    }
+
+    public LiveData<List<Lesson>> getObservableTimetable(String dayOfWeek) {
+        return mUnimibDao.getObservableTimetableOfDay(dayOfWeek);
+    }
+
+    public List<Lesson> getTimetable() {
+        return mUnimibDao.getTimetable();
+    }
+
+    public List<Lesson> getTimetable(String dayOfWeek) {
+        return mUnimibDao.getTimetableOfDay(dayOfWeek);
+    }
+
+    public LiveData<Lesson> getObservableLesson(int id) {
+        return mUnimibDao.getObservableLesson(id);
+    }
+
+    public Lesson getLesson(int id) {
+        return mUnimibDao.getLesson(id);
+    }
+
+    public boolean isTimetableEmpty() {
+        return mUnimibDao.getTimetableSize() == 0;
+    }
+
+    public void deleteTimetable() {
+        mUnimibDao.deleteTimetable();
+    }
+
+    public void deleteLesson(int id) {
+        mUnimibDao.deleteLesson(id);
+    }
+
+    public void deleteLessons(List<Lesson> lessons) {
+        for (Lesson lesson : lessons)
+            mUnimibDao.deleteLesson(lesson.getId());
+    }
+
+    public int updateLesson(Lesson lesson) {
+        return mUnimibDao.updateLesson(lesson);
+    }
+
+    public LiveData<List<String>> getCoursesNames(String like) {
+        return mUnimibDao.getCoursesNames(like + '%');
     }
 
 

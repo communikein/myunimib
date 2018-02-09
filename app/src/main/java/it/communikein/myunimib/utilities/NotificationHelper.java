@@ -24,9 +24,8 @@ import it.communikein.myunimib.ui.MainActivity;
 @Singleton
 public class NotificationHelper extends ContextWrapper {
 
-    private static final String LOG_TAG = NotificationHelper.class.getSimpleName();
+    private static final String TAG = NotificationHelper.class.getSimpleName();
 
-    private final Context mContext;
     private static NotificationManager notificationManager;
 
     private final String CHANNEL_BOOKLET_ID;
@@ -44,16 +43,16 @@ public class NotificationHelper extends ContextWrapper {
     public NotificationHelper(Context base) {
         super(base);
 
-        mContext = base;
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         CHANNEL_BOOKLET_ID = getString(R.string.channel_booklet_id);
-        CHANNEL_BOOKLET_NAME = base.getString(R.string.channel_booklet_name);
+        CHANNEL_BOOKLET_NAME = getString(R.string.channel_booklet_name);
 
         CHANNEL_AVAILABLE_EXAMS_ID = getString(R.string.channel_available_exams_id);
-        CHANNEL_AVAILABLE_EXAMS_NAME = base.getString(R.string.channel_available_exams_name);
+        CHANNEL_AVAILABLE_EXAMS_NAME = getString(R.string.channel_available_exams_name);
 
         CHANNEL_ENROLLED_EXAMS_ID = getString(R.string.channel_enrolled_exams_id);
-        CHANNEL_ENROLLED_EXAMS_NAME = base.getString(R.string.channel_enrolled_exams_name);
+        CHANNEL_ENROLLED_EXAMS_NAME = getString(R.string.channel_enrolled_exams_name);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createChannels();
@@ -68,7 +67,7 @@ public class NotificationHelper extends ContextWrapper {
         channel.setLightColor(Color.RED);
         channel.setShowBadge(true);
         channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-        getManager().createNotificationChannel(channel);
+        notificationManager.createNotificationChannel(channel);
 
         channel = new NotificationChannel(CHANNEL_AVAILABLE_EXAMS_ID,
                 CHANNEL_AVAILABLE_EXAMS_NAME, NotificationManager.IMPORTANCE_DEFAULT);
@@ -76,7 +75,7 @@ public class NotificationHelper extends ContextWrapper {
         channel.enableVibration(true);
         channel.setLightColor(Color.RED);
         channel.setShowBadge(true);
-        getManager().createNotificationChannel(channel);
+        notificationManager.createNotificationChannel(channel);
 
         channel = new NotificationChannel(CHANNEL_ENROLLED_EXAMS_ID,
                 CHANNEL_ENROLLED_EXAMS_NAME, NotificationManager.IMPORTANCE_DEFAULT);
@@ -84,20 +83,20 @@ public class NotificationHelper extends ContextWrapper {
         channel.enableVibration(true);
         channel.setLightColor(Color.RED);
         channel.setShowBadge(true);
-        getManager().createNotificationChannel(channel);
+        notificationManager.createNotificationChannel(channel);
     }
 
 
     public NotificationCompat.Builder getNotificationBookletChanges() {
-        String title = mContext.getString(R.string.channel_booklet_name);
-        String content = mContext.getString(R.string.channel_booklet_content_changes);
+        String title = getString(R.string.channel_booklet_name);
+        String content = getString(R.string.channel_booklet_content_changes);
 
-        Intent intent = new Intent(mContext, MainActivity.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MainActivity.FRAGMENT_SELECTED_TAG,
                 MainActivity.TAG_FRAGMENT_BOOKLET);
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                mContext,
+                getApplicationContext(),
                 BOOKLET_CHANGES_NOTIFICATION_ID,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -106,15 +105,15 @@ public class NotificationHelper extends ContextWrapper {
     }
 
     public NotificationCompat.Builder getNotificationAvailableChanges() {
-        String title = mContext.getString(R.string.channel_available_exams_name);
-        String content = mContext.getString(R.string.channel_available_exams_content_changes);
+        String title = getString(R.string.channel_available_exams_name);
+        String content = getString(R.string.channel_available_exams_content_changes);
 
-        Intent intent = new Intent(mContext, MainActivity.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MainActivity.FRAGMENT_SELECTED_TAG,
                 MainActivity.TAG_FRAGMENT_EXAMS_AVAILABLE);
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                mContext,
+                getApplicationContext(),
                 AVAILABLE_EXAMS_CHANGES_NOTIFICATION_ID,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -123,15 +122,15 @@ public class NotificationHelper extends ContextWrapper {
     }
 
     public NotificationCompat.Builder getNotificationEnrolledChanges() {
-        String title = mContext.getString(R.string.channel_enrolled_exams_name);
-        String content = mContext.getString(R.string.channel_enrolled_exams_content_changes);
+        String title = getString(R.string.channel_enrolled_exams_name);
+        String content = getString(R.string.channel_enrolled_exams_content_changes);
 
-        Intent intent = new Intent(mContext, MainActivity.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MainActivity.FRAGMENT_SELECTED_TAG,
                 MainActivity.TAG_FRAGMENT_EXAMS_ENROLLED);
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                mContext,
+                getApplicationContext(),
                 ENROLLED_EXAMS_CHANGES_NOTIFICATION_ID,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -162,15 +161,6 @@ public class NotificationHelper extends ContextWrapper {
 
 
     public void notify(int id, NotificationCompat.Builder notification) {
-        getManager().notify(id, notification.build());
-    }
-
-
-    private NotificationManager getManager() {
-        if (notificationManager == null) {
-            notificationManager = (NotificationManager)
-                    getSystemService(Context.NOTIFICATION_SERVICE);
-        }
-        return notificationManager;
+        notificationManager.notify(id, notification.build());
     }
 }

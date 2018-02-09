@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.ExamID;
-import it.communikein.myunimib.databinding.EnrolledExamListItemBinding;
+import it.communikein.myunimib.databinding.ListItemEnrolledExamBinding;
 import it.communikein.myunimib.utilities.DateHelper;
 
 import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamAdapter.ExamAdapterViewHolder;
@@ -41,8 +41,8 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHol
 
     @Override
     public ExamAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        EnrolledExamListItemBinding binding = DataBindingUtil
-                .inflate(LayoutInflater.from(parent.getContext()), R.layout.enrolled_exam_list_item,
+        ListItemEnrolledExamBinding binding = DataBindingUtil
+                .inflate(LayoutInflater.from(parent.getContext()), R.layout.list_item_enrolled_exam,
                         parent, false);
         binding.setCallback(mExamClickCallback);
 
@@ -122,9 +122,9 @@ public class EnrolledExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHol
      */
     class ExamAdapterViewHolder extends RecyclerView.ViewHolder {
 
-        final EnrolledExamListItemBinding mBinding;
+        final ListItemEnrolledExamBinding mBinding;
 
-        ExamAdapterViewHolder(EnrolledExamListItemBinding binding) {
+        ExamAdapterViewHolder(ListItemEnrolledExamBinding binding) {
             super(binding.getRoot());
 
             this.mBinding = binding;

@@ -86,7 +86,7 @@
                 android:onClick="@{() -> callback.onEnrollmentClicked(exam)}"
                 android:gravity="center"
                 android:tint="@color/colorAccentDark"
-                app:srcCompat="@drawable/ic_add_black"
+                app:srcCompat="@drawable/ic_add_black_24dp"
                 android:contentDescription="@string/action_enroll_exam"
                 style="?android:attr/borderlessButtonStyle"/>
 

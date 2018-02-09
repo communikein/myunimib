@@ -7,6 +7,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -74,12 +75,12 @@ public class BuildingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setTitle();
 
         mViewModel = ViewModelProviders
                 .of(this, viewModelFactory)
                 .get(BuildingsViewModel.class);
 
-        setTitle();
         showTabs();
         hideBottomNavigation();
 
@@ -125,6 +126,8 @@ public class BuildingsFragment extends Fragment {
 
     private void showTabs() {
         if (getActivity() != null) {
+            ((MainActivity) getActivity()).getTabLayout().setTabGravity(TabLayout.GRAVITY_FILL);
+            ((MainActivity) getActivity()).getTabLayout().setTabMode(TabLayout.MODE_FIXED);
             ((MainActivity) getActivity()).showTabsLayout(TABS_TITLE);
         }
     }

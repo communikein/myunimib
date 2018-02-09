@@ -36,7 +36,7 @@
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             app:layout_constraintTop_toBottomOf="@id/appbar"
-            app:hintTextAppearance="@style/LoginHintText"
+            app:hintTextAppearance="@style/HintText"
             app:errorEnabled="true"
             app:errorTextAppearance="@style/ErrorText">
 
@@ -63,7 +63,7 @@
             app:layout_constraintStart_toStartOf="@+id/username_text_input_layout"
             app:layout_constraintTop_toBottomOf="@+id/username_text_input_layout"
             app:passwordToggleEnabled="true"
-            app:hintTextAppearance="@style/LoginHintText"
+            app:hintTextAppearance="@style/HintText"
             app:passwordToggleTint="@color/colorPrimaryDark"
             app:errorEnabled="true"
             app:errorTextAppearance="@style/ErrorText">

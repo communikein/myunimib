@@ -35,7 +35,7 @@
         <item name="android:textColor">@color/dark_red</item>
     </style>
 
-    <style name="LoginHintText" parent="TextAppearance.AppCompat.Small">
+    <style name="HintText" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">@color/colorPrimaryDark</item>
     </style>
 

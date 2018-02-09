@@ -36,5 +36,15 @@ public class Utils {
         FirebaseCrash.logcat(Log.ERROR, TAG, e.getMessage());
         FirebaseCrash.report(e);
     }
+
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+
+            return true;
+        } catch (NumberFormatException ignore) {
+            return false;
+        }
+    }
 }
 

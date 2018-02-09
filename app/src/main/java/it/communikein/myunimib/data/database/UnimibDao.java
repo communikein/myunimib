@@ -11,6 +11,7 @@ import java.util.List;
 import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.BookletEntry;
 import it.communikein.myunimib.data.model.EnrolledExam;
+import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
 
 
@@ -28,6 +29,9 @@ public interface UnimibDao {
 
     @Insert
     void addUser(User user);
+
+    @Insert
+    void addLesson(Lesson lesson);
 
 
     @Insert
@@ -52,6 +56,9 @@ public interface UnimibDao {
     @Query("DELETE FROM user")
     void deleteUser();
 
+    @Query("DELETE FROM lessons")
+    void deleteTimetable();
+
 
     @Query("DELETE FROM booklet WHERE adsceId = :adsceId")
     void deleteBookletEntry(int adsceId);
@@ -64,6 +71,10 @@ public interface UnimibDao {
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     void deleteEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
+    @Query("DELETE FROM lessons WHERE id= :id")
+    void deleteLesson(int id);
+
+
 
     @Query("SELECT * FROM booklet")
     LiveData<List<BookletEntry>> getObservableBooklet();
@@ -74,6 +85,12 @@ public interface UnimibDao {
     @Query("SELECT * FROM enrolled_exams")
     LiveData<List<EnrolledExam>> getObservableEnrolledExams();
 
+    @Query("SELECT * FROM lessons")
+    LiveData<List<Lesson>> getObservableTimetable();
+
+    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week")
+    LiveData<List<Lesson>> getObservableTimetableOfDay(String day_of_week);
+
 
     @Query("SELECT * FROM booklet")
     List<BookletEntry> getBooklet();
@@ -83,6 +100,12 @@ public interface UnimibDao {
 
     @Query("SELECT * FROM enrolled_exams")
     List<EnrolledExam> getEnrolledExams();
+
+    @Query("SELECT * FROM lessons")
+    List<Lesson> getTimetable();
+
+    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week")
+    List<Lesson> getTimetableOfDay(String day_of_week);
 
 
     @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")
@@ -110,6 +133,12 @@ public interface UnimibDao {
     @Query("SELECT * FROM user WHERE username = :username")
     LiveData<User> getObservableUser(String username);
 
+    @Query("SELECT * FROM lessons WHERE id = :id")
+    Lesson getLesson(int id);
+
+    @Query("SELECT * FROM lessons WHERE id = :id")
+    LiveData<Lesson> getObservableLesson(int id);
+
 
     @Query("SELECT COUNT(adsceId) FROM booklet")
     int getBookletSize();
@@ -123,9 +152,12 @@ public interface UnimibDao {
     @Query("SELECT COUNT(username) FROM user")
     int getUsersCount();
 
+    @Query("SELECT COUNT(courseName) FROM lessons")
+    int getTimetableSize();
 
-    @Query("SELECT UPPER(name) FROM booklet WHERE UPPER(name) LIKE UPPER(:name)")
-    List<String> getCoursesNames(String name);
+
+    @Query("SELECT name FROM booklet WHERE name LIKE :name")
+    LiveData<List<String>> getCoursesNames(String name);
 
 
     @Update
@@ -139,4 +171,7 @@ public interface UnimibDao {
 
     @Update
     int updateUser(User user);
+
+    @Update
+    int updateLesson(Lesson lesson);
 }

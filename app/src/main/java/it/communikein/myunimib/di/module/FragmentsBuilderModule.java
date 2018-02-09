@@ -7,6 +7,7 @@ import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
 import it.communikein.myunimib.ui.list.booklet.BookletFragment;
 import it.communikein.myunimib.ui.list.building.BuildingsFragment;
 import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
+import it.communikein.myunimib.ui.list.timetable.TimetableFragment;
 
 @Module
 public abstract class FragmentsBuilderModule {
@@ -25,5 +26,8 @@ public abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
     abstract BuildingsFragment contributeBuildingsFragment();
+
+    @ContributesAndroidInjector
+    abstract TimetableFragment contributeTimetableFragment();
 
 }

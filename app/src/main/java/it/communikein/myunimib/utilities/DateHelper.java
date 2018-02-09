@@ -6,6 +6,7 @@ import android.text.format.DateUtils;
 import it.communikein.myunimib.R;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -19,9 +20,56 @@ public class DateHelper {
             new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     public static final DateFormat dateTime =
             new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+    public static final DateFormat time =
+            new SimpleDateFormat("HH.mm", Locale.getDefault());
     public static final DateFormat dateFile =
             new SimpleDateFormat("ddMMyyyy", Locale.getDefault());
 
+
+    public static String displayDayName(DAY_OF_WEEK dayOfWeek, Context context) {
+        String display = null;
+        switch (dayOfWeek) {
+            case MONDAY:
+                display = context.getString(R.string.monday);
+                break;
+            case TUESDAY:
+                display = context.getString(R.string.tuesday);
+                break;
+            case WEDNESDAY:
+                display = context.getString(R.string.wednesday);
+                break;
+            case THURSDAY:
+                display = context.getString(R.string.thursday);
+                break;
+            case FRIDAY:
+                display = context.getString(R.string.friday);
+                break;
+            case SATURDAY:
+                display = context.getString(R.string.saturday);
+                break;
+            case SUNDAY:
+                display = context.getString(R.string.sunday);
+                break;
+        }
+
+        return display;
+    }
+
+    public static String printTime(long millis) {
+        Date date = new Date(millis);
+
+        return time.format(date);
+    }
+
+    public static long getTime(String timeToSave) {
+        try {
+            Date date = time.parse(timeToSave);
+
+            return date.getTime();
+        } catch (ParseException e) {
+            return -1;
+        }
+    }
 
     private static long getNormalizedUtcMsForToday() {
 

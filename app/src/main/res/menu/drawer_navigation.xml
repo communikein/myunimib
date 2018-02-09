@@ -17,6 +17,11 @@
             android:icon="@drawable/ic_location_city_black_24dp"
             android:title="@string/title_buildings" />
 
+        <item
+            android:id="@+id/navigation_timetable"
+            android:icon="@drawable/ic_today_black_24dp"
+            android:title="@string/title_timetable" />
+
     </group>
 
     <group

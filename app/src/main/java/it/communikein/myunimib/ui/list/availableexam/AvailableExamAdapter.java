@@ -14,7 +14,7 @@ import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.Exam;
 import it.communikein.myunimib.data.model.ExamID;
-import it.communikein.myunimib.databinding.AvailableExamListItemBinding;
+import it.communikein.myunimib.databinding.ListItemAvailableExamBinding;
 import it.communikein.myunimib.utilities.DateHelper;
 
 import it.communikein.myunimib.ui.list.availableexam.AvailableExamAdapter.ExamAdapterViewHolder;
@@ -44,9 +44,9 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHo
 
     @Override
     public ExamAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        AvailableExamListItemBinding binding = DataBindingUtil
+        ListItemAvailableExamBinding binding = DataBindingUtil
                 .inflate(LayoutInflater.from(parent.getContext()),
-                        R.layout.available_exam_list_item,
+                        R.layout.list_item_available_exam,
                         parent, false);
         binding.setCallback(mExamClickCallback);
 
@@ -123,9 +123,9 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHo
      */
     class ExamAdapterViewHolder extends RecyclerView.ViewHolder {
 
-        final AvailableExamListItemBinding mBinding;
+        final ListItemAvailableExamBinding mBinding;
 
-        ExamAdapterViewHolder(AvailableExamListItemBinding binding) {
+        ExamAdapterViewHolder(ListItemAvailableExamBinding binding) {
             super(binding.getRoot());
 
             this.mBinding = binding;

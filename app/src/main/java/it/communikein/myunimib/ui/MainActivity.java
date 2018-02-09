@@ -37,6 +37,7 @@ import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
 import it.communikein.myunimib.ui.list.booklet.BookletFragment;
 import it.communikein.myunimib.ui.list.building.BuildingsFragment;
 import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
+import it.communikein.myunimib.ui.list.timetable.TimetableFragment;
 import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 import it.communikein.myunimib.viewmodel.factory.MainActivityViewModelFactory;
@@ -49,7 +50,7 @@ import javax.inject.Inject;
 public class MainActivity extends AppCompatActivity implements
         HasSupportFragmentInjector, NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private ActivityMainBinding mBinding;
 
@@ -74,12 +75,14 @@ public class MainActivity extends AppCompatActivity implements
     private static final int INDEX_FRAGMENT_EXAMS_AVAILABLE = 2;
     private static final int INDEX_FRAGMENT_EXAMS_ENROLLED = 3;
     private static final int INDEX_FRAGMENT_BUILDINGS = 4;
+    private static final int INDEX_FRAGMENT_TIMETABLE = 5;
 
     public static final String TAG_FRAGMENT_HOME = "tab-home";
     public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
     public static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
     public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
     public static final String TAG_FRAGMENT_BUILDINGS = "tab-buildings";
+    public static final String TAG_FRAGMENT_TIMETABLE = "tab-timetable";
 
     private static final long DRAWER_CLOSE_DELAY_MS = 250;
     protected ActionBarDrawerToggle mDrawerToggle;
@@ -267,11 +270,16 @@ public class MainActivity extends AppCompatActivity implements
         fragments.add(INDEX_FRAGMENT_EXAMS_AVAILABLE, new AvailableExamsFragment());
         fragments.add(INDEX_FRAGMENT_EXAMS_ENROLLED, new EnrolledExamsFragment());
         fragments.add(INDEX_FRAGMENT_BUILDINGS, new BuildingsFragment());
+        fragments.add(INDEX_FRAGMENT_TIMETABLE, new TimetableFragment());
     }
 
 
     public void hideTabsLayout() {
         mBinding.tabs.setVisibility(View.GONE);
+    }
+
+    public TabLayout getTabLayout() {
+        return mBinding.tabs;
     }
 
     public void showTabsLayout(ArrayList<String> tabs) {
@@ -373,6 +381,10 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.navigation_buildings:
                 index = INDEX_FRAGMENT_BUILDINGS;
                 FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_BUILDINGS;
+                break;
+            case R.id.navigation_timetable:
+                index = INDEX_FRAGMENT_TIMETABLE;
+                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_TIMETABLE;
                 break;
             case R.id.navigation_logout:
                 return tryLogout();

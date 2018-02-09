@@ -188,5 +188,22 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_buildings">Buildings</string>
+    <string name="label_time_start">08.00</string>
+    <string name="label_time_end">10.00</string>
+    <string name="label_course_name">Fondamenti di Informatica</string>
+    <string name="label_classroom">U14-T024</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+    <string name="prompt_course_name">Course name</string>
+    <string name="prompt_lesson_building">Building</string>
+    <string name="prompt_lesson_class">Room</string>
+    <string name="prompt_start_time">Start</string>
+    <string name="prompt_end_time">End</string>
+    <string name="saving_lesson">Lesson save in progress..</string>
 
 </resources>
