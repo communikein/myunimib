@@ -162,7 +162,7 @@ public class UserAuthentication {
     private JSONArray getFacultiesKeysJSON() {
         JSONArray array = new JSONArray();
 
-        for (int i=0; i<getFaculties().size(); i++)
+        if (getFaculties()!= null) for (int i=0; i<getFaculties().size(); i++)
             array.put(getFaculties().keyAt(i));
 
         return array;
@@ -175,7 +175,7 @@ public class UserAuthentication {
     private JSONArray getFacultiesValuesJSON() {
         JSONArray array = new JSONArray();
 
-        for (int i=0; i<getFaculties().size(); i++)
+        if (getFaculties()!= null) for (int i=0; i<getFaculties().size(); i++)
             array.put(getFaculties().valueAt(i));
 
         return array;

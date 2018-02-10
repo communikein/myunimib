@@ -47,7 +47,7 @@ public class S3Helper {
     private static final String TAG = S3Helper.class.getSimpleName();
 
     public static final String URL_HOME =
-            "https://s3w.si.unimib.it/esse3/Home.do;";
+            "https://s3w.si.unimib.it/esse3/auth/studente/HomePageStudente.do;";
     public static final String URL_LIBRETTO =
             "https://s3w.si.unimib.it/esse3/auth/studente/Libretto/LibrettoHome.do;";
     public static final String URL_AVAILABLE_EXAMS =

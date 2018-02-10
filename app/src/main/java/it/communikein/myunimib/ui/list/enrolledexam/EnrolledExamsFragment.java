@@ -125,18 +125,6 @@ public class EnrolledExamsFragment extends Fragment implements
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_refresh:
-                onRefresh();
-
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
 
     @Override
     public void onRefresh() {

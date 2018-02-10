@@ -286,9 +286,21 @@ public class LoginActivity extends AuthAppCompatActivity implements
     }
 
     private void finishLogin() {
+        resetView();
+
         /* Since the user is logged in, start the Main Activity */
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    private void resetView() {
+        mBinding.usernameEdittext.requestFocus();
+        mBinding.usernameEdittext.setText("");
+        mBinding.passwordEdittext.setText("");
+        mBinding.termsCheck.setChecked(false);
+
+        hideFacultyChoiceView();
+        showMainLoginView();
     }
 
     @SuppressWarnings("unchecked")

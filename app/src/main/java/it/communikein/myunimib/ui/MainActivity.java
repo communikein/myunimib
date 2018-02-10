@@ -31,6 +31,7 @@ import dagger.android.AndroidInjection;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
 import it.communikein.myunimib.ui.detail.HomeFragment;
 import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements
     private final String DRAWER_ITEM_SELECTED = "drawer-item-selected";
     private int drawerItemSelectedId = R.id.navigation_home;
 
+    private boolean isLoggingOut = false;
+
     private ProgressDialog progressDialog;
 
     @Override
@@ -123,9 +126,13 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(SAVE_FRAGMENT_SELECTED, FRAGMENT_SELECTED_TAG);
+        if (isLoggingOut)
+            outState.clear();
+        else {
+            outState.putString(SAVE_FRAGMENT_SELECTED, FRAGMENT_SELECTED_TAG);
 
-        super.onSaveInstanceState(outState);
+            super.onSaveInstanceState(outState);
+        }
     }
 
     private void restoreInstanceState(Bundle savedInstanceState) {
@@ -216,11 +223,10 @@ public class MainActivity extends AppCompatActivity implements
         userNameTextView.setVisibility(View.VISIBLE);
         userEmailTextView.setVisibility(View.VISIBLE);
 
-        if (Utils.user == null)
-            Utils.user = mViewModel.getUser();
+        User user = mViewModel.getUser();
 
-        userNameTextView.setText(Utils.user.getName());
-        userEmailTextView.setText(Utils.user.getUniversityMail());
+        userNameTextView.setText(user.getName());
+        userEmailTextView.setText(user.getUniversityMail());
 
         mViewModel.loadProfilePicture(userImageView);
     }
@@ -305,22 +311,12 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.settings_menu, menu);
         return true;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.action_logout:
-                return tryLogout();
-
-            case R.id.action_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-        }
-
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
@@ -432,7 +428,10 @@ public class MainActivity extends AppCompatActivity implements
         builder.setTitle(getString(R.string.dialog_logout));
         builder.setMessage(getString(R.string.dialog_logout_message_ok));
         String positiveText = getString(android.R.string.ok);
-        builder.setPositiveButton(positiveText, (dialog, which) -> finish());
+        builder.setPositiveButton(positiveText, (dialog, which) -> {
+            isLoggingOut = true;
+            finish();
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
     }

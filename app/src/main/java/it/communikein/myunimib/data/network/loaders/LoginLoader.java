@@ -38,6 +38,7 @@ import static it.communikein.myunimib.data.network.loaders.S3Helper.ERROR_RESPON
 import static it.communikein.myunimib.data.network.loaders.S3Helper.ERROR_S3_NOT_AVAILABLE;
 import static it.communikein.myunimib.data.network.loaders.S3Helper.ERROR_WRONG_PASSWORD;
 import static it.communikein.myunimib.data.network.loaders.S3Helper.OK_LOGGED_IN;
+import static it.communikein.myunimib.data.network.loaders.S3Helper.URL_HOME;
 import static it.communikein.myunimib.data.network.loaders.S3Helper.URL_LIBRETTO;
 
 public class LoginLoader extends AsyncTaskLoader<User> {
@@ -127,7 +128,7 @@ public class LoginLoader extends AsyncTaskLoader<User> {
 
             /* If this is a real login, try to contact the server and save its response */
             if (!user.isFake()) {
-                resp = S3Helper.getPage(user, URL_LIBRETTO, context, userHelper::updateSessionId);
+                resp = S3Helper.getPage(user, URL_HOME, context, userHelper::updateSessionId);
                 if (resp != null)
                     respCode = resp.getResponseCode();
                 else
@@ -168,7 +169,7 @@ public class LoginLoader extends AsyncTaskLoader<User> {
                         Log.d(TAG, "Got new JSESSIONID");
 
                         /* Try to get the page with the new session ID */
-                        resp = S3Helper.getPage(user, URL_LIBRETTO, context, userHelper::updateSessionId);
+                        resp = S3Helper.getPage(user, URL_HOME, context, userHelper::updateSessionId);
                         if (resp != null)
                             respCode = resp.getResponseCode();
                         else

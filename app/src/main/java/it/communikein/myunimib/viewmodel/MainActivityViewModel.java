@@ -35,6 +35,7 @@ public class MainActivityViewModel extends ViewModel {
     public void logout(Activity activity, AccountRemovedListener accountRemovedListener,
                        AccountRemoveErrorListener accountRemoveErrorListener) {
         mRepository.deleteUser(activity, accountRemovedListener, accountRemoveErrorListener);
+        mProfilePictureRequest.clearCache();
     }
 
     public User getUser() {
@@ -42,6 +43,8 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void loadProfilePicture(NetworkImageView target) {
+        this.mProfilePictureRequest.changeUser(getUser());
+
         ProfilePictureVolleyRequest.ProfilePictureLoader imageLoader =
                 mProfilePictureRequest.getImageLoader();
 

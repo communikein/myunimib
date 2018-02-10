@@ -21,6 +21,7 @@ import com.android.volley.toolbox.ImageRequest;
 
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.model.User;
+import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 
 import java.util.HashMap;
@@ -38,13 +39,15 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
     private final ProfilePictureLoader mImageLoader;
 
     private final LruCache<String, Bitmap> cache = new LruCache<>(1);
+    private UserAuthentication userAuthentication;
 
     @Inject
     public ProfilePictureVolleyRequest(UnimibRepository repository, Context context) {
         this.mRepository = repository;
         this.mRequestQueue = getRequestQueue(context);
+        this.userAuthentication = mRepository.getUser();
 
-        mImageLoader = new ProfilePictureLoader(mRepository.getUser(), mRequestQueue, this);
+        this.mImageLoader = new ProfilePictureLoader(mRequestQueue, this);
     }
 
 
@@ -61,6 +64,15 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
     public void putBitmap(String url, Bitmap bitmap) {
         Log.d(ProfilePictureRequest.class.getSimpleName(), "Saving bitmap in cache (" + url + ").");
         cache.put(url, bitmap);
+    }
+
+    public void clearCache() {
+        cache.evictAll();
+    }
+
+    public void changeUser(UserAuthentication userAuthentication) {
+        clearCache();
+        this.userAuthentication = userAuthentication;
     }
 
 
@@ -83,25 +95,21 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
 
     public final class ProfilePictureLoader extends ImageLoader {
 
-        private User mUser;
-
         /**
          * Constructs a new ImageLoader.
          *
          * @param queue      The RequestQueue to use for making image requests.
          * @param imageCache The cache to use as an L1 cache.
          */
-        ProfilePictureLoader(User user, RequestQueue queue, ImageCache imageCache) {
+        ProfilePictureLoader(RequestQueue queue, ImageCache imageCache) {
             super(queue, imageCache);
-
-            this.mUser = user;
         }
 
         @Override
         protected Request<Bitmap> makeImageRequest(String requestUrl, int maxWidth,
                                                    int maxHeight, ImageView.ScaleType scaleType,
                                                    final String cacheKey) {
-            ProfilePictureRequest request = new ProfilePictureRequest(mUser,
+            ProfilePictureRequest request = new ProfilePictureRequest(
                     response ->
                         onGetImageSuccess(cacheKey, response),
                     maxWidth, maxHeight, scaleType,
@@ -113,7 +121,7 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
                             // Save it
                             cookie = cookie.substring(cookie.indexOf("JSESSIONID=") + 11);
                             cookie = cookie.substring(0, cookie.indexOf(";"));
-                            mUser.setSessionID(cookie);
+                            userAuthentication.setSessionID(cookie);
                             mRepository.updateUserSessionId(cookie);
                         }
                     });
@@ -128,22 +136,18 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
 
     final class ProfilePictureRequest extends ImageRequest {
 
-        private final User mUser;
-
-        ProfilePictureRequest(User user, Response.Listener<Bitmap> listener, int maxWidth,
+        ProfilePictureRequest(Response.Listener<Bitmap> listener, int maxWidth,
                               int maxHeight, ImageView.ScaleType scaleType,
                               Response.ErrorListener errorListener) {
             super(S3Helper.URL_PROFILE_PICTURE, listener, maxWidth, maxHeight, scaleType,
                     Bitmap.Config.RGB_565, errorListener);
-
-            this.mUser = user;
         }
 
         @Override
         public Map<String, String> getHeaders() {
             Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Basic " + mUser.getAuthToken());
-            headers.put("Cookie", "JSESSIONID=" + mUser.getSessionID());
+            headers.put("Authorization", "Basic " + userAuthentication.getAuthToken());
+            headers.put("Cookie", "JSESSIONID=" + userAuthentication.getSessionID());
             return headers;
         }
 

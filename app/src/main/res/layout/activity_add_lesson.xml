@@ -27,109 +27,213 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/course_name_wrapper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/appbar"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <AutoCompleteTextView
-                android:id="@+id/course_name_text"
-                style="@style/HintText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/prompt_course_name"
-                android:inputType="textCapWords"
-                android:maxLines="1"
-                android:completionThreshold="1"/>
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/lesson_building_wrapper"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/vertical_midline"
-            app:layout_constraintTop_toBottomOf="@id/course_name_wrapper">
-
-            <AutoCompleteTextView
-                android:id="@+id/lesson_building_text"
-                style="@style/HintText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/prompt_lesson_building"
-                android:inputType="textCapCharacters"
-                android:maxLines="1"
-                android:completionThreshold="1"/>
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.constraint.Guideline
-            android:id="@+id/vertical_midline"
+        <TextView
+            android:id="@+id/label_main_data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            app:layout_constraintTop_toBottomOf="@id/appbar"
+            android:padding="8dp"
+            android:text="@string/label_new_lesson_main_data"
+            android:textStyle="bold"/>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/lesson_room_wrapper"
-            android:layout_width="0dp"
+        <android.support.v7.widget.CardView
+            android:id="@+id/main_data_section_wrapper"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/course_name_wrapper"
-            app:layout_constraintStart_toEndOf="@id/vertical_midline"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/label_main_data"
+            app:cardUseCompatPadding="true">
 
-            <EditText
-                android:id="@+id/lesson_class_text"
-                style="@style/HintText"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/prompt_lesson_class"
-                android:inputType="textCapCharacters"
-                android:maxLines="1"/>
+                android:padding="8dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <ImageView
+                    android:id="@+id/name_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_info"
+                    android:contentDescription="@string/lesson_name_description"
+                    app:layout_constraintTop_toTopOf="@id/course_name_wrapper"
+                    app:layout_constraintBottom_toBottomOf="@id/course_name_wrapper"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"/>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/lesson_start_wrapper"
-            android:layout_width="0dp"
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/course_name_wrapper"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@id/name_icon"
+                    app:layout_constraintEnd_toStartOf="@id/name_show_icon">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/course_name_text"
+                        style="@style/HintText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/prompt_course_name"
+                        android:inputType="textCapWords"
+                        android:maxLines="1"
+                        android:completionThreshold="1" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/name_show_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_arrow_drop_down"
+                    android:contentDescription="@string/lesson_name_description"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/course_name_wrapper"
+                    app:layout_constraintBottom_toBottomOf="@id/course_name_wrapper"/>
+
+                <ImageView
+                    android:id="@+id/place_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_place"
+                    android:contentDescription="@string/lesson_location_description"
+                    app:layout_constraintTop_toTopOf="@id/lesson_location_wrapper"
+                    app:layout_constraintBottom_toBottomOf="@id/lesson_location_wrapper"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"/>
+
+                <LinearLayout
+                    android:id="@+id/lesson_location_wrapper"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/course_name_wrapper"
+                    app:layout_constraintStart_toEndOf="@id/place_icon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:weightSum="2"
+                    android:baselineAligned="false">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/lesson_building_wrapper"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/lesson_building_text"
+                            style="@style/HintText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/prompt_lesson_building"
+                            android:inputType="textCapCharacters"
+                            android:maxLines="1"
+                            android:completionThreshold="1"/>
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/lesson_room_wrapper"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <EditText
+                            android:id="@+id/lesson_class_text"
+                            style="@style/HintText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/prompt_lesson_class"
+                            android:inputType="textCapCharacters"
+                            android:maxLines="1"/>
+
+                    </android.support.design.widget.TextInputLayout>
+
+                </LinearLayout>
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <TextView
+            android:id="@+id/label_time_data"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/lesson_building_wrapper"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/vertical_midline">
+            app:layout_constraintTop_toBottomOf="@id/main_data_section_wrapper"
+            android:padding="8dp"
+            android:text="@string/label_new_lesson_time_data"
+            android:textStyle="bold"/>
 
-            <EditText
-                android:id="@+id/lesson_start_time"
-                style="@style/HintText"
+        <android.support.v7.widget.CardView
+            android:id="@+id/time_section_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_time_data"
+            app:cardUseCompatPadding="true">
+
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/prompt_start_time"
-                android:inputType="time"
-                android:maxLines="1"/>
+                android:padding="8dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <android.support.constraint.Guideline
+                    android:id="@+id/vertical_midline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/lesson_end_wrapper"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/lesson_room_wrapper"
-            app:layout_constraintStart_toEndOf="@id/vertical_midline"
-            app:layout_constraintEnd_toEndOf="parent">
+                <TextView
+                    android:id="@+id/label_time_data_from"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:padding="8dp"
+                    android:text="@string/label_new_lesson_time_data_from"
+                    android:textSize="12sp"
+                    android:textColor="@color/secondary_text"/>
 
-            <EditText
-                android:id="@+id/lesson_end_time"
-                style="@style/HintText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/prompt_end_time"
-                android:inputType="time"
-                android:maxLines="1"
-                android:imeOptions="actionSend"/>
+                <EditText
+                    android:id="@+id/lesson_start_time"
+                    style="@style/HintText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/label_time_data_from"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/vertical_midline"
+                    android:hint="@string/prompt_start_time"
+                    android:textAlignment="center"
+                    tools:text="10:00"
+                    android:inputType="none"/>
 
-        </android.support.design.widget.TextInputLayout>
+                <TextView
+                    android:id="@+id/label_time_data_to"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="@id/vertical_midline"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:padding="8dp"
+                    android:text="@string/label_new_lesson_time_data_to"
+                    android:textSize="12sp"
+                    android:textColor="@color/secondary_text"/>
+
+                <EditText
+                    android:id="@+id/lesson_end_time"
+                    style="@style/HintText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/label_time_data_to"
+                    app:layout_constraintStart_toEndOf="@id/vertical_midline"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:hint="@string/prompt_end_time"
+                    android:textAlignment="center"
+                    tools:text="11:00"
+                    android:inputType="none"/>
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.v7.widget.CardView>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"

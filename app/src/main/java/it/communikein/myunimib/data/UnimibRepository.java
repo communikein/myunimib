@@ -329,7 +329,6 @@ public class UnimibRepository {
      * BOOKLET *****
      ***************/
 
-    @WorkerThread
     public LiveData<List<BookletEntry>> getObservableCurrentBooklet() {
         initializeData();
 

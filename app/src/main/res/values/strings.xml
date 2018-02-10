@@ -205,5 +205,13 @@
     <string name="prompt_start_time">Start</string>
     <string name="prompt_end_time">End</string>
     <string name="saving_lesson">Lesson save in progress..</string>
+    <string name="label_new_lesson_main_data">Main data</string>
+    <string name="label_new_lesson_time_data">Time</string>
+    <string name="label_new_lesson_time_data_from">FROM</string>
+    <string name="label_new_lesson_time_data_to">TO</string>
+    <string name="lesson_name_description">Course name</string>
+    <string name="lesson_location_description">Lesson location</string>
+    <string name="time_format">%1$s.%2$s</string>
+    <string name="confirm_discard">Do you want to discard the changes?</string>
 
 </resources>

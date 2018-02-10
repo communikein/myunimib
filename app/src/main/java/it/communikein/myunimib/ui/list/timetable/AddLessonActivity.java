@@ -1,5 +1,6 @@
 package it.communikein.myunimib.ui.list.timetable;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
@@ -16,6 +17,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -88,7 +90,7 @@ public class AddLessonActivity extends AppCompatActivity {
         initStartTime();
         initEndTime();
 
-        initFab();
+        mBinding.fab.setOnClickListener(v -> saveLesson());
     }
 
     @Override
@@ -96,23 +98,42 @@ public class AddLessonActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                Intent upIntent = NavUtils.getParentActivityIntent(this);
-                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
-                    // This activity is NOT part of this app's task, so create a new task
-                    // when navigating up, with a synthesized back stack.
-                    TaskStackBuilder.create(this)
-                            // Add all of this activity's parents to the back stack
-                            .addNextIntentWithParentStack(upIntent)
-                            // Navigate up to the closest parent
-                            .startActivities();
-                } else {
-                    // This activity is part of this app's task, so simply
-                    // navigate up to the logical parent activity.
-                    NavUtils.navigateUpTo(this, upIntent);
-                }
+                new AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.attention_title))
+                        .setMessage(R.string.confirm_discard)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            Intent upIntent = NavUtils.getParentActivityIntent(this);
+                            if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+                                // This activity is NOT part of this app's task, so create a new task
+                                // when navigating up, with a synthesized back stack.
+                                TaskStackBuilder.create(this)
+                                        // Add all of this activity's parents to the back stack
+                                        .addNextIntentWithParentStack(upIntent)
+                                        // Navigate up to the closest parent
+                                        .startActivities();
+                            } else {
+                                // This activity is part of this app's task, so simply
+                                // navigate up to the logical parent activity.
+                                NavUtils.navigateUpTo(this, upIntent);
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.attention_title))
+                .setMessage(R.string.confirm_discard)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> super.onBackPressed())
+                .setNegativeButton(android.R.string.cancel, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     private void initCoursesAutoComplete() {
@@ -139,6 +160,19 @@ public class AddLessonActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
             }
+        });
+
+        mBinding.nameShowIcon.setOnClickListener(v -> {
+            String name = mBinding.courseNameText.getText().toString();
+            mViewModel.getCoursesNames(name).observe(AddLessonActivity.this, list -> {
+                if (list != null) {
+                    // update the adapter
+                    adapterCourses.clear();
+                    adapterCourses.addAll(list);
+                    adapterCourses.notifyDataSetChanged();
+                    mBinding.courseNameText.showDropDown();
+                }
+            });
         });
     }
 
@@ -168,67 +202,74 @@ public class AddLessonActivity extends AppCompatActivity {
     }
 
     private void initStartTime() {
+        Calendar currentTime = Calendar.getInstance();
+        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+        mBinding.lessonStartTime.setText(formatTime(hour, 0));
+
+        mBinding.lessonStartTime.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus)
+                initTime(mBinding.lessonStartTime);
+        });
         mBinding.lessonStartTime.setOnClickListener(v -> {
-            Calendar currentTime = Calendar.getInstance();
-            int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-            int minute = currentTime.get(Calendar.MINUTE);
-            TimePickerDialog mTimePicker;
-            mTimePicker = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-                String hourDisplay = String.valueOf(selectedHour);
-                if (selectedHour < 10)
-                    hourDisplay = "0" + selectedHour;
-
-                String minuteDisplay = String.valueOf(selectedMinute);
-                if (selectedMinute < 10)
-                    minuteDisplay = "0" + selectedMinute;
-
-                mBinding.lessonStartTime.setText(hourDisplay + "." + minuteDisplay);
-            }, hour, minute, true);
-            mTimePicker.setTitle(getString(R.string.prompt_start_time));
-            mTimePicker.show();
+            initTime(mBinding.lessonStartTime);
         });
     }
 
     private void initEndTime() {
+        Calendar currentTime = Calendar.getInstance();
+        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+        mBinding.lessonEndTime.setText(formatTime(hour, 0));
+
+        mBinding.lessonEndTime.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus)
+                initTime(mBinding.lessonEndTime);
+        });
         mBinding.lessonEndTime.setOnClickListener(v -> {
-            Calendar currentTime = Calendar.getInstance();
-            int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-            int minute = currentTime.get(Calendar.MINUTE);
-            TimePickerDialog mTimePicker;
-            mTimePicker = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-                String hourDisplay = String.valueOf(selectedHour);
-                if (selectedHour < 10)
-                    hourDisplay = "0" + selectedHour;
-
-                String minuteDisplay = String.valueOf(selectedMinute);
-                if (selectedMinute < 10)
-                    minuteDisplay = "0" + selectedMinute;
-
-                mBinding.lessonEndTime.setText(hourDisplay + "." + minuteDisplay);
-            }, hour, minute, true);
-            mTimePicker.setTitle(getString(R.string.prompt_end_time));
-            mTimePicker.show();
+            initTime(mBinding.lessonEndTime);
         });
     }
 
-    private void initFab() {
-        mBinding.fab.setOnClickListener(v -> {
-            String name = mBinding.courseNameText.getText().toString();
-            String building = mBinding.lessonBuildingText.getText().toString();
-            String room = mBinding.lessonClassText.getText().toString();
+    private void initTime(final EditText timeEditText) {
+        Calendar currentTime = Calendar.getInstance();
+        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+        int minute = currentTime.get(Calendar.MINUTE);
 
-            String start_str = mBinding.lessonStartTime.getText().toString().replace(':', '.');
-            long start = DateHelper.getTime(start_str);
-            String end_str = mBinding.lessonEndTime.getText().toString().replace(':', '.');
-            long end = DateHelper.getTime(end_str);
+        TimePickerDialog mTimePicker;
+        mTimePicker = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
+            timeEditText.setText(formatTime(selectedHour, selectedMinute));
+        }, hour, minute, true);
+        mTimePicker.setTitle(getString(R.string.prompt_start_time));
+        mTimePicker.show();
+    }
 
-            Lesson lesson = new Lesson(name, building, room, mViewModel.getDay(), start, end);
-            mViewModel.addLesson(lesson, () -> {
-                progressDialog.dismiss();
-                finish();
-            });
-            progressDialog.show();
+    private String formatTime(int hours, int minutes) {
+        String hourDisplay = String.valueOf(hours);
+        if (hours < 10)
+            hourDisplay = "0" + hours;
+
+        String minuteDisplay = String.valueOf(minutes);
+        if (minutes < 10)
+            minuteDisplay = "0" + minutes;
+
+        return getString(R.string.time_format, hourDisplay, minuteDisplay);
+    }
+
+    private void saveLesson() {
+        String name = mBinding.courseNameText.getText().toString();
+        String building = mBinding.lessonBuildingText.getText().toString();
+        String room = mBinding.lessonClassText.getText().toString();
+
+        String start_str = mBinding.lessonStartTime.getText().toString();
+        long start = DateHelper.getTime(start_str);
+        String end_str = mBinding.lessonEndTime.getText().toString();
+        long end = DateHelper.getTime(end_str);
+
+        Lesson lesson = new Lesson(name, building, room, mViewModel.getDay(), start, end);
+        mViewModel.addLesson(lesson, () -> {
+            progressDialog.dismiss();
+            finish();
         });
+        progressDialog.show();
     }
 
     private void initProgressDialog() {

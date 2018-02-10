@@ -22,7 +22,6 @@ public class Utils {
     public static final DecimalFormat integerFormat = new DecimalFormat("##");
     public static final DecimalFormat markFormat = new DecimalFormat("##.##");
 
-    public static User user;
 
     public static void hideKeyboard(Context context){
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
