@@ -67,9 +67,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private final List<Fragment> fragments = new ArrayList<>();
 
-    private static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
+    public static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
     private static final String SAVE_FRAGMENT_SELECTED = "save-fragment-selected";
-    public static String FRAGMENT_SELECTED_TAG;
+    public String FRAGMENT_SELECTED_TAG;
 
     private static final int INDEX_FRAGMENT_HOME = 0;
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
@@ -90,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements
     private final Handler mDrawerActionHandler = new Handler();
     private final String DRAWER_ITEM_SELECTED = "drawer-item-selected";
     private int drawerItemSelectedId = R.id.navigation_home;
-
-    private boolean isLoggingOut = false;
 
     private ProgressDialog progressDialog;
 
@@ -126,13 +124,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (isLoggingOut)
-            outState.clear();
-        else {
-            outState.putString(SAVE_FRAGMENT_SELECTED, FRAGMENT_SELECTED_TAG);
+        outState.putString(SAVE_FRAGMENT_SELECTED, FRAGMENT_SELECTED_TAG);
 
-            super.onSaveInstanceState(outState);
-        }
+        super.onSaveInstanceState(outState);
     }
 
     private void restoreInstanceState(Bundle savedInstanceState) {
@@ -429,8 +423,7 @@ public class MainActivity extends AppCompatActivity implements
         builder.setMessage(getString(R.string.dialog_logout_message_ok));
         String positiveText = getString(android.R.string.ok);
         builder.setPositiveButton(positiveText, (dialog, which) -> {
-            isLoggingOut = true;
-            finish();
+            MainActivity.this.finish();
         });
         AlertDialog dialog = builder.create();
         dialog.show();

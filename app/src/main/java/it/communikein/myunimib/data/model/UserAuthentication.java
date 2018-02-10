@@ -243,7 +243,7 @@ public class UserAuthentication {
     public boolean shouldChooseFaculty() { return !isFacultyChosen() && hasMultiFaculty(); }
 
     @Ignore
-    private boolean hasMultiFaculty() { return hasFacultiesList(); }
+    public boolean hasMultiFaculty() { return hasFacultiesList(); }
 
     @Ignore
     public boolean hasOneFaculty() {

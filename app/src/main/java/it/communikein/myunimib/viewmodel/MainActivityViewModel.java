@@ -35,6 +35,7 @@ public class MainActivityViewModel extends ViewModel {
     public void logout(Activity activity, AccountRemovedListener accountRemovedListener,
                        AccountRemoveErrorListener accountRemoveErrorListener) {
         mRepository.deleteUser(activity, accountRemovedListener, accountRemoveErrorListener);
+        mRepository.clearData();
         mProfilePictureRequest.clearCache();
     }
 

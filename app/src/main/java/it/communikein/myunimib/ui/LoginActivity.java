@@ -111,8 +111,19 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
             if (S3_accounts.length == 0)
                 mBinding.buttonLogin.setOnClickListener(v -> attemptLogin());
-            else
-                startActivity(new Intent(this, MainActivity.class));
+            else {
+                User user = mViewModel.getUser();
+
+                if (!user.isAuthTokenSet()) {
+                    mBinding.buttonLogin.setOnClickListener(v -> attemptLogin());
+                }
+                else if (user.hasMultiFaculty() && !user.isFacultyChosen()) {
+                    hideMainLoginView();
+                    showFacultyChoiceView(user, this);
+                }
+                else
+                    startActivity(new Intent(this, MainActivity.class));
+            }
         }
         else
             // Request the GET_ACCOUNTS permission via a user dialog
@@ -218,34 +229,11 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
                 /* Update the UI */
                 hideMainLoginView();
-                showFacultyChoiceView();
+                showFacultyChoiceView(user, context);
 
                 /* Signal the user */
                 Snackbar.make(mBinding.loginView,
                         R.string.faculty_to_choose, Snackbar.LENGTH_LONG).show();
-
-                /* Load the faculties */
-                ArrayList<String> courses_names = new ArrayList<>();
-                for (int i=0; i<user.getFaculties().size(); i++)
-                    courses_names.add(user.getFaculties().valueAt(i));
-
-                /* Show the faculties list */
-                final ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
-                        R.layout.simple_spinner_item, courses_names);
-                mBinding.coursesSpinner.setAdapter(adapter);
-
-                /* When the user has chosen the faculty */
-                mBinding.dialogButtonOK.setOnClickListener(v -> {
-                    /* Save the chosen faculty */
-                    selectedFaculty = user.getFaculties().keyAt(selected);
-
-                    /* Do the login again */
-                    getSupportLoaderManager()
-                            .initLoader(LOADER_CONFIRM_FACULTY_ID, null, this)
-                            .forceLoad();
-
-                    showProgress(true);
-                });
                 break;
 
             /* If the login process is completed successfully */
@@ -413,10 +401,33 @@ public class LoginActivity extends AuthAppCompatActivity implements
         return valid;
     }
 
-    private void showFacultyChoiceView() {
+    private void showFacultyChoiceView(User user, Context context) {
         mBinding.coursesLabel.setVisibility(View.VISIBLE);
         mBinding.coursesSpinner.setVisibility(View.VISIBLE);
         mBinding.dialogButtonOK.setVisibility(View.VISIBLE);
+
+        /* Load the faculties */
+        ArrayList<String> courses_names = new ArrayList<>();
+        for (int i=0; i<user.getFaculties().size(); i++)
+            courses_names.add(user.getFaculties().valueAt(i));
+
+        /* Show the faculties list */
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
+                R.layout.simple_spinner_item, courses_names);
+        mBinding.coursesSpinner.setAdapter(adapter);
+
+        /* When the user has chosen the faculty */
+        mBinding.dialogButtonOK.setOnClickListener(v -> {
+            /* Save the chosen faculty */
+            selectedFaculty = user.getFaculties().keyAt(selected);
+
+            /* Do the login again */
+            getSupportLoaderManager()
+                    .initLoader(LOADER_CONFIRM_FACULTY_ID, null, LoginActivity.this)
+                    .forceLoad();
+
+            showProgress(true);
+        });
     }
 
     private void hideFacultyChoiceView() {

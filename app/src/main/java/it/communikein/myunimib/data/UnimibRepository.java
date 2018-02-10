@@ -634,9 +634,7 @@ public class UnimibRepository {
         return mUnimibNetworkDataSource.loginUser(userToLogin, activity);
     }
 
-    public UserDataLoader updateUserData(int selectedFaculty, Activity activity) {
-        updateChosenFaculty(selectedFaculty);
-
+    public UserDataLoader updateUserData(Activity activity) {
         return mUnimibNetworkDataSource.downloadUserData(activity);
     }
 

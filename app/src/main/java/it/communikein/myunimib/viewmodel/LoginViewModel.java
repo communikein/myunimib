@@ -40,7 +40,8 @@ public class LoginViewModel extends ViewModel {
     }
 
     public UserDataLoader downloadUserData(Activity activity, int selectedFaculty) {
-        return mRepository.updateUserData(selectedFaculty, activity);
+        mRepository.updateChosenFaculty(selectedFaculty);
+        return mRepository.updateUserData(activity);
     }
 
 }

@@ -93,7 +93,7 @@ public class NotificationHelper extends ContextWrapper {
 
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(MainActivity.FRAGMENT_SELECTED_TAG,
+        intent.putExtra(MainActivity.INTENT_PARAM_SHOW_FRAGMENT,
                 MainActivity.TAG_FRAGMENT_BOOKLET);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
@@ -110,7 +110,7 @@ public class NotificationHelper extends ContextWrapper {
 
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(MainActivity.FRAGMENT_SELECTED_TAG,
+        intent.putExtra(MainActivity.INTENT_PARAM_SHOW_FRAGMENT,
                 MainActivity.TAG_FRAGMENT_EXAMS_AVAILABLE);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
@@ -127,7 +127,7 @@ public class NotificationHelper extends ContextWrapper {
 
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(MainActivity.FRAGMENT_SELECTED_TAG,
+        intent.putExtra(MainActivity.INTENT_PARAM_SHOW_FRAGMENT,
                 MainActivity.TAG_FRAGMENT_EXAMS_ENROLLED);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
