@@ -8,7 +8,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.Exam;
 import it.communikein.myunimib.data.model.UserAuthentication;
@@ -54,7 +53,7 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/Appelli.do;";
     public static final String URL_ENROLLED_EXAMS =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/BachecaPrenotazioni.do;";
-    public static final String URL_ENROLLED_EXAM_CERTIFICATE =
+    private static final String URL_ENROLLED_EXAM_CERTIFICATE =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/StampaStatinoPDF.do?";
     public static final String URL_ENROLL_TO =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/EffettuaPrenotazioneAppello.do;";
@@ -196,7 +195,7 @@ public class S3Helper {
         return ris;
     }
 
-    public static String parseSessionID(String cookies) {
+    private static String parseSessionID(String cookies) {
         if (cookies != null && !cookies.isEmpty() && cookies.contains("JSESSIONID")) {
             cookies = cookies.substring(cookies.indexOf("JSESSIONID=") + 11);
             cookies = cookies.substring(0, cookies.indexOf(";"));
@@ -292,7 +291,7 @@ public class S3Helper {
             return null;
     }
 
-    public static SparseArray<String> downloadFacultiesList(UserAuthentication user, Document document) {
+    private static SparseArray<String> downloadFacultiesList(UserAuthentication user, Document document) {
         SparseArray<String> courses = new SparseArray<>();
 
         if (user.isFake()) {

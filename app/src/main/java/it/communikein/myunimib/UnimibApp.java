@@ -23,7 +23,7 @@ public class UnimibApp extends Application implements HasActivityInjector, HasSe
     @Inject
     DispatchingAndroidInjector<Service> dispatchingAndroidServiceInjector;
 
-    protected AppComponent appComponent;
+    AppComponent appComponent;
 
     public static UnimibApp get(Context context) {
         return (UnimibApp) context.getApplicationContext();

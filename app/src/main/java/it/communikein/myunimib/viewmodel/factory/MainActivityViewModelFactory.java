@@ -6,13 +6,8 @@ import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
-import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
-import it.communikein.myunimib.ui.detail.HomeFragment;
-import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
-import it.communikein.myunimib.ui.list.booklet.BookletFragment;
-import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 public class MainActivityViewModelFactory extends ViewModelProvider.NewInstanceFactory {

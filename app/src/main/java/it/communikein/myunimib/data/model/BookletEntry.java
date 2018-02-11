@@ -34,7 +34,7 @@ public class BookletEntry {
         return adsceId;
     }
 
-    private void setAdsceId(int adsceId) {
+    public void setAdsceId(int adsceId) {
         this.adsceId = adsceId;
     }
 
@@ -42,7 +42,7 @@ public class BookletEntry {
         return cfu;
     }
 
-    private void setCfu(int cfu) {
+    public void setCfu(int cfu) {
         this.cfu = cfu;
     }
 
@@ -50,7 +50,7 @@ public class BookletEntry {
         return name;
     }
 
-    private void setName(String name) {
+    public void setName(String name) {
         if (name == null) this.name = "";
         else this.name = name;
     }
@@ -67,11 +67,11 @@ public class BookletEntry {
             return getDate().getTime();
     }
 
-    private void setDate(Date date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
-    private void setDate(long millis) {
+    public void setDate(long millis) {
         if (millis < 0) setDate(null);
         else setDate(new Date(millis));
     }
@@ -80,7 +80,7 @@ public class BookletEntry {
         return code;
     }
 
-    private void setCode(String code) {
+    public void setCode(String code) {
         if (code == null) this.code = "";
         else this.code = code;
     }
@@ -89,7 +89,7 @@ public class BookletEntry {
         return state;
     }
 
-    private void setState(String state) {
+    public void setState(String state) {
         if (state == null) this.state = "";
         else this.state = state;
     }
@@ -98,7 +98,7 @@ public class BookletEntry {
         return score;
     }
 
-    private void setScore(String score) {
+    public void setScore(String score) {
         if (score == null) this.score = "";
         else this.score = score;
     }

@@ -21,7 +21,6 @@ import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.Utils;
-import it.communikein.myunimib.viewmodel.BookletViewModel;
 import it.communikein.myunimib.viewmodel.HomeViewModel;
 import it.communikein.myunimib.viewmodel.factory.HomeViewModelFactory;
 

@@ -42,6 +42,8 @@
     <string name="action_sign_in">Sign in</string>
     <string name="label_do_fake_login">Do fake login</string>
     <string name="terms_and_conditions">I accept this service\'s Terms and Conditions.</string>
+    <integer name="start_terms_and_conditions">24</integer>
+    <integer name="end_terms_and_conditions">44</integer>
 
     <string name="error_user_invalid">Username not valid</string>
     <string name="error_user_empty">Username required</string>
@@ -218,5 +220,15 @@
     <string name="label_confirm">Are you sure?</string>
     <string name="label_lesson_deleted">Lesson deleted</string>
     <string name="label_loading_lesson">Loading lesson\'s data</string>
+    <string name="action_delete_lesson">Delete lesson</string>
+    <string name="university_view">University</string>
+    <string name="error_missing_course_name">Insert course name</string>
+    <string name="error_missing_building">Select building</string>
+    <string name="error_missing_room">Insert room</string>
+    <string name="error_missing_start_time">Insert start time</string>
+    <string name="error_missing_end_time">Insert end time</string>
+    <string name="error_time_end_before_start">Insert a valid start and end time</string>
+    <string name="lesson_added">Lesson added!</string>
+    <string name="action_discarded">Cancelled!</string>
 
 </resources>

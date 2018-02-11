@@ -81,7 +81,7 @@ public class Exam extends ExamID {
 
 
     @Override
-    public boolean isIdentic(Object obj) {
+    boolean isIdentic(Object obj) {
         if (! (obj instanceof Exam)) return false;
 
         Exam exam = (Exam) obj;

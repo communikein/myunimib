@@ -11,13 +11,11 @@ import java.net.SocketTimeoutException;
 
 import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.model.User;
-import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
 
 import static it.communikein.myunimib.data.network.loaders.S3Helper.ERROR_CONNECTION_TIMEOUT;
 import static it.communikein.myunimib.data.network.loaders.S3Helper.ERROR_GENERIC;
 import static it.communikein.myunimib.data.network.loaders.S3Helper.OK_UPDATED;
-import static it.communikein.myunimib.data.network.loaders.S3Helper.downloadUserData;
 
 public class UserDataLoader extends AsyncTaskLoader<User> {
 

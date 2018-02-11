@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,7 +19,6 @@ import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,8 +32,10 @@ import it.communikein.myunimib.databinding.FragmentTimetableBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.DAY_OF_WEEK;
 import it.communikein.myunimib.viewmodel.TimetableViewModel;
-import it.communikein.myunimib.viewmodel.factory.BookletViewModelFactory;
 import it.communikein.myunimib.viewmodel.factory.TimetableViewModelFactory;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,7 +44,9 @@ public class TimetableFragment extends Fragment {
 
     private static final String LOG_TAG = TimetableFragment.class.getSimpleName();
 
-    public final ArrayList<String> TABS_TITLE = new ArrayList<>();
+    public static final int CODE_CREATE_LESSON = 254;
+
+    private final ArrayList<String> TABS_TITLE = new ArrayList<>();
     private String FRAGMENT_MONDAY;
     private String FRAGMENT_TUESDAY;
     private String FRAGMENT_WEDNESDAY;
@@ -118,17 +122,16 @@ public class TimetableFragment extends Fragment {
         initFab();
 
         initViewPager();
-
-        showCurrentDay();
+        mBinding.viewpager.setCurrentItem(getCurrentDay());
     }
 
-    private void showCurrentDay() {
+    private int getCurrentDay() {
         Calendar currentTime = Calendar.getInstance();
         int day = currentTime.get(Calendar.DAY_OF_WEEK) - 2;
         if (day == -1)
             day = 6;
 
-        mBinding.viewpager.setCurrentItem(day);
+        return day;
     }
 
     private void setTitle() {
@@ -176,7 +179,7 @@ public class TimetableFragment extends Fragment {
                 DayFragment fragment = adapter.getCurrent(selected);
                 Intent intent = new Intent(getActivity(), AddLessonActivity.class);
                 intent.putExtra(AddLessonActivity.DAY, fragment.getDay());
-                startActivity(intent);
+                startActivityForResult(intent, CODE_CREATE_LESSON);
             }
         });
     }
@@ -195,6 +198,31 @@ public class TimetableFragment extends Fragment {
         }
     }
 
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case CODE_CREATE_LESSON:
+
+                switch (resultCode) {
+                    case RESULT_OK:
+                        int selected = data.getIntExtra(AddLessonActivity.DAY, getCurrentDay());
+                        mBinding.viewpager.setCurrentItem(selected);
+
+                        Snackbar.make(mBinding.coordinatorLayout,
+                                R.string.lesson_added, Snackbar.LENGTH_SHORT).show();
+                        break;
+                    case RESULT_CANCELED:
+                        Snackbar.make(mBinding.coordinatorLayout,
+                                R.string.action_discarded, Snackbar.LENGTH_SHORT).show();
+                        break;
+                }
+
+                break;
+        }
+    }
 
     static class DaysPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
@@ -219,7 +247,7 @@ public class TimetableFragment extends Fragment {
             mFragmentTitleList.add(title);
         }
 
-        public DayFragment getCurrent(int position) {
+        DayFragment getCurrent(int position) {
             return (DayFragment) getItem(position);
         }
 

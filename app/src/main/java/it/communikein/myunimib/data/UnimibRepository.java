@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -336,7 +335,7 @@ public class UnimibRepository {
         return mUnimibDao.getObservableBooklet();
     }
 
-    public ArrayList<BookletEntry> getCurrentBooklet() {
+    private ArrayList<BookletEntry> getCurrentBooklet() {
         initializeData();
 
         return (ArrayList<BookletEntry>) mUnimibDao.getBooklet();
@@ -346,13 +345,13 @@ public class UnimibRepository {
         return mUnimibNetworkDataSource.getBookletLoading();
     }
 
-    public BookletEntry getBookletEntry(int adsceId) {
+    private BookletEntry getBookletEntry(int adsceId) {
         initializeData();
 
         return mUnimibDao.getBookletEntry(adsceId);
     }
 
-    public boolean isBookletEmpty() {
+    private boolean isBookletEmpty() {
         return mUnimibDao.getBookletSize() == 0;
     }
 
@@ -360,11 +359,11 @@ public class UnimibRepository {
         mUnimibDao.deleteBooklet();
     }
 
-    public void deleteBookletEntry(int adsce_id) {
+    private void deleteBookletEntry(int adsce_id) {
         mUnimibDao.deleteBookletEntry(adsce_id);
     }
 
-    public void deleteBookletEntries(ArrayList<BookletEntry> exams) {
+    private void deleteBookletEntries(ArrayList<BookletEntry> exams) {
         for (BookletEntry exam : exams)
             deleteBookletEntry(exam.getAdsceId());
     }
@@ -391,7 +390,7 @@ public class UnimibRepository {
         return mUnimibDao.getObservableAvailableExams();
     }
 
-    public ArrayList<AvailableExam> getCurrentAvailableExams() {
+    private ArrayList<AvailableExam> getCurrentAvailableExams() {
         initializeData();
 
         return (ArrayList<AvailableExam>) mUnimibDao.getAvailableExams();
@@ -408,7 +407,7 @@ public class UnimibRepository {
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
-    public AvailableExam getAvailableExam(ExamID examID) {
+    private AvailableExam getAvailableExam(ExamID examID) {
         initializeData();
 
         return mUnimibDao.getAvailableExam(examID.getAdsceId(), examID.getAppId(),
@@ -423,12 +422,12 @@ public class UnimibRepository {
         mUnimibDao.deleteAvailableExams();
     }
 
-    public void deleteAvailableExam(ExamID examId) {
+    private void deleteAvailableExam(ExamID examId) {
         mUnimibDao.deleteAvailableExam(examId.getAdsceId(), examId.getAppId(),
                 examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
 
-    public void deleteAvailableExams(ArrayList<AvailableExam> exams) {
+    private void deleteAvailableExams(ArrayList<AvailableExam> exams) {
         for (AvailableExam exam : exams)
             deleteAvailableExam(exam);
     }
@@ -467,7 +466,7 @@ public class UnimibRepository {
         return mUnimibDao.getObservableEnrolledExams();
     }
 
-    public ArrayList<EnrolledExam> getCurrentEnrolledExams() {
+    private ArrayList<EnrolledExam> getCurrentEnrolledExams() {
         initializeData();
 
         return (ArrayList<EnrolledExam>) mUnimibDao.getEnrolledExams();
@@ -484,7 +483,7 @@ public class UnimibRepository {
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
-    public EnrolledExam getEnrolledExam(ExamID examID) {
+    private EnrolledExam getEnrolledExam(ExamID examID) {
         initializeData();
 
         return mUnimibDao.getEnrolledExam(examID.getAdsceId(), examID.getAppId(),
@@ -499,12 +498,12 @@ public class UnimibRepository {
         mUnimibDao.deleteEnrolledExams();
     }
 
-    public void deleteEnrolledExam(ExamID examId) {
+    private void deleteEnrolledExam(ExamID examId) {
         mUnimibDao.deleteAvailableExam(examId.getAdsceId(), examId.getAppId(),
                 examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
 
-    public void deleteEnrolledExams(ArrayList<EnrolledExam> exams) {
+    private void deleteEnrolledExams(ArrayList<EnrolledExam> exams) {
         for (EnrolledExam exam : exams)
             deleteEnrolledExam(exam);
     }

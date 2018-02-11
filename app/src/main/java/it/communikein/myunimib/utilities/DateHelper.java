@@ -20,7 +20,7 @@ public class DateHelper {
             new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     public static final DateFormat dateTime =
             new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-    public static final DateFormat time =
+    private static final DateFormat time =
             new SimpleDateFormat("HH.mm", Locale.getDefault());
     public static final DateFormat dateFile =
             new SimpleDateFormat("ddMMyyyy", Locale.getDefault());
@@ -211,7 +211,7 @@ public class DateHelper {
                  * documentation on DateFormat#getBestDateTimePattern(Locale, String)
                  * https://developer.android.com/reference/android/text/format/DateFormat.html#getBestDateTimePattern
                  */
-                String localizedDayName = new SimpleDateFormat("EEEE").format(localDate);
+                String localizedDayName = new SimpleDateFormat("EEEE", Locale.getDefault()).format(localDate);
                 return readableDate.replace(localizedDayName, dayName);
             } else {
                 return readableDate;
@@ -277,7 +277,7 @@ public class DateHelper {
                 return context.getString(R.string.tomorrow);
 
             default:
-                SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE");
+                SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
                 return dayFormat.format(dateInMillis);
         }
     }

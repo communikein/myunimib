@@ -6,25 +6,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.content.AsyncTaskLoader;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 
-import javax.inject.Inject;
 import javax.net.ssl.HttpsURLConnection;
 
 import it.communikein.myunimib.accountmanager.AccountUtils;
-import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.model.UserAuthentication;
@@ -39,7 +35,6 @@ import static it.communikein.myunimib.data.network.loaders.S3Helper.ERROR_S3_NOT
 import static it.communikein.myunimib.data.network.loaders.S3Helper.ERROR_WRONG_PASSWORD;
 import static it.communikein.myunimib.data.network.loaders.S3Helper.OK_LOGGED_IN;
 import static it.communikein.myunimib.data.network.loaders.S3Helper.URL_HOME;
-import static it.communikein.myunimib.data.network.loaders.S3Helper.URL_LIBRETTO;
 
 public class LoginLoader extends AsyncTaskLoader<User> {
 

@@ -25,7 +25,6 @@ import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
-import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 @Singleton
 public class UserHelper {
@@ -33,7 +32,7 @@ public class UserHelper {
     private static final String TAG = UserHelper.class.getSimpleName();
 
     private final AccountManager mAccountManager;
-    private MutableLiveData<User> mUser;
+    private final MutableLiveData<User> mUser;
 
     public interface AccountRemovedListener {
         void onAccountRemoved(boolean removed);

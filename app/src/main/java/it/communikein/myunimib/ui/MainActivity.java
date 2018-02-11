@@ -39,7 +39,6 @@ import it.communikein.myunimib.ui.list.booklet.BookletFragment;
 import it.communikein.myunimib.ui.list.building.BuildingsFragment;
 import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
 import it.communikein.myunimib.ui.list.timetable.TimetableFragment;
-import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 import it.communikein.myunimib.viewmodel.factory.MainActivityViewModelFactory;
 
@@ -69,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
     private static final String SAVE_FRAGMENT_SELECTED = "save-fragment-selected";
-    public String FRAGMENT_SELECTED_TAG;
+    private String FRAGMENT_SELECTED_TAG;
 
     private static final int INDEX_FRAGMENT_HOME = 0;
     private static final int INDEX_FRAGMENT_BOOKLET = 1;
@@ -78,17 +77,16 @@ public class MainActivity extends AppCompatActivity implements
     private static final int INDEX_FRAGMENT_BUILDINGS = 4;
     private static final int INDEX_FRAGMENT_TIMETABLE = 5;
 
-    public static final String TAG_FRAGMENT_HOME = "tab-home";
+    private static final String TAG_FRAGMENT_HOME = "tab-home";
     public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
     public static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
     public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
-    public static final String TAG_FRAGMENT_BUILDINGS = "tab-buildings";
-    public static final String TAG_FRAGMENT_TIMETABLE = "tab-timetable";
+    private static final String TAG_FRAGMENT_BUILDINGS = "tab-buildings";
+    private static final String TAG_FRAGMENT_TIMETABLE = "tab-timetable";
 
     private static final long DRAWER_CLOSE_DELAY_MS = 250;
-    protected ActionBarDrawerToggle mDrawerToggle;
+    private ActionBarDrawerToggle mDrawerToggle;
     private final Handler mDrawerActionHandler = new Handler();
-    private final String DRAWER_ITEM_SELECTED = "drawer-item-selected";
     private int drawerItemSelectedId = R.id.navigation_home;
 
     private ProgressDialog progressDialog;
@@ -167,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements
         mBinding.bottomNavigation.setSelectedItemId(navId);
     }
 
-    protected void initDrawerNavigation(Bundle savedInstanceState) {
+    private void initDrawerNavigation(Bundle savedInstanceState) {
         initDrawerHeader();
         updateDrawerHeader();
 
@@ -178,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (savedInstanceState != null) {
             /* Get the last selected drawer menu item ID */
+            String DRAWER_ITEM_SELECTED = "drawer-item-selected";
             drawerItemSelectedId = savedInstanceState.getInt(DRAWER_ITEM_SELECTED);
 
             /* Remove this entry to avoid problems further */
@@ -203,11 +202,11 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void initDrawerHeader() {
+    private void initDrawerHeader() {
         updateDrawerHeader();
     }
 
-    protected void updateDrawerHeader() {
+    private void updateDrawerHeader() {
         View header = mBinding.drawerNavigation.getHeaderView(0);
         NetworkImageView userImageView = header.findViewById(R.id.circleView);
         TextView userNameTextView = header.findViewById(R.id.user_name_textview);
@@ -422,9 +421,8 @@ public class MainActivity extends AppCompatActivity implements
         builder.setTitle(getString(R.string.dialog_logout));
         builder.setMessage(getString(R.string.dialog_logout_message_ok));
         String positiveText = getString(android.R.string.ok);
-        builder.setPositiveButton(positiveText, (dialog, which) -> {
-            MainActivity.this.finish();
-        });
+        builder.setPositiveButton(positiveText,
+                (dialog, which) -> MainActivity.this.finish());
         AlertDialog dialog = builder.create();
         dialog.show();
     }

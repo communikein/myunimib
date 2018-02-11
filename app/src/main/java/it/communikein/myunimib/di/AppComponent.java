@@ -14,7 +14,6 @@ import it.communikein.myunimib.di.module.LoginActivityModule;
 import it.communikein.myunimib.di.module.MainActivityModule;
 import it.communikein.myunimib.di.module.IntentServiceModule;
 import it.communikein.myunimib.di.module.UnimibAppModule;
-import it.communikein.myunimib.ui.list.timetable.AddLessonActivity;
 
 @Singleton
 @Component(modules = {

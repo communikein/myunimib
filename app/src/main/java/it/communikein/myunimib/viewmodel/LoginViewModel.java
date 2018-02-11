@@ -5,12 +5,10 @@ import android.arch.lifecycle.ViewModel;
 
 import javax.inject.Inject;
 
-import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.network.loaders.LoginLoader;
 import it.communikein.myunimib.data.network.loaders.UserDataLoader;
-import it.communikein.myunimib.utilities.Utils;
 
 public class LoginViewModel extends ViewModel {
 

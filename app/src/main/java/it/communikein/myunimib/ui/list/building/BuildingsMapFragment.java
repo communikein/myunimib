@@ -55,6 +55,12 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
 
         if (getParentViewModel() != null) {
             updateMap(getParentViewModel().getBuildings());
+
+            getParentViewModel().getSelectedBuilding().observe(this, building -> {
+                if (building != null) {
+                    moveCamera(building.getLatitude(), building.getLongitude(), 6f);
+                }
+            });
         }
     }
 
@@ -71,6 +77,11 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
 
         if (getParentViewModel() != null) {
             updateMap(getParentViewModel().getBuildings());
+
+            if (getParentViewModel().getSelectedBuilding().getValue() != null) {
+                Building b = getParentViewModel().getSelectedBuilding().getValue();
+                moveCamera(b.getLatitude(), b.getLongitude(), 6f);
+            }
         }
     }
 
@@ -97,9 +108,15 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
                 mMap.addMarker(new MarkerOptions().position(coords));
             }
 
+            moveCamera(milan.latitude, milan.longitude, 5f);
+        }
+    }
+
+    private void moveCamera(double lat, double lng, float zoom) {
+        if (mMap != null) {
             CameraPosition.Builder builder = new CameraPosition.Builder();
-            builder.target(milan);
-            builder.zoom(5f);
+            builder.target(new LatLng(lat, lng));
+            builder.zoom(zoom);
 
             CameraUpdate update = CameraUpdateFactory.newCameraPosition(builder.build());
             mMap.moveCamera(update);

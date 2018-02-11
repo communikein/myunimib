@@ -6,7 +6,6 @@ import android.arch.lifecycle.ViewModel;
 
 import javax.inject.Inject;
 
-import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.ExamID;

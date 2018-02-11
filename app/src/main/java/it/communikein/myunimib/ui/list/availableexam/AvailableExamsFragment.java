@@ -21,7 +21,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,7 +35,6 @@ import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.Exam;
 import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
-import it.communikein.myunimib.data.network.loaders.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;

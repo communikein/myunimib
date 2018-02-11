@@ -22,8 +22,8 @@ public class UserAuthentication {
     public static final String PREF_PASSWORD = "user_password";
     public static final String PREF_SESSION_ID = "user_session_id";
     public static final String PREF_FACULTIES = "user_faculties";
-    public static final String PREF_FACULTIES_KEYS = "user_faculties_keys";
-    public static final String PREF_FACULTIES_VALUES = "user_faculties_values";
+    private static final String PREF_FACULTIES_KEYS = "user_faculties_keys";
+    private static final String PREF_FACULTIES_VALUES = "user_faculties_values";
     public static final String PREF_SELECTED_FACULTY = "selected_faculty";
     public static final String PREF_FAKE = "user_fake";
 
@@ -60,9 +60,9 @@ public class UserAuthentication {
     }
 
     @Ignore
-    public UserAuthentication(String username, String password, String sessionID,
-                              SparseArray<String> faculties, int selectedFaculty,
-                              boolean isFake) {
+    UserAuthentication(String username, String password, String sessionID,
+                       SparseArray<String> faculties, int selectedFaculty,
+                       boolean isFake) {
         setUsername(username);
         setPassword(password);
         setAuthToken(username, password);
@@ -78,7 +78,7 @@ public class UserAuthentication {
         return mUsername;
     }
 
-    public void setUsername(String username) {
+    private void setUsername(String username) {
         if (username != null) this.mUsername = username;
         else this.mUsername = "";
     }
@@ -87,7 +87,7 @@ public class UserAuthentication {
         return mPassword;
     }
 
-    public void setPassword(String password) {
+    private void setPassword(String password) {
         if (password != null) {
             this.mPassword = password;
             setAuthToken(getUsername(), password);
@@ -186,7 +186,7 @@ public class UserAuthentication {
     }
 
     @Ignore
-    public boolean hasFacultiesList() {
+    private boolean hasFacultiesList() {
         return getFaculties() != null && getFaculties().size() > 0;
     }
 

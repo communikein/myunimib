@@ -3,7 +3,6 @@ package it.communikein.myunimib.ui.list.timetable;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -45,7 +43,7 @@ public class DayFragment extends Fragment implements
         void onDeleteLessonComplete();
     }
 
-    void setDay(DAY_OF_WEEK day_of_week) {
+    private void setDay(DAY_OF_WEEK day_of_week) {
         this.day_of_week = day_of_week;
     }
 
@@ -160,19 +158,20 @@ public class DayFragment extends Fragment implements
 
             // remove the item from recycler view
             adapter.removeItem(viewHolder.getAdapterPosition());
-            getParentViewModel().deleteLesson(deletedItem, () -> {
-                // showing snack bar with Undo option
-                Snackbar snackbar = Snackbar.make(
-                        getParentCoordinatorLayout(), name + " removed!", Snackbar.LENGTH_LONG);
-                snackbar.setAction("UNDO", view -> {
-                    // undo is selected, restore the deleted item
-                    getParentViewModel().restoreLesson(deletedItem, () -> {
-                        adapter.restoreItem(deletedItem, deletedIndex);
+            if (getParentViewModel() != null) {
+                getParentViewModel().deleteLesson(deletedItem, () -> {
+                    // showing snack bar with Undo option
+                    Snackbar snackbar = Snackbar.make(
+                            getParentCoordinatorLayout(), name + " removed!", Snackbar.LENGTH_LONG);
+                    snackbar.setAction("UNDO", view -> {
+                        // undo is selected, restore the deleted item
+                        getParentViewModel().restoreLesson(deletedItem,
+                                () -> adapter.restoreItem(deletedItem, deletedIndex));
                     });
+                    snackbar.setActionTextColor(Color.YELLOW);
+                    snackbar.show();
                 });
-                snackbar.setActionTextColor(Color.YELLOW);
-                snackbar.show();
-            });
+            }
         }
     }
 }

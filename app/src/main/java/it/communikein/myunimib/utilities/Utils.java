@@ -2,10 +2,11 @@ package it.communikein.myunimib.utilities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
-import it.communikein.myunimib.data.model.User;
 import com.google.firebase.crash.FirebaseCrash;
 
 import java.text.DecimalFormat;
@@ -14,6 +15,13 @@ import java.util.Locale;
 
 
 public class Utils {
+
+    private static final String PLAY_STORE_URL =
+            "https://play.google.com/store/apps/details?id=it.communikein.myunimib";
+    private static final String PLAY_STORE_URI = "market://details?id=it.communikein.myunimib";
+    private static final String ENTER_BETA_URL =
+            "https://play.google.com/apps/testing/it.communikein.myunimib";
+    public static final String TERMS_CONDITIONS_URL = "http://txt.do/23mn";
 
     public static final SimpleDateFormat sdf = new SimpleDateFormat(
             "dd-MM-yyyy HH:mm:ss", Locale.getDefault());
@@ -44,6 +52,21 @@ public class Utils {
         } catch (NumberFormatException ignore) {
             return false;
         }
+    }
+
+    public static void showAppInStore(Context context) {
+        try {
+            context.startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(PLAY_STORE_URI)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            context.startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(PLAY_STORE_URL)));
+        }
+    }
+
+    public static void showBetaProgram(Context context) {
+        context.startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse(Utils.ENTER_BETA_URL)));
     }
 }
 

@@ -17,6 +17,7 @@
     <color name="waiting">#fdd835</color>
 
     <color name="dark_red">#ab000d</color>
+    <color name="red_delete">#B71C1C</color>
 
     <color name="iconColor">#c7c6c2</color>
     <color name="selectedNavItemBackground">#e8effa</color>

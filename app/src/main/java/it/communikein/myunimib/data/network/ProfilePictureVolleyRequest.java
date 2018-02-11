@@ -20,7 +20,6 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 
 import it.communikein.myunimib.data.UnimibRepository;
-import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 

@@ -31,7 +31,6 @@ import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
-import it.communikein.myunimib.data.network.loaders.S3Helper;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityAvailableExamDetailsBinding;
 import it.communikein.myunimib.viewmodel.AvailableExamDetailViewModel;
@@ -270,13 +269,15 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
 
     private void showCertificate() {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        File certificate_file = mViewModel.getExam().getValue().getCertificatePath();
-        Uri certificate_uri = FileProvider.getUriForFile(this,
-                getString(R.string.file_provider_authority), certificate_file);
+        if (mViewModel.getExam().getValue() != null) {
+            File certificate_file = mViewModel.getExam().getValue().getCertificatePath();
+            Uri certificate_uri = FileProvider.getUriForFile(this,
+                    getString(R.string.file_provider_authority), certificate_file);
 
-        intent.setDataAndType(certificate_uri, "application/pdf");
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(intent);
+            intent.setDataAndType(certificate_uri, "application/pdf");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        }
     }
 
     private void showProgress(final boolean show) {

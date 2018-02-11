@@ -17,7 +17,6 @@ import java.net.SocketTimeoutException;
 import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.model.Exam;
 import it.communikein.myunimib.data.model.User;
-import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.utilities.Utils;
 

@@ -3,7 +3,6 @@ package it.communikein.myunimib.data;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -16,7 +15,7 @@ import it.communikein.myunimib.data.model.Building;
 @Singleton
 public class UniversityUtils {
 
-    private List<Building> uniBuildings;
+    private final List<Building> uniBuildings;
 
     @Inject
     public UniversityUtils() {

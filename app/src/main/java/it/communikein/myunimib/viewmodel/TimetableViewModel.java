@@ -3,7 +3,6 @@ package it.communikein.myunimib.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
-import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,7 +12,6 @@ import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.ui.list.timetable.AddLessonActivity;
 import it.communikein.myunimib.ui.list.timetable.DayFragment;
-import it.communikein.myunimib.utilities.DAY_OF_WEEK;
 
 public class TimetableViewModel extends ViewModel {
 

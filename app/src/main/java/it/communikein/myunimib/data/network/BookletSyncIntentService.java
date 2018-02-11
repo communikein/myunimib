@@ -12,9 +12,7 @@ import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasServiceInjector;
-import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
-import it.communikein.myunimib.data.model.User;
 
 
 public class BookletSyncIntentService extends IntentService implements HasServiceInjector {

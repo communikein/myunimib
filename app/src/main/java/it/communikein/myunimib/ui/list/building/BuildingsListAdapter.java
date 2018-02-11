@@ -21,7 +21,7 @@ public class BuildingsListAdapter extends RecyclerView.Adapter<BuildingViewHolde
     private ArrayList<Building> mList;
 
     @Nullable
-    private OnListItemClickListener mOnClickListener;
+    private final OnListItemClickListener mOnClickListener;
     public interface OnListItemClickListener {
         void onListPoiClick(Building poi);
     }

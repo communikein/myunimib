@@ -12,9 +12,9 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -162,7 +162,10 @@ public class AddLessonActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.attention_title))
                 .setMessage(R.string.confirm_discard)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> super.onBackPressed())
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                })
                 .setNegativeButton(android.R.string.cancel, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
@@ -242,9 +245,7 @@ public class AddLessonActivity extends AppCompatActivity {
             if (hasFocus)
                 initTime(mBinding.lessonStartTime);
         });
-        mBinding.lessonStartTime.setOnClickListener(v -> {
-            initTime(mBinding.lessonStartTime);
-        });
+        mBinding.lessonStartTime.setOnClickListener(v -> initTime(mBinding.lessonStartTime));
     }
 
     private void initEndTime() {
@@ -256,9 +257,7 @@ public class AddLessonActivity extends AppCompatActivity {
             if (hasFocus)
                 initTime(mBinding.lessonEndTime);
         });
-        mBinding.lessonEndTime.setOnClickListener(v -> {
-            initTime(mBinding.lessonEndTime);
-        });
+        mBinding.lessonEndTime.setOnClickListener(v -> initTime(mBinding.lessonEndTime));
     }
 
     private void initTime(final EditText timeEditText) {
@@ -267,9 +266,10 @@ public class AddLessonActivity extends AppCompatActivity {
         int minute = currentTime.get(Calendar.MINUTE);
 
         TimePickerDialog mTimePicker;
-        mTimePicker = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-            timeEditText.setText(formatTime(selectedHour, selectedMinute));
-        }, hour, minute, true);
+        mTimePicker = new TimePickerDialog(this,
+                (timePicker, selectedHour, selectedMinute) ->
+                        timeEditText.setText(formatTime(selectedHour, selectedMinute)),
+                hour, minute, true);
         mTimePicker.setTitle(getString(R.string.prompt_start_time));
         mTimePicker.show();
     }
@@ -287,21 +287,82 @@ public class AddLessonActivity extends AppCompatActivity {
     }
 
     private void saveLesson() {
+        Lesson lesson = validateData();
+        if (lesson != null) {
+            mViewModel.addLesson(lesson, () -> {
+                progressDialog.dismiss();
+                Intent intent = getIntent();
+                intent.putExtra(DAY, dayOfWeek.ordinal());
+                setResult(RESULT_OK, intent);
+                finish();
+            });
+            progressDialog.show();
+        }
+    }
+
+    private Lesson validateData() {
+        mBinding.courseNameWrapper.setError(null);
+        mBinding.lessonBuildingWrapper.setError(null);
+        mBinding.lessonRoomWrapper.setError(null);
+
+        mBinding.lessonStartTime.setError(null);
+        mBinding.lessonEndTime.setError(null);
+
+        View error_view = null;
+
         String name = mBinding.courseNameText.getText().toString();
-        String building = mBinding.lessonBuildingText.getText().toString();
-        String room = mBinding.lessonClassText.getText().toString();
+        if (name.isEmpty()) {
+            mBinding.courseNameWrapper.setError(getString(R.string.error_missing_course_name));
+            error_view = mBinding.courseNameWrapper;
+        }
+        String building = null;
+        if (error_view == null) {
+            building = mBinding.lessonBuildingText.getText().toString();
+            if (building.isEmpty()) {
+                mBinding.lessonBuildingText.setError(getString(R.string.error_missing_building));
+                error_view = mBinding.lessonBuildingWrapper;
+            }
+        }
+        String room = null;
+        if (error_view == null) {
+            room = mBinding.lessonClassText.getText().toString();
+            if (room.isEmpty()) {
+                mBinding.lessonClassText.setError(getString(R.string.error_missing_room));
+                error_view = mBinding.lessonRoomWrapper;
+            }
+        }
 
-        String start_str = mBinding.lessonStartTime.getText().toString();
-        long start = DateHelper.getTime(start_str);
-        String end_str = mBinding.lessonEndTime.getText().toString();
-        long end = DateHelper.getTime(end_str);
+        long start = -1;
+        if (error_view == null) {
+            String start_str = mBinding.lessonStartTime.getText().toString();
+            if (start_str.isEmpty()) {
+                mBinding.lessonStartTime.setError(getString(R.string.error_missing_start_time));
+                error_view = mBinding.lessonStartTime;
+            } else
+                start = DateHelper.getTime(start_str);
+        }
+        long end = -1;
+        if (error_view == null) {
+            String end_str = mBinding.lessonEndTime.getText().toString();
+            if (end_str.isEmpty()) {
+                mBinding.lessonEndTime.setError(getString(R.string.error_missing_end_time));
+                error_view = mBinding.lessonEndTime;
+            } else
+                end = DateHelper.getTime(end_str);
+        }
+        if (error_view == null) {
+            if (end <= start) {
+                mBinding.lessonEndTime.setError(getString(R.string.error_time_end_before_start));
+                error_view = mBinding.lessonEndTime;
+            }
+        }
 
-        Lesson lesson = new Lesson(name, building, room, mViewModel.getDay(), start, end);
-        mViewModel.addLesson(lesson, () -> {
-            progressDialog.dismiss();
-            finish();
-        });
-        progressDialog.show();
+        if (error_view != null) {
+            error_view.requestFocus();
+            return null;
+        }
+        else
+            return new Lesson(name, building, room, mViewModel.getDay(), start, end);
     }
 
     private void initProgressDialog(String message) {

@@ -1,9 +1,6 @@
 package it.communikein.myunimib.viewmodel;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.arch.lifecycle.ViewModel;
-import android.content.Context;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -11,7 +8,6 @@ import com.android.volley.toolbox.NetworkImageView;
 import javax.inject.Inject;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;

@@ -29,7 +29,8 @@
                 card_view:layout_constraintBottom_toBottomOf="parent"
                 android:paddingEnd="16dp"
                 android:paddingStart="16dp"
-                card_view:srcCompat="@drawable/ic_delete" />
+                card_view:srcCompat="@drawable/ic_delete"
+                android:contentDescription="@string/action_delete_lesson"/>
 
         </android.support.constraint.ConstraintLayout>
 

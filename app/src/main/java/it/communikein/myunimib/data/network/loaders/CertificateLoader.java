@@ -11,10 +11,7 @@ import java.net.SocketTimeoutException;
 import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.User;
-import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
-
-import it.communikein.myunimib.data.network.loaders.S3Helper.NewSessionIdListener;
 
 public class CertificateLoader extends AsyncTaskLoader<Cursor> {
 

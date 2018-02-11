@@ -8,7 +8,6 @@ import com.android.volley.toolbox.NetworkImageView;
 
 import javax.inject.Inject;
 
-import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.UserHelper.AccountRemovedListener;

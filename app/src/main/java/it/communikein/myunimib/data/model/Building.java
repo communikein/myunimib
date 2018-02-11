@@ -45,7 +45,7 @@ public class Building {
         return name;
     }
 
-    public void setName(@NonNull String name) {
+    private void setName(@NonNull String name) {
         this.name = name;
     }
 
@@ -53,7 +53,7 @@ public class Building {
         return address;
     }
 
-    public void setAddress(String address) {
+    private void setAddress(String address) {
         this.address = address;
     }
 
@@ -61,7 +61,7 @@ public class Building {
         return description;
     }
 
-    public void setDescription(String description) {
+    private void setDescription(String description) {
         this.description = description;
     }
 
@@ -80,7 +80,7 @@ public class Building {
         return this.latitude;
     }
 
-    public void setLatitude(double latitude) {
+    private void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
@@ -88,7 +88,7 @@ public class Building {
         return this.longitude;
     }
 
-    public void setLongitude(double longitude) {
+    private void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 

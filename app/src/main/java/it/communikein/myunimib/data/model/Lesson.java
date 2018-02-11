@@ -56,7 +56,8 @@ public class Lesson {
         this.id = id;
     }
 
-    @NonNull public String getDayOfWeek() {
+    @NonNull
+    public String getDayOfWeek() {
         return dayOfWeek;
     }
 

@@ -19,7 +19,11 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,7 +49,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import it.communikein.myunimib.viewmodel.LoginViewModel;
-import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 import it.communikein.myunimib.viewmodel.factory.LoginViewModelFactory;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -175,6 +178,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
         showMainLoginView();
         hideFacultyChoiceView();
 
+        initTermsCheck();
+
         mBinding.buttonLogin.setOnClickListener(view -> attemptLogin());
 
         mBinding.coursesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -198,13 +203,33 @@ public class LoginActivity extends AuthAppCompatActivity implements
         mBinding.toolbar.setTitle(R.string.title_login);
     }
 
+    private void initTermsCheck() {
+        String text = getString(R.string.terms_and_conditions);
+        SpannableString ss = new SpannableString(text);
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View textView) {
+                Intent browserIntent = new Intent(
+                        Intent.ACTION_VIEW, Uri.parse(Utils.TERMS_CONDITIONS_URL));
+                startActivity(browserIntent);
+            }
+        };
+        ss.setSpan(clickableSpan,
+                getResources().getInteger(R.integer.start_terms_and_conditions),
+                getResources().getInteger(R.integer.end_terms_and_conditions),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        mBinding.termsCheck.setText(ss);
+        mBinding.termsCheck.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
     private void handleIntent(Intent intent) {
         String appLinkAction = intent.getAction();
         Uri appLinkData = intent.getData();
 
         if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
             username = appLinkData.getLastPathSegment();
-            mBinding.usernameTextInputLayout.getEditText().setText(username);
+            mBinding.usernameEdittext.setText(username);
         }
     }
 
@@ -459,8 +484,8 @@ public class LoginActivity extends AuthAppCompatActivity implements
                  * Get the username and password inserted by the user, create an
                  * authentic user, then start the login process.
                  */
-                username = mBinding.usernameTextInputLayout.getEditText().getText().toString();
-                String password = mBinding.passwordTextInputLayout.getEditText().getText().toString();
+                username = mBinding.usernameEdittext.getText().toString();
+                String password = mBinding.passwordEdittext.getText().toString();
                 return mViewModel.doLogin(this, username, password);
 
             case LOADER_FAKE_LOGIN_ID:

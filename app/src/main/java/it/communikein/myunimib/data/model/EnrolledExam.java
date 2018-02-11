@@ -43,7 +43,7 @@ public class EnrolledExam extends Exam {
 
     public String getCode() { return this.code; }
 
-    private void setCode(String code) {
+    public void setCode(String code) {
         if (code == null) this.code = "";
         else this.code = code;
     }
@@ -52,7 +52,7 @@ public class EnrolledExam extends Exam {
         return this.building;
     }
 
-    private void setBuilding(String building) {
+    public void setBuilding(String building) {
         if (building == null) this.building = "";
         else this.building = building;
     }
@@ -61,7 +61,7 @@ public class EnrolledExam extends Exam {
         return this.room;
     }
 
-    private void setRoom(String room) {
+    public void setRoom(String room) {
         if (room == null) this.room = "";
         else this.room = room;
     }
@@ -70,7 +70,7 @@ public class EnrolledExam extends Exam {
         return this.reserved;
     }
 
-    private void setReserved(String reserved) {
+    public void setReserved(String reserved) {
         if (reserved == null) this.reserved = "";
         else this.reserved = reserved;
     }
@@ -87,7 +87,7 @@ public class EnrolledExam extends Exam {
         return ris.toString();
     }
 
-    private void setTeachers(ArrayList<String> teachers) {
+    public void setTeachers(ArrayList<String> teachers) {
         if (teachers == null) this.teachers = new ArrayList<>();
         else this.teachers = teachers;
     }

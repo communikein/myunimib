@@ -34,7 +34,7 @@ public class BuildingsFragment extends Fragment {
 
     private static final String TAG = BuildingsFragment.class.getSimpleName();
 
-    public static final ArrayList<String> TABS_TITLE = new ArrayList<>();
+    private static final ArrayList<String> TABS_TITLE = new ArrayList<>();
     private static final String FRAGMENT_MAP_TITLE = "Map";
     private static final String FRAGMENT_LIST_TITLE = "List";
 
@@ -122,6 +122,10 @@ public class BuildingsFragment extends Fragment {
 
             viewPager.setAdapter(adapter);
         }
+    }
+
+    public ViewPager getViewPager() {
+        return mBinding.viewpager;
     }
 
     private void showTabs() {

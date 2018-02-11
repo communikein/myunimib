@@ -1,19 +1,14 @@
 package it.communikein.myunimib.ui.list.timetable;
 
 import android.databinding.DataBindingUtil;
-import android.graphics.Color;
-import android.support.design.widget.Snackbar;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import java.util.ArrayList;
 
@@ -126,7 +121,7 @@ public class LessonsListAdapter extends RecyclerView.Adapter<ListItemViewHolder>
     static class ListItemViewHolder extends RecyclerView.ViewHolder  implements
             View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
 
-        public ListItemLessonBinding mBinding;
+        public final ListItemLessonBinding mBinding;
 
         private OnMenuEditClickListener onMenuEditClickListener;
         private OnMenuDeleteClickListener onMenuDeleteClickListener;
