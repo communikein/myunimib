@@ -12,6 +12,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.Window;
@@ -36,6 +37,7 @@ import it.communikein.myunimib.viewmodel.factory.AddLessonViewModelFactory;
 public class AddLessonActivity extends AppCompatActivity {
 
     public static final String DAY = "DAY";
+    public static final String LESSON_ID = "LESSON_ID";
 
     public interface AddLessonListener {
         void onLessonAddComplete();
@@ -52,6 +54,9 @@ public class AddLessonActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapterBuildings;
     private ProgressDialog progressDialog;
 
+    private int lessonId;
+    private DAY_OF_WEEK dayOfWeek;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -62,13 +67,15 @@ public class AddLessonActivity extends AppCompatActivity {
         mViewModel = ViewModelProviders
                 .of(this, viewModelFactory)
                 .get(AddLessonViewModel.class);
-        mViewModel.setDayOfWeek(parseIntent());
+
+        parseIntent();
+        mViewModel.setDayOfWeek(dayOfWeek);
 
         initUI();
     }
 
     private void initUI(){
-        initProgressDialog();
+        initProgressDialog(getString(R.string.saving_lesson));
 
         setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null)
@@ -89,6 +96,31 @@ public class AddLessonActivity extends AppCompatActivity {
         initBuildingsAutoComplete();
         initStartTime();
         initEndTime();
+
+        if (lessonId != -1) {
+            initProgressDialog(getString(R.string.label_loading_lesson));
+            progressDialog.show();
+
+            mViewModel.getLesson(lessonId).observe(this, lesson -> {
+                progressDialog.dismiss();
+                initProgressDialog(getString(R.string.saving_lesson));
+
+                updateUI(lesson);
+            });
+        }
+        else {
+            mBinding.fab.setOnClickListener(v -> saveLesson());
+        }
+    }
+
+    private void updateUI(Lesson lesson) {
+        if (lesson == null) return;
+
+        mBinding.courseNameText.setText(lesson.getCourseName());
+        mBinding.lessonBuildingText.setText(lesson.getBuilding());
+        mBinding.lessonClassText.setText(lesson.getClassroom());
+        mBinding.lessonStartTime.setText(lesson.printTimeStart());
+        mBinding.lessonEndTime.setText(lesson.printTimeEnd());
 
         mBinding.fab.setOnClickListener(v -> saveLesson());
     }
@@ -272,19 +304,19 @@ public class AddLessonActivity extends AppCompatActivity {
         progressDialog.show();
     }
 
-    private void initProgressDialog() {
+    private void initProgressDialog(String message) {
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.saving_lesson));
+        progressDialog.setMessage(message);
         progressDialog.setCancelable(false);
     }
 
-    private DAY_OF_WEEK parseIntent() {
+    private void parseIntent() {
         Intent intent = getIntent();
 
-        if (intent != null)
-            return (DAY_OF_WEEK) intent.getSerializableExtra(DAY);
-
-        return null;
+        if (intent != null) {
+            dayOfWeek = (DAY_OF_WEEK) intent.getSerializableExtra(DAY);
+            lessonId = intent.getIntExtra(LESSON_ID, -1);
+        }
     }
 
 }

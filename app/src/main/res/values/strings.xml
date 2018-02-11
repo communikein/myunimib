@@ -213,5 +213,10 @@
     <string name="lesson_location_description">Lesson location</string>
     <string name="time_format">%1$s.%2$s</string>
     <string name="confirm_discard">Do you want to discard the changes?</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="label_confirm">Are you sure?</string>
+    <string name="label_lesson_deleted">Lesson deleted</string>
+    <string name="label_loading_lesson">Loading lesson\'s data</string>
 
 </resources>

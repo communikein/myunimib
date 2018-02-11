@@ -39,6 +39,10 @@ public class AddLessonViewModel extends ViewModel {
         return dayOfWeek.getDay();
     }
 
+    public LiveData<Lesson> getLesson(int lessonId) {
+        return mRepository.getObservableLesson(lessonId);
+    }
+
     public void addLesson(Lesson lesson, AddLessonActivity.AddLessonListener listener) {
         mRepository.addLesson(lesson, listener);
     }

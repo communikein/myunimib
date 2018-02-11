@@ -29,6 +29,7 @@ import it.communikein.myunimib.data.network.loaders.EnrollLoader;
 import it.communikein.myunimib.data.network.loaders.LoginLoader;
 import it.communikein.myunimib.data.network.loaders.UserDataLoader;
 import it.communikein.myunimib.ui.list.timetable.AddLessonActivity;
+import it.communikein.myunimib.ui.list.timetable.DayFragment;
 import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.data.UserHelper.AccountRemoveErrorListener;
 import it.communikein.myunimib.data.UserHelper.AccountRemovedListener;
@@ -567,8 +568,11 @@ public class UnimibRepository {
         mUnimibDao.deleteTimetable();
     }
 
-    public void deleteLesson(int id) {
-        mUnimibDao.deleteLesson(id);
+    public void deleteLesson(int id, DayFragment.DeleteLessonListener listener) {
+        mExecutors.diskIO().execute(() -> {
+            mUnimibDao.deleteLesson(id);
+            listener.onDeleteLessonComplete();
+        });
     }
 
     public void deleteLessons(List<Lesson> lessons) {

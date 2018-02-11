@@ -88,7 +88,7 @@ public interface UnimibDao {
     @Query("SELECT * FROM lessons")
     LiveData<List<Lesson>> getObservableTimetable();
 
-    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week")
+    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week ORDER BY timeStart ASC")
     LiveData<List<Lesson>> getObservableTimetableOfDay(String day_of_week);
 
 
@@ -104,8 +104,11 @@ public interface UnimibDao {
     @Query("SELECT * FROM lessons")
     List<Lesson> getTimetable();
 
-    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week")
+    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week ORDER BY timeStart ASC")
     List<Lesson> getTimetableOfDay(String day_of_week);
+
+    @Query("SELECT name FROM booklet WHERE name LIKE :name")
+    LiveData<List<String>> getCoursesNames(String name);
 
 
     @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")
@@ -154,10 +157,6 @@ public interface UnimibDao {
 
     @Query("SELECT COUNT(courseName) FROM lessons")
     int getTimetableSize();
-
-
-    @Query("SELECT name FROM booklet WHERE name LIKE :name")
-    LiveData<List<String>> getCoursesNames(String name);
 
 
     @Update

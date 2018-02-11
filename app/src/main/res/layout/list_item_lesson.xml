@@ -15,8 +15,29 @@
         card_view:cardUseCompatPadding="true">
 
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/backgroundView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/dark_red">
+
+            <ImageView
+                android:id="@+id/delete_icon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintTop_toTopOf="parent"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                card_view:srcCompat="@drawable/ic_delete" />
+
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/foregroundView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white">
 
             <TextView
                 android:id="@+id/time_start_text"

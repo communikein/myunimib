@@ -1,10 +1,19 @@
 package it.communikein.myunimib.ui.list.timetable;
 
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
+import android.support.design.widget.Snackbar;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import java.util.ArrayList;
 
@@ -17,13 +26,37 @@ public class LessonsListAdapter extends RecyclerView.Adapter<ListItemViewHolder>
 
     private ArrayList<Lesson> mList;
 
+    private OnMenuEditClickListener mOnMenuEditClickListener;
+    private OnMenuDeleteClickListener mOnMenuDeleteClickListener;
+
+    public interface OnMenuDeleteClickListener {
+        boolean onMenuDeleteClicked(Lesson lesson, int position);
+    }
+    public interface OnMenuEditClickListener {
+        boolean onMenuEditClicked(Lesson lesson, int position);
+    }
+
     @Override
     public ListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ListItemLessonBinding binding = DataBindingUtil
                 .inflate(LayoutInflater.from(parent.getContext()), R.layout.list_item_lesson,
                         parent, false);
 
-        return new ListItemViewHolder(binding);
+        return new ListItemViewHolder(binding)
+                .setOnMenuDeleteClickListener(mOnMenuDeleteClickListener)
+                .setOnMenuEditClickListener(mOnMenuEditClickListener);
+    }
+
+    public LessonsListAdapter setOnItemEditListener(OnMenuEditClickListener listener) {
+        this.mOnMenuEditClickListener = listener;
+
+        return this;
+    }
+
+    public LessonsListAdapter setOnItemDeleteListener(OnMenuDeleteClickListener listener) {
+        this.mOnMenuDeleteClickListener = listener;
+
+        return this;
     }
 
     @Override
@@ -76,15 +109,71 @@ public class LessonsListAdapter extends RecyclerView.Adapter<ListItemViewHolder>
         }
     }
 
+    public Lesson getItem(int position) {
+        return mList.get(position);
+    }
 
-    class ListItemViewHolder extends RecyclerView.ViewHolder {
+    public void removeItem(int position) {
+        mList.remove(position);
+        notifyItemRemoved(position);
+    }
 
-        ListItemLessonBinding mBinding;
+    public void restoreItem(Lesson lesson, int position) {
+        mList.add(position, lesson);
+        notifyItemInserted(position);
+    }
 
-        public ListItemViewHolder(ListItemLessonBinding binding) {
+    static class ListItemViewHolder extends RecyclerView.ViewHolder  implements
+            View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
+
+        public ListItemLessonBinding mBinding;
+
+        private OnMenuEditClickListener onMenuEditClickListener;
+        private OnMenuDeleteClickListener onMenuDeleteClickListener;
+
+        ListItemViewHolder(ListItemLessonBinding binding) {
             super(binding.getRoot());
 
             this.mBinding = binding;
+            binding.getRoot().setOnCreateContextMenuListener(this);
+        }
+
+        ListItemViewHolder setOnMenuEditClickListener(OnMenuEditClickListener listener) {
+            this.onMenuEditClickListener = listener;
+
+            return this;
+        }
+
+        ListItemViewHolder setOnMenuDeleteClickListener(OnMenuDeleteClickListener listener) {
+            this.onMenuDeleteClickListener = listener;
+
+            return this;
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            MenuItem deleteAction = menu.add(Menu.NONE, R.id.action_edit, 0, R.string.action_edit);
+            MenuItem editAction = menu.add(Menu.NONE, R.id.action_delete, 0, R.string.action_delete);
+
+            deleteAction.setOnMenuItemClickListener(this);
+            editAction.setOnMenuItemClickListener(this);
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_edit:
+                    return onMenuEditClickListener
+                            .onMenuEditClicked(mBinding.getLesson(), getLayoutPosition());
+
+                    /*
+                case R.id.action_delete:
+                    return onMenuDeleteClickListener
+                            .onMenuDeleteClicked(mBinding.getLesson(), getLayoutPosition());
+                            */
+            }
+
+            return false;
         }
     }
 }
