@@ -122,8 +122,10 @@ public class GraduationProjectionFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         setTitle();
         hideBottomNavigation();
+        hideTabs();
 
         mViewModel = ViewModelProviders
                 .of(this, viewModelFactory)
@@ -198,6 +200,12 @@ public class GraduationProjectionFragment extends Fragment implements
     private void hideBottomNavigation() {
         if (getActivity() != null) {
             ((MainActivity) getActivity()).hideBottomNavigation();
+        }
+    }
+
+    private void hideTabs() {
+        if (getActivity() != null) {
+            ((MainActivity) getActivity()).hideTabsLayout();
         }
     }
 
