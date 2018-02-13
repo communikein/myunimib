@@ -123,6 +123,7 @@ public class GraduationProjectionFragment extends Fragment implements
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setTitle();
+        hideBottomNavigation();
 
         mViewModel = ViewModelProviders
                 .of(this, viewModelFactory)
@@ -190,7 +191,13 @@ public class GraduationProjectionFragment extends Fragment implements
             ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
             /* If there is an ActionBar, set it's title */
             if (actionBar != null)
-                actionBar.setTitle(R.string.title_booklet);
+                actionBar.setTitle(R.string.title_graduation_score_prevision);
+        }
+    }
+
+    private void hideBottomNavigation() {
+        if (getActivity() != null) {
+            ((MainActivity) getActivity()).hideBottomNavigation();
         }
     }
 

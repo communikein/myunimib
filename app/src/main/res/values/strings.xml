@@ -234,7 +234,7 @@
     <string name="label_unenroll_in_progress">Unenrollment in progress</string>
     <string name="label_loading_certificate">Loading certificate</string>
     <string name="error_feature_not_available">Feature not available yet</string>
-    <string name="title_graduation_score_prevision">Graduation score calculator</string>
+    <string name="title_graduation_score_prevision">Graduation score projection</string>
 
     <string name="label_real_graduation_projection_score">Graduation score projection: %1$s</string>
     <string name="action_show">Show</string>
