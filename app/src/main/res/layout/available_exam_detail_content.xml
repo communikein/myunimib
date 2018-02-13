@@ -23,7 +23,7 @@
         android:layout_height="match_parent"
         android:padding="@dimen/activity_vertical_margin"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".ui.detail.AvailableExamDetailActivity" >
+        tools:context=".ui.exam.available.AvailableExamDetailActivity" >
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"

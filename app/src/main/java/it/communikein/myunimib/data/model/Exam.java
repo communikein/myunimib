@@ -9,6 +9,7 @@ import it.communikein.myunimib.utilities.DateHelper;
 import java.io.File;
 import java.util.Date;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class Exam extends ExamID {
 
     private String name;

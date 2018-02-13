@@ -18,101 +18,64 @@ import it.communikein.myunimib.data.model.User;
 @Dao
 public interface UnimibDao {
 
+    /***************
+     * BOOKLET *****
+     ***************/
+
     @Insert
     void addBookletEntry(BookletEntry entry);
+
+    @Insert
+    void bulkInsertBooklet(List<BookletEntry> entry);
+
+    @Query("DELETE FROM booklet")
+    void deleteBooklet();
+
+    @Query("DELETE FROM booklet WHERE id = :id")
+    void deleteBookletEntry(int id);
+
+    @Query("SELECT * FROM booklet WHERE fake = 0")
+    LiveData<List<BookletEntry>> getObservableBooklet();
+
+    @Query("SELECT * FROM booklet WHERE fake = 1")
+    LiveData<List<BookletEntry>> getObservableFakeBooklet();
+
+    @Query("SELECT * FROM booklet")
+    List<BookletEntry> getBooklet();
+
+    @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")
+    BookletEntry getBookletEntry(int adsceId);
+
+    @Query("SELECT COUNT(adsceId) FROM booklet")
+    int getBookletSize();
+
+    @Update
+    int updateBookletEntry(BookletEntry entry);
+
+
+
+    /*****************
+     * AVAILABLE *****
+     *****************/
 
     @Insert
     void addAvailableExam(AvailableExam entry);
 
     @Insert
-    void addEnrolledExam(EnrolledExam entry);
-
-    @Insert
-    void addUser(User user);
-
-    @Insert
-    void addLesson(Lesson lesson);
-
-
-    @Insert
-    void bulkInsertBooklet(List<BookletEntry> entry);
-
-    @Insert
     void bulkInsertAvailableExams(List<AvailableExam> entry);
-
-    @Insert
-    void bulkInsertEnrolledExams(List<EnrolledExam> entry);
-
-
-    @Query("DELETE FROM booklet")
-    void deleteBooklet();
 
     @Query("DELETE FROM available_exams")
     void deleteAvailableExams();
-
-    @Query("DELETE FROM enrolled_exams")
-    void deleteEnrolledExams();
-
-    @Query("DELETE FROM user")
-    void deleteUser();
-
-    @Query("DELETE FROM lessons")
-    void deleteTimetable();
-
-
-    @Query("DELETE FROM booklet WHERE adsceId = :adsceId")
-    void deleteBookletEntry(int adsceId);
 
     @Query("DELETE FROM available_exams WHERE adsceId = :adsceId AND appId = :appId " +
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     void deleteAvailableExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
-    @Query("DELETE FROM enrolled_exams WHERE adsceId = :adsceId AND appId = :appId " +
-            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
-    void deleteEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
-
-    @Query("DELETE FROM lessons WHERE id= :id")
-    void deleteLesson(int id);
-
-
-
-    @Query("SELECT * FROM booklet")
-    LiveData<List<BookletEntry>> getObservableBooklet();
-
     @Query("SELECT * FROM available_exams")
     LiveData<List<AvailableExam>> getObservableAvailableExams();
 
-    @Query("SELECT * FROM enrolled_exams")
-    LiveData<List<EnrolledExam>> getObservableEnrolledExams();
-
-    @Query("SELECT * FROM lessons")
-    LiveData<List<Lesson>> getObservableTimetable();
-
-    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week ORDER BY timeStart ASC")
-    LiveData<List<Lesson>> getObservableTimetableOfDay(String day_of_week);
-
-
-    @Query("SELECT * FROM booklet")
-    List<BookletEntry> getBooklet();
-
     @Query("SELECT * FROM available_exams")
     List<AvailableExam> getAvailableExams();
-
-    @Query("SELECT * FROM enrolled_exams")
-    List<EnrolledExam> getEnrolledExams();
-
-    @Query("SELECT * FROM lessons")
-    List<Lesson> getTimetable();
-
-    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week ORDER BY timeStart ASC")
-    List<Lesson> getTimetableOfDay(String day_of_week);
-
-    @Query("SELECT name FROM booklet WHERE name LIKE :name")
-    LiveData<List<String>> getCoursesNames(String name);
-
-
-    @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")
-    BookletEntry getBookletEntry(int adsceId);
 
     @Query("SELECT * FROM available_exams WHERE adsceId = :adsceId AND appId = :appId " +
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
@@ -122,6 +85,37 @@ public interface UnimibDao {
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     AvailableExam getAvailableExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
+    @Query("SELECT COUNT(adsceId) FROM available_exams")
+    int getAvailableExamsSize();
+
+    @Update
+    int updateAvailableExam(AvailableExam entry);
+
+
+
+    /****************
+     * ENROLLED *****
+     ****************/
+
+    @Insert
+    void addEnrolledExam(EnrolledExam entry);
+
+    @Insert
+    void bulkInsertEnrolledExams(List<EnrolledExam> entry);
+
+    @Query("DELETE FROM enrolled_exams")
+    void deleteEnrolledExams();
+
+    @Query("DELETE FROM enrolled_exams WHERE adsceId = :adsceId AND appId = :appId " +
+            "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
+    void deleteEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
+
+    @Query("SELECT * FROM enrolled_exams")
+    LiveData<List<EnrolledExam>> getObservableEnrolledExams();
+
+    @Query("SELECT * FROM enrolled_exams")
+    List<EnrolledExam> getEnrolledExams();
+
     @Query("SELECT * FROM enrolled_exams WHERE adsceId = :adsceId AND appId = :appId " +
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     LiveData<EnrolledExam> getObservableEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
@@ -130,11 +124,38 @@ public interface UnimibDao {
             "AND attDidEsaId = :attDidEsaId AND cdsEsaId = :cdsEsaId")
     EnrolledExam getEnrolledExam(int adsceId, int appId, int attDidEsaId, int cdsEsaId);
 
-    @Query("SELECT * FROM user WHERE username = :username")
-    User getUser(String username);
+    @Query("SELECT COUNT(adsceId) FROM enrolled_exams")
+    int getEnrolledExamsSize();
 
-    @Query("SELECT * FROM user WHERE username = :username")
-    LiveData<User> getObservableUser(String username);
+    @Update
+    int updateEnrolledExam(EnrolledExam entry);
+
+
+
+    /***************
+     * LESSONS *****
+     ***************/
+
+    @Insert
+    void addLesson(Lesson lesson);
+
+    @Query("DELETE FROM lessons")
+    void deleteTimetable();
+
+    @Query("DELETE FROM lessons WHERE id = :id")
+    void deleteLesson(int id);
+
+    @Query("SELECT * FROM lessons")
+    LiveData<List<Lesson>> getObservableTimetable();
+
+    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week ORDER BY timeStart ASC")
+    LiveData<List<Lesson>> getObservableTimetableOfDay(String day_of_week);
+
+    @Query("SELECT * FROM lessons")
+    List<Lesson> getTimetable();
+
+    @Query("SELECT * FROM lessons WHERE dayOfWeek= :day_of_week ORDER BY timeStart ASC")
+    List<Lesson> getTimetableOfDay(String day_of_week);
 
     @Query("SELECT * FROM lessons WHERE id = :id")
     Lesson getLesson(int id);
@@ -142,35 +163,19 @@ public interface UnimibDao {
     @Query("SELECT * FROM lessons WHERE id = :id")
     LiveData<Lesson> getObservableLesson(int id);
 
-
-    @Query("SELECT COUNT(adsceId) FROM booklet")
-    int getBookletSize();
-
-    @Query("SELECT COUNT(adsceId) FROM available_exams")
-    int getAvailableExamsSize();
-
-    @Query("SELECT COUNT(adsceId) FROM enrolled_exams")
-    int getEnrolledExamsSize();
-
-    @Query("SELECT COUNT(username) FROM user")
-    int getUsersCount();
-
     @Query("SELECT COUNT(courseName) FROM lessons")
     int getTimetableSize();
 
-
-    @Update
-    int updateBookletEntry(BookletEntry entry);
-
-    @Update
-    int updateAvailableExam(AvailableExam entry);
-
-    @Update
-    int updateEnrolledExam(EnrolledExam entry);
-
-    @Update
-    int updateUser(User user);
-
     @Update
     int updateLesson(Lesson lesson);
+
+
+
+    /*************
+     * OTHER *****
+     *************/
+
+    @Query("SELECT name FROM booklet WHERE name LIKE :name")
+    LiveData<List<String>> getCoursesNames(String name);
+
 }

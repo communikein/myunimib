@@ -2,12 +2,13 @@ package it.communikein.myunimib.di.module;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
-import it.communikein.myunimib.ui.detail.HomeFragment;
-import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
-import it.communikein.myunimib.ui.list.booklet.BookletFragment;
-import it.communikein.myunimib.ui.list.building.BuildingsFragment;
-import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
-import it.communikein.myunimib.ui.list.timetable.TimetableFragment;
+import it.communikein.myunimib.ui.graduation.projection.GraduationProjectionFragment;
+import it.communikein.myunimib.ui.home.HomeFragment;
+import it.communikein.myunimib.ui.exam.available.AvailableExamsFragment;
+import it.communikein.myunimib.ui.exam.booklet.BookletFragment;
+import it.communikein.myunimib.ui.building.BuildingsFragment;
+import it.communikein.myunimib.ui.exam.enrolled.EnrolledExamsFragment;
+import it.communikein.myunimib.ui.timetable.TimetableFragment;
 
 @Module
 public abstract class FragmentsBuilderModule {
@@ -29,5 +30,8 @@ public abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
     abstract TimetableFragment contributeTimetableFragment();
+
+    @ContributesAndroidInjector
+    abstract GraduationProjectionFragment contributeGraduationProjectionFragment();
 
 }

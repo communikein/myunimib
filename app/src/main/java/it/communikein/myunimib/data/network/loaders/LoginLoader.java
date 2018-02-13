@@ -20,7 +20,7 @@ import java.net.SocketTimeoutException;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import it.communikein.myunimib.accountmanager.AccountUtils;
+import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.model.UserAuthentication;
@@ -276,7 +276,7 @@ public class LoginLoader extends AsyncTaskLoader<User> {
         /* Save the account on the device via Account Manager */
         AccountManager accountManager = AccountManager.get(context.getApplicationContext());
         /* Create a new UNIMIB account to save on the device */
-        Account account = new Account(user.getUsername(), AccountUtils.ACCOUNT_TYPE);
+        Account account = new Account(user.getUsername(), context.getString(R.string.account_type));
 
         if (accountManager.getPassword(account) == null)
             accountManager.addAccountExplicitly(account, user.getPassword(), null);

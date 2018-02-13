@@ -56,7 +56,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:label="@string/app_name"
             android:launchMode="standard">
             <intent-filter>
@@ -81,9 +81,9 @@
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/title_home"
-            android:launchMode="standard"/>
+            android:launchMode="standard" />
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:label="@string/title_settings"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
@@ -91,21 +91,21 @@
                 android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.detail.AvailableExamDetailActivity"
+            android:name=".ui.exam.available.AvailableExamDetailActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.detail.EnrolledExamDetailActivity"
+            android:name=".ui.exam.enrolled.EnrolledExamDetailActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.list.timetable.AddLessonActivity"
+            android:name=".ui.timetable.AddLessonActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -171,6 +171,7 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
     </application>
 
 </manifest>

@@ -15,6 +15,7 @@ import it.communikein.myunimib.di.AppComponent;
 import it.communikein.myunimib.di.DaggerAppComponent;
 import it.communikein.myunimib.di.module.UnimibAppModule;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class UnimibApp extends Application implements HasActivityInjector, HasServiceInjector {
 
     @Inject

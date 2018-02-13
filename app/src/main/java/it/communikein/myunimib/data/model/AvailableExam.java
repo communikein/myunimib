@@ -5,6 +5,7 @@ import android.arch.persistence.room.Ignore;
 
 import java.util.Date;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 @Entity(tableName = "available_exams", primaryKeys = {"adsceId", "appId", "attDidEsaId", "cdsEsaId"})
 public class AvailableExam extends Exam {
 

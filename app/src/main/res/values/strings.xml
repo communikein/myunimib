@@ -1,7 +1,7 @@
 <resources>
     <!-- Strings related to general APP info -->
     <string name="app_name" translatable="false">MyUNIMIB</string>
-    <string name="account_name" translatable="false">UNIMIB</string>
+    <string name="account_type" translatable="false">UNIMIB</string>
 
     <string name="content_authority" translatable="false">it.communikein.myunimib</string>
     <string name="file_provider_authority" translatable="false">it.communikein.myunimib.fileprovider</string>
@@ -230,5 +230,20 @@
     <string name="error_time_end_before_start">Insert a valid start and end time</string>
     <string name="lesson_added">Lesson added!</string>
     <string name="action_discarded">Cancelled!</string>
+    <string name="action_show_attachment">Attachment</string>
+    <string name="label_unenroll_in_progress">Unenrollment in progress</string>
+    <string name="label_loading_certificate">Loading certificate</string>
+    <string name="error_feature_not_available">Feature not available yet</string>
+    <string name="title_graduation_score_prevision">Graduation score calculator</string>
+
+    <string name="label_real_graduation_projection_score">Graduation score projection: %1$s</string>
+    <string name="action_show">Show</string>
+    <string name="add">Add</string>
+    <string name="action_add">Add</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="prompt_exam_score">Score</string>
+    <string name="prompt_exam_cfu">CFU</string>
+    <string name="label_exam_projection_data">Exam projection data</string>
+    <string name="label_projection_added">Exam\'s projection added</string>
 
 </resources>

@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import it.communikein.myunimib.ui.LoginActivity;
+import it.communikein.myunimib.ui.login.LoginActivity;
 
 
 class S3Authenticator extends AbstractAccountAuthenticator {
@@ -25,8 +25,7 @@ class S3Authenticator extends AbstractAccountAuthenticator {
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
                              String authTokenType, String[] requiredFeatures, Bundle options) {
         final Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(AccountUtils.ARG_ACCOUNT_TYPE, accountType);
-        intent.putExtra(AccountUtils.ARG_IS_ADDING_NEW_ACCOUNT, true);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 
         final Bundle bundle = new Bundle();

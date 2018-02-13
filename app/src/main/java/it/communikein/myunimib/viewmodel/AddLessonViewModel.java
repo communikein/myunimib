@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.model.Building;
 import it.communikein.myunimib.data.model.Lesson;
-import it.communikein.myunimib.ui.list.timetable.AddLessonActivity;
+import it.communikein.myunimib.ui.timetable.AddLessonActivity;
 import it.communikein.myunimib.utilities.DAY_OF_WEEK;
 
 public class AddLessonViewModel extends ViewModel {

@@ -57,8 +57,6 @@ public class S3Helper {
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/StampaStatinoPDF.do?";
     public static final String URL_ENROLL_TO =
             "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/EffettuaPrenotazioneAppello.do;";
-    public static final String URL_UNENROLL_FROM =
-            "https://s3w.si.unimib.it/esse3/auth/studente/Appelli/CancellaAppello.do;";
     public static final String URL_PROFILE_PICTURE =
             "https://s3w.si.unimib.it/esse3/auth/AddressBook/DownloadFoto.do;";
     public static final String URL_CAREER_BASE =
@@ -142,18 +140,34 @@ public class S3Helper {
 
     public static HttpsURLConnection getPage(UserAuthentication user, String url, Context context,
                                       NewSessionIdListener listener) throws IOException {
-        return getPage(user, url, null, false, context, listener);
+        return getPage(user, url, null, false, true, context, listener);
     }
 
     public static HttpsURLConnection getPage(UserAuthentication user, String url, String query,
                                              boolean queryOperator, Context context,
                                              NewSessionIdListener listener) throws IOException {
+        return getPage(user, url, query, queryOperator, true, context, listener);
+    }
+
+    public static HttpsURLConnection postPage(UserAuthentication user, String url, String query,
+                                             boolean queryOperator, Context context,
+                                             NewSessionIdListener listener) throws IOException {
+        return getPage(user, url, query, queryOperator, false, context, listener);
+    }
+
+    private static HttpsURLConnection getPage(UserAuthentication user, String url, String query,
+                                             boolean queryOperator, boolean get, Context context,
+                                             NewSessionIdListener listener) throws IOException {
         String USER_AGENT = System.getProperty("http.agent");
 
         URL url_target = buildUrl(user, url, query, queryOperator);
         if (url_target == null) return null;
+
         HttpsURLConnection con = (HttpsURLConnection) url_target.openConnection();
-        con.setRequestMethod("GET");
+        if (get)
+            con.setRequestMethod("GET");
+        else
+            con.setRequestMethod("POST");
         con.setRequestProperty("Accept", "text/html");
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Host", "s3w.si.unimib.it");
@@ -163,6 +177,8 @@ public class S3Helper {
         if (user.getSessionID() != null)
             con.setRequestProperty("Cookie", "JSESSIONID=" + user.getSessionID());
         con.setConnectTimeout(5000);
+        if (!get)
+            con.setDoOutput(true);
 
         /* For devices running Nougat (API 24) or above, use the network_security_config.xml */
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
@@ -173,7 +189,7 @@ public class S3Helper {
         if (sessionID != null) {
             user.setSessionID(sessionID);
             listener.onNewSessionID(sessionID);
-            con = getPage(user, url, query, queryOperator, context, listener);
+            con = getPage(user, url, query, queryOperator, get, context, listener);
         }
 
         return con;
@@ -365,6 +381,14 @@ public class S3Helper {
         return new EnrollLoader(activity, exam)
                 .setEnrollCompleteListener(enrollCompleteListener)
                 .setEnrollUpdatesListener(enrollUpdatesListener);
+    }
+
+    public static UnEnrollLoader createUnEnrollLoader(Exam exam, Activity activity,
+                                                  UnEnrollLoader.UnEnrollCompleteListener unEnrollCompleteListener,
+                                                  UnEnrollLoader.UnEnrollUpdatesListener unEnrollUpdatesListener) {
+        return new UnEnrollLoader(activity, exam)
+                .setUnEnrollCompleteListener(unEnrollCompleteListener)
+                .setUnEnrollUpdatesListener(unEnrollUpdatesListener);
     }
 
     public static UserDataLoader createUserDataLoader(Activity activity) {

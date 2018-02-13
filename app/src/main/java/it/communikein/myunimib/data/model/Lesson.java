@@ -9,9 +9,9 @@ import android.support.annotation.NonNull;
 import it.communikein.myunimib.utilities.DateHelper;
 import it.communikein.myunimib.utilities.Utils;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 @Entity(tableName = "lessons", indices = {
-        @Index(value = {"courseName", "dayOfWeek", "timeStart", "timeEnd"}, unique = true)}
-        )
+        @Index(value = {"courseName", "dayOfWeek", "timeStart", "timeEnd"}, unique = true)})
 public class Lesson {
 
     @PrimaryKey(autoGenerate = true)

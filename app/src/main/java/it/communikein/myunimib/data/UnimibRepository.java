@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import it.communikein.myunimib.AppExecutors;
+import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.BookletEntry;
 import it.communikein.myunimib.data.model.Building;
@@ -26,9 +27,11 @@ import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.data.network.loaders.CertificateLoader;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
 import it.communikein.myunimib.data.network.loaders.LoginLoader;
+import it.communikein.myunimib.data.network.loaders.UnEnrollLoader;
 import it.communikein.myunimib.data.network.loaders.UserDataLoader;
-import it.communikein.myunimib.ui.list.timetable.AddLessonActivity;
-import it.communikein.myunimib.ui.list.timetable.DayFragment;
+import it.communikein.myunimib.ui.graduation.projection.GraduationProjectionFragment;
+import it.communikein.myunimib.ui.timetable.AddLessonActivity;
+import it.communikein.myunimib.ui.timetable.DayFragment;
 import it.communikein.myunimib.utilities.NotificationHelper;
 import it.communikein.myunimib.data.UserHelper.AccountRemoveErrorListener;
 import it.communikein.myunimib.data.UserHelper.AccountRemovedListener;
@@ -45,6 +48,8 @@ public class UnimibRepository {
     private final UserHelper mUserHelper;
     private final AppExecutors mExecutors;
     private final NotificationHelper mNotificationHelper;
+
+    private final String ACCOUNT_TYPE;
 
     private boolean mInitialized = false;
 
@@ -69,6 +74,8 @@ public class UnimibRepository {
         mUserHelper = userHelper;
         mExecutors = executors;
         mNotificationHelper = notificationHelper;
+
+        ACCOUNT_TYPE = application.getString(R.string.account_type);
 
         mModifiedBookletEntriesCount = new MutableLiveData<>();
         mModifiedAvailableExamsCount = new MutableLiveData<>();
@@ -329,10 +336,21 @@ public class UnimibRepository {
      * BOOKLET *****
      ***************/
 
+    public void addBookletEntry(BookletEntry entry, GraduationProjectionFragment.AddProjectionListener listener) {
+        mExecutors.diskIO().execute(() -> {
+            mUnimibDao.addBookletEntry(entry);
+            listener.onProjectionAddComplete();
+        });
+    }
+
     public LiveData<List<BookletEntry>> getObservableCurrentBooklet() {
         initializeData();
 
         return mUnimibDao.getObservableBooklet();
+    }
+
+    public LiveData<List<BookletEntry>> getObservableFakeExams() {
+        return mUnimibDao.getObservableFakeBooklet();
     }
 
     private ArrayList<BookletEntry> getCurrentBooklet() {
@@ -359,15 +377,21 @@ public class UnimibRepository {
         mUnimibDao.deleteBooklet();
     }
 
-    private void deleteBookletEntry(int adsce_id) {
-        mUnimibDao.deleteBookletEntry(adsce_id);
+    public void deleteBookletEntry(BookletEntry entry, GraduationProjectionFragment.DeleteProjectionListener listener) {
+        mExecutors.diskIO().execute(() -> {
+            mUnimibDao.deleteBookletEntry(entry.getId());
+            listener.onProjectionDeleteComplete();
+        });
+    }
+
+    public void deleteBookletEntry(BookletEntry entry) {
+        mUnimibDao.deleteBookletEntry(entry.getId());
     }
 
     private void deleteBookletEntries(ArrayList<BookletEntry> exams) {
         for (BookletEntry exam : exams)
-            deleteBookletEntry(exam.getAdsceId());
+            deleteBookletEntry(exam);
     }
-
 
     public void startFetchBookletService() {
         mUnimibNetworkDataSource.startFetchBookletService();
@@ -522,6 +546,17 @@ public class UnimibRepository {
         return mUnimibNetworkDataSource.loadCertificate(exam, activity);
     }
 
+    public UnEnrollLoader unEnrollExam(Exam exam, Activity activity,
+                                   UnEnrollLoader.UnEnrollUpdatesListener unEnrollUpdatesListener) {
+        return mUnimibNetworkDataSource.unEnrollExam(exam, activity,
+                (/*Un-enrollment complete*/) -> {
+                    mExecutors.diskIO().execute(() -> deleteEnrolledExam(exam));
+                    startFetchEnrolledExamsService();
+                    startFetchAvailableExamsService();
+                },
+                unEnrollUpdatesListener);
+    }
+
 
 
     /*****************
@@ -658,5 +693,9 @@ public class UnimibRepository {
 
     public Context getContext() {
         return mContext;
+    }
+
+    public String getAccountType() {
+        return ACCOUNT_TYPE;
     }
 }

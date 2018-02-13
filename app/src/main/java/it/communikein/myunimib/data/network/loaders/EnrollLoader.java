@@ -79,7 +79,7 @@ public class EnrollLoader extends AsyncTaskLoader<Boolean> {
             User user = userHelper.getUser();
 
             Bundle result = UnimibNetworkDataSource
-                    .tryGetUrlWithLogin(S3Helper.URL_ENROLL_TO, user,
+                    .authenticatedGET(S3Helper.URL_ENROLL_TO, user,
                             urlParameters, true,
                             context, userHelper::updateSessionId);
             int s3_response = result.getInt(UnimibNetworkDataSource.PARAM_KEY_RESPONSE);

@@ -7,6 +7,7 @@ import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class ExamID {
 
     @Ignore

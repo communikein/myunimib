@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.accountmanager.AccountUtils;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
@@ -30,6 +29,8 @@ import it.communikein.myunimib.utilities.Utils;
 public class UserHelper {
 
     private static final String TAG = UserHelper.class.getSimpleName();
+
+    private final String ACCOUNT_TYPE;
 
     private final AccountManager mAccountManager;
     private final MutableLiveData<User> mUser;
@@ -46,7 +47,7 @@ public class UserHelper {
     @Inject
     public UserHelper(Context context) {
         this.mAccountManager = AccountManager.get(context.getApplicationContext());
-
+        this.ACCOUNT_TYPE = context.getString(R.string.account_type);
         this.mUser = new MutableLiveData<>();
 
         initUser();
@@ -57,7 +58,7 @@ public class UserHelper {
     }
 
     public void updateSessionId(String sessionID) {
-        Account[] accounts = mAccountManager.getAccountsByType(AccountUtils.ACCOUNT_TYPE);
+        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
         Account selected;
 
         if (accounts.length > 0) {
@@ -69,7 +70,7 @@ public class UserHelper {
     }
 
     public void updateChosenFaculty(int chosenFaculty) {
-        Account[] accounts = mAccountManager.getAccountsByType(AccountUtils.ACCOUNT_TYPE);
+        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
         Account selected;
 
         if (accounts.length > 0) {
@@ -81,7 +82,7 @@ public class UserHelper {
     }
 
     public void saveUserAuth(UserAuthentication user){
-        Account[] accounts = mAccountManager.getAccountsByType(AccountUtils.ACCOUNT_TYPE);
+        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
         Account selected;
 
         if (accounts.length > 0) {
@@ -97,7 +98,7 @@ public class UserHelper {
     }
 
     public void saveUser(User user){
-        Account[] accounts = mAccountManager.getAccountsByType(AccountUtils.ACCOUNT_TYPE);
+        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
         Account selected;
 
         if (accounts.length > 0) {
@@ -124,7 +125,7 @@ public class UserHelper {
     }
 
     public User getUser(){
-        Account[] accounts = mAccountManager.getAccountsByType(AccountUtils.ACCOUNT_TYPE);
+        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
         Account selected;
 
         if (accounts.length > 0) {
@@ -175,7 +176,7 @@ public class UserHelper {
 
     public void deleteUser(Activity activity, AccountRemovedListener listener,
                            AccountRemoveErrorListener errorListener) {
-        Account[] accounts = mAccountManager.getAccountsByType(AccountUtils.ACCOUNT_TYPE);
+        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
         Account selected;
 
         if (accounts.length > 0) {

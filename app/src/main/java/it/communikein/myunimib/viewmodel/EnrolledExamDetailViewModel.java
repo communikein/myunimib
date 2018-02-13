@@ -12,6 +12,8 @@ import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.network.loaders.CertificateLoader;
+import it.communikein.myunimib.data.network.loaders.UnEnrollLoader;
+import it.communikein.myunimib.data.network.loaders.UnEnrollLoader.UnEnrollUpdatesListener;
 
 
 public class EnrolledExamDetailViewModel extends ViewModel {
@@ -37,6 +39,10 @@ public class EnrolledExamDetailViewModel extends ViewModel {
 
     public Building getBuilding(String name) {
         return mRepository.getBuilding(name);
+    }
+
+    public UnEnrollLoader unEnroll(Activity activity, UnEnrollUpdatesListener callback){
+        return mRepository.unEnrollExam(mExam.getValue(), activity, callback);
     }
 
 

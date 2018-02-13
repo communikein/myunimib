@@ -48,6 +48,7 @@ import it.communikein.myunimib.data.network.loaders.CertificateLoader;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
 import it.communikein.myunimib.data.network.loaders.LoginLoader;
 import it.communikein.myunimib.data.network.loaders.S3Helper;
+import it.communikein.myunimib.data.network.loaders.UnEnrollLoader;
 import it.communikein.myunimib.data.network.loaders.UserDataLoader;
 import it.communikein.myunimib.utilities.DateHelper;
 import it.communikein.myunimib.utilities.Utils;
@@ -210,7 +211,7 @@ public class UnimibNetworkDataSource {
         String html;
         try {
             /* Try to get the private page */
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
+            Bundle result = authenticatedGET(S3Helper.URL_LIBRETTO, user, null,
                     false, context, listener);
 
             html = result.getString(PARAM_KEY_HTML);
@@ -218,7 +219,7 @@ public class UnimibNetworkDataSource {
 
             /* If it fails the first time, try once again */
             if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
-                result = tryGetUrlWithLogin(S3Helper.URL_LIBRETTO, user, null,
+                result = authenticatedGET(S3Helper.URL_LIBRETTO, user, null,
                         false, context, listener);
 
                 html = result.getString(PARAM_KEY_HTML);
@@ -275,7 +276,7 @@ public class UnimibNetworkDataSource {
                                 state.indexOf("."));
 
                     BookletEntry newExam = new BookletEntry(adsce_id, exam_name, dateStart,
-                            cfu, state, mark, code);
+                            cfu, state, mark, code, false);
                     booklet.add(newExam);
                 }
 
@@ -408,7 +409,7 @@ public class UnimibNetworkDataSource {
         String html;
         try {
             /* Try to get the private page */
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
+            Bundle result = authenticatedGET(S3Helper.URL_AVAILABLE_EXAMS, user, null,
                     false, context, listener);
 
             html = result.getString(PARAM_KEY_HTML);
@@ -416,7 +417,7 @@ public class UnimibNetworkDataSource {
 
             /* If it fails the first time, try once again */
             if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
-                result = tryGetUrlWithLogin(S3Helper.URL_AVAILABLE_EXAMS, user, null,
+                result = authenticatedGET(S3Helper.URL_AVAILABLE_EXAMS, user, null,
                         false, context, listener);
 
                 html = result.getString(PARAM_KEY_HTML);
@@ -596,7 +597,7 @@ public class UnimibNetworkDataSource {
         String html;
         try {
             /* Try to get the private page */
-            Bundle result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, null,
+            Bundle result = authenticatedGET(S3Helper.URL_ENROLLED_EXAMS, user, null,
                     false, context, listener);
 
             html = result.getString(PARAM_KEY_HTML);
@@ -604,7 +605,7 @@ public class UnimibNetworkDataSource {
 
             /* If it fails the first time, try once again */
             if (html == null || s3_response != HttpURLConnection.HTTP_OK) {
-                result = tryGetUrlWithLogin(S3Helper.URL_ENROLLED_EXAMS, user, null,
+                result = authenticatedGET(S3Helper.URL_ENROLLED_EXAMS, user, null,
                         false, context, listener);
 
                 html = result.getString(PARAM_KEY_HTML);
@@ -676,6 +677,13 @@ public class UnimibNetworkDataSource {
 
     public CertificateLoader loadCertificate(EnrolledExam exam, Activity activity) {
         return S3Helper.createCertificateLoader(exam, activity);
+    }
+
+    public UnEnrollLoader unEnrollExam(Exam exam, Activity activity,
+                                       UnEnrollLoader.UnEnrollCompleteListener unEnrollCompleteListener,
+                                       UnEnrollLoader.UnEnrollUpdatesListener unEnrollUpdatesListener) {
+        return S3Helper.createUnEnrollLoader(exam, activity,
+                unEnrollCompleteListener, unEnrollUpdatesListener);
     }
 
 
@@ -796,13 +804,26 @@ public class UnimibNetworkDataSource {
     }
 
 
-    public static Bundle tryGetUrlWithLogin(String url, UserAuthentication user, String params,
-                                            boolean queryOperator, Context context,
-                                            S3Helper.NewSessionIdListener listener) throws IOException {
-        Bundle result = new Bundle();
+    public static Bundle authenticatedPOST(String url, UserAuthentication user, String params,
+                                           boolean queryOperator, Context context,
+                                           S3Helper.NewSessionIdListener listener) throws IOException {
+        // Try to get the private page
+        HttpsURLConnection response = S3Helper.postPage(user, url, params, queryOperator, context, listener);
 
+        return parseServerResponse(response);
+    }
+
+    public static Bundle authenticatedGET(String url, UserAuthentication user, String params,
+                                          boolean queryOperator, Context context,
+                                          S3Helper.NewSessionIdListener listener) throws IOException {
         // Try to get the private page
         HttpsURLConnection response = S3Helper.getPage(user, url, params, queryOperator, context, listener);
+
+        return parseServerResponse(response);
+    }
+
+    public static Bundle parseServerResponse(HttpsURLConnection response) throws IOException {
+        Bundle result = new Bundle();
 
         if (response != null) {
             int s3_response = response.getResponseCode();

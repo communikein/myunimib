@@ -8,7 +8,7 @@ import android.util.SparseArray;
 
 import javax.inject.Singleton;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"WeakerAccess", "unused"})
 @Entity(tableName = "user")
 @Singleton
 public class User extends UserAuthentication {

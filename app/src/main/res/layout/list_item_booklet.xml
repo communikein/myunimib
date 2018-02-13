@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="bookletEntry"
+            type="it.communikein.myunimib.data.model.BookletEntry"/>
+        <variable name="callback"
+            type="it.communikein.myunimib.ui.exam.booklet.BookletAdapter.ExamClickCallback"/>
+    </data>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() ->  callback.onListItemClick(bookletEntry.adsceId)}"
+        app:cardUseCompatPadding="true">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <View
+                android:id="@+id/exam_icon"
+                android:layout_height="0dp"
+                android:layout_width="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@{bookletEntry.isPassed() ? @color/passed : @color/waiting}" />
+
+            <TextView
+                android:id="@+id/exam_name_textview"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:textSize="18sp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:ellipsize="marquee"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/exam_icon"
+                app:layout_constraintRight_toLeftOf="@id/exam_score_textview"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Sistemi Complessi: Modelli e Simulazione"
+                android:text="@{bookletEntry.name}"/>
+
+            <TextView
+                android:id="@+id/exam_score_textview"
+                style="@style/TextAppearance.AppCompat.Display1"
+                android:textColor="@color/passed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/exam_name_textview"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="30L"
+                android:text="@{bookletEntry.score}"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
+
+</layout>

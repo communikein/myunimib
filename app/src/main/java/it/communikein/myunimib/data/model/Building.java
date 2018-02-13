@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 @Entity(tableName = "buildings")
 public class Building {
 

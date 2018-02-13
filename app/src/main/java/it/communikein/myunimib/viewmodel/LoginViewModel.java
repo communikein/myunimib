@@ -23,6 +23,10 @@ public class LoginViewModel extends ViewModel {
         return mRepository.getUser();
     }
 
+    public String getAccountType() {
+        return mRepository.getAccountType();
+    }
+
     public LoginLoader doLogin(Activity activity, String username, String password) {
         User temp_user = new User(username, password);
         temp_user.setFake(false);

@@ -8,7 +8,7 @@
         <variable name="exam"
             type="it.communikein.myunimib.data.model.EnrolledExam"/>
         <variable name="callback"
-            type="it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamAdapter.ExamClickCallback"/>
+            type="it.communikein.myunimib.ui.exam.enrolled.EnrolledExamAdapter.ExamClickCallback"/>
     </data>
 
     <android.support.v7.widget.CardView

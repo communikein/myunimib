@@ -10,8 +10,8 @@ import javax.inject.Inject;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
-import it.communikein.myunimib.ui.list.timetable.AddLessonActivity;
-import it.communikein.myunimib.ui.list.timetable.DayFragment;
+import it.communikein.myunimib.ui.timetable.AddLessonActivity;
+import it.communikein.myunimib.ui.timetable.DayFragment;
 
 public class TimetableViewModel extends ViewModel {
 

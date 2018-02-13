@@ -10,8 +10,6 @@ import android.view.inputmethod.InputMethodManager;
 import com.google.firebase.crash.FirebaseCrash;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 
 
 public class Utils {
@@ -23,12 +21,8 @@ public class Utils {
             "https://play.google.com/apps/testing/it.communikein.myunimib";
     public static final String TERMS_CONDITIONS_URL = "http://txt.do/23mn";
 
-    public static final SimpleDateFormat sdf = new SimpleDateFormat(
-            "dd-MM-yyyy HH:mm:ss", Locale.getDefault());
-    public static final SimpleDateFormat timeFormat = new SimpleDateFormat(
-            "HH:mm", Locale.getDefault());
     public static final DecimalFormat integerFormat = new DecimalFormat("##");
-    public static final DecimalFormat markFormat = new DecimalFormat("##.##");
+    public static final DecimalFormat markFormat = new DecimalFormat("###.##");
 
 
     public static void hideKeyboard(Context context){

@@ -16,7 +16,7 @@ import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasServiceInjector;
 import it.communikein.myunimib.data.UnimibRepository;
 
-
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class ExamEnrolledSyncJobService extends JobService implements HasServiceInjector {
 
     private static final String LOG_TAG = ExamEnrolledSyncJobService.class.getSimpleName();

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class UserAuthentication {
 
     public static final String PREF_USERNAME = "user_username";

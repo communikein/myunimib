@@ -22,6 +22,11 @@
             android:icon="@drawable/ic_today_black_24dp"
             android:title="@string/title_timetable" />
 
+        <item
+            android:id="@+id/navigation_graduation_score"
+            android:icon="@drawable/ic_school_black"
+            android:title="@string/title_graduation_score_prevision" />
+
     </group>
 
     <group

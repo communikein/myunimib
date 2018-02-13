@@ -33,12 +33,14 @@ import dagger.android.support.HasSupportFragmentInjector;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
-import it.communikein.myunimib.ui.detail.HomeFragment;
-import it.communikein.myunimib.ui.list.availableexam.AvailableExamsFragment;
-import it.communikein.myunimib.ui.list.booklet.BookletFragment;
-import it.communikein.myunimib.ui.list.building.BuildingsFragment;
-import it.communikein.myunimib.ui.list.enrolledexam.EnrolledExamsFragment;
-import it.communikein.myunimib.ui.list.timetable.TimetableFragment;
+import it.communikein.myunimib.ui.graduation.projection.GraduationProjectionFragment;
+import it.communikein.myunimib.ui.home.HomeFragment;
+import it.communikein.myunimib.ui.exam.available.AvailableExamsFragment;
+import it.communikein.myunimib.ui.exam.booklet.BookletFragment;
+import it.communikein.myunimib.ui.building.BuildingsFragment;
+import it.communikein.myunimib.ui.exam.enrolled.EnrolledExamsFragment;
+import it.communikein.myunimib.ui.settings.SettingsActivity;
+import it.communikein.myunimib.ui.timetable.TimetableFragment;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 import it.communikein.myunimib.viewmodel.factory.MainActivityViewModelFactory;
 
@@ -76,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int INDEX_FRAGMENT_EXAMS_ENROLLED = 3;
     private static final int INDEX_FRAGMENT_BUILDINGS = 4;
     private static final int INDEX_FRAGMENT_TIMETABLE = 5;
+    private static final int INDEX_FRAGMENT_GRADUATION_PROJECTION = 6;
 
     private static final String TAG_FRAGMENT_HOME = "tab-home";
     public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
@@ -83,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
     private static final String TAG_FRAGMENT_BUILDINGS = "tab-buildings";
     private static final String TAG_FRAGMENT_TIMETABLE = "tab-timetable";
+    private static final String TAG_FRAGMENT_GRADUATION_PROJECTION = "tab-graduation-projection";
 
     private static final long DRAWER_CLOSE_DELAY_MS = 250;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -270,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements
         fragments.add(INDEX_FRAGMENT_EXAMS_ENROLLED, new EnrolledExamsFragment());
         fragments.add(INDEX_FRAGMENT_BUILDINGS, new BuildingsFragment());
         fragments.add(INDEX_FRAGMENT_TIMETABLE, new TimetableFragment());
+        fragments.add(INDEX_FRAGMENT_GRADUATION_PROJECTION, new GraduationProjectionFragment());
     }
 
 
@@ -374,6 +379,10 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.navigation_timetable:
                 index = INDEX_FRAGMENT_TIMETABLE;
                 FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_TIMETABLE;
+                break;
+            case R.id.navigation_graduation_score:
+                index = INDEX_FRAGMENT_GRADUATION_PROJECTION;
+                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_GRADUATION_PROJECTION;
                 break;
             case R.id.navigation_logout:
                 return tryLogout();
