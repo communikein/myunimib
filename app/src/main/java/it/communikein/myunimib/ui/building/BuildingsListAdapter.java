@@ -26,11 +26,6 @@ public class BuildingsListAdapter extends RecyclerView.Adapter<BuildingViewHolde
         void onListPoiClick(Building poi);
     }
 
-    /**
-     * Creates a PoisListAdapter.
-     *
-     * @param onListItemClickListener Used to talk to the UI and app resources
-     */
     BuildingsListAdapter(@Nullable OnListItemClickListener onListItemClickListener) {
         mOnClickListener = onListItemClickListener;
     }

@@ -27,7 +27,7 @@ public class ExamEnrolledSyncIntentService extends IntentService implements HasS
 
 
     public ExamEnrolledSyncIntentService() {
-        super("ExamEnrolledSyncIntentService");
+        super(LOG_TAG);
     }
 
     @Override
@@ -38,8 +38,6 @@ public class ExamEnrolledSyncIntentService extends IntentService implements HasS
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(LOG_TAG, "Intent service started");
-
         repository.fetchEnrolledExams();
     }
 

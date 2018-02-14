@@ -46,13 +46,9 @@ public class ExamEnrolledSyncJobService extends JobService implements HasService
      */
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        Log.d(LOG_TAG, "Scheduled enrolled exams job started.");
-
         repository.fetchEnrolledExams();
 
         jobFinished(jobParameters, false);
-
-        Log.d(LOG_TAG, "Scheduled enrolled exams job finished.");
 
         return true;
     }

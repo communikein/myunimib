@@ -116,7 +116,6 @@ public class BookletFragment extends Fragment implements
 
             mViewModel.getBooklet().observe(this, list -> {
                 if (list != null) {
-                    Log.d(LOG_TAG, "Updating the booklet list. " + list.size() + " elements.");
                     mAdapter.setList((ArrayList<BookletEntry>) list);
                 }
             });

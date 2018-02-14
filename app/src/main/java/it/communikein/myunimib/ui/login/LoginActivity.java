@@ -187,8 +187,6 @@ public class LoginActivity extends AuthAppCompatActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selected = position;
-
-                Log.d("LOGIN_CHOOSE_FACULTY", "New faculty selected: " + position);
             }
 
             @Override

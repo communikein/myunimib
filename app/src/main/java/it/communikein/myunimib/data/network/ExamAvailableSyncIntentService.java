@@ -26,9 +26,7 @@ public class ExamAvailableSyncIntentService extends IntentService implements Has
     UnimibRepository repository;
 
 
-    public ExamAvailableSyncIntentService() {
-        super("ExamAvailableSyncIntentService");
-    }
+    public ExamAvailableSyncIntentService() { super(LOG_TAG); }
 
     @Override
     public void onCreate() {
@@ -38,8 +36,6 @@ public class ExamAvailableSyncIntentService extends IntentService implements Has
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(LOG_TAG, "Intent service started");
-
         repository.fetchAvailableExams();
     }
 

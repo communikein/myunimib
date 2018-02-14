@@ -46,13 +46,9 @@ public class ExamAvailableSyncJobService extends JobService implements HasServic
      */
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        Log.d(LOG_TAG, "Scheduled available exams job started.");
-
         repository.fetchAvailableExams();
 
         jobFinished(jobParameters, false);
-
-        Log.d(LOG_TAG, "Scheduled available exams job finished.");
 
         return true;
     }

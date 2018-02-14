@@ -33,6 +33,7 @@ import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.ActivityAvailableExamDetailsBinding;
+import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.viewmodel.AvailableExamDetailViewModel;
 import it.communikein.myunimib.viewmodel.factory.AvailableExamViewModelFactory;
 
@@ -177,17 +178,17 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
         switch (status) {
             case EnrollLoader.STATUS_STARTED:
                 Snackbar.make(mBinding.container,
-                        "Enrollment started.", Snackbar.LENGTH_LONG).show();
+                        R.string.label_enrollment_started, Snackbar.LENGTH_LONG).show();
                 break;
 
             case EnrollLoader.STATUS_ENROLLMENT_OK:
                 Snackbar.make(mBinding.container,
-                        "Enrollment confirmed.", Snackbar.LENGTH_LONG).show();
+                        R.string.label_enrollment_confirmed, Snackbar.LENGTH_LONG).show();
                 break;
 
             case EnrollLoader.STATUS_CERTIFICATE_DOWNLOADED:
                 Snackbar.make(mBinding.container,
-                        "Certificate downloaded.", Snackbar.LENGTH_LONG)
+                        R.string.label_certificate_downloaded, Snackbar.LENGTH_LONG)
                         .setAction(R.string.open, v -> showCertificate())
                         .show();
                 break;
@@ -205,12 +206,12 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
 
             case EnrollLoader.STATUS_ERROR_CERTIFICATE:
                 Snackbar.make(mBinding.container,
-                        "ERROR: certificate not found.", Snackbar.LENGTH_LONG).show();
+                        R.string.error_certificate_not_found, Snackbar.LENGTH_LONG).show();
                 break;
 
             case EnrollLoader.STATUS_ERROR_GENERAL:
                 Snackbar.make(mBinding.container,
-                        "ERROR: general.", Snackbar.LENGTH_LONG).show();
+                        R.string.error_generic, Snackbar.LENGTH_LONG).show();
                 break;
         }
     }
@@ -219,7 +220,7 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
     private void tryEnroll() {
         new AlertDialog.Builder(getBaseContext())
             .setTitle(getString(R.string.attention_title))
-            .setMessage("Sicuro di voler procedere con la prenotazione dell'esame?")
+            .setMessage(R.string.prompt_enrollment_confirm)
             .setPositiveButton(android.R.string.ok, (dialog, which) -> doEnroll())
             .setNegativeButton(android.R.string.cancel, null)
             .setIcon(android.R.drawable.ic_dialog_alert)
@@ -228,7 +229,7 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
 
     @SuppressWarnings("unchecked")
     private void doEnroll() {
-        progress.setMessage("Sto prenotando l'esame..");
+        progress.setMessage(getString(R.string.label_enrollment_in_progress));
         showProgress(true);
 
         getSupportLoaderManager()
@@ -262,8 +263,7 @@ public class AvailableExamDetailActivity extends AppCompatActivity implements
     }
 
     private void showUnimibWebsite() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://s3w.si.unimib.it/esse3/"));
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Utils.UNIMIB_WEBSITE));
         startActivity(browserIntent);
     }
 

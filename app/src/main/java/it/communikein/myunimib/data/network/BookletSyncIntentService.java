@@ -26,7 +26,7 @@ public class BookletSyncIntentService extends IntentService implements HasServic
     UnimibRepository repository;
 
     public BookletSyncIntentService() {
-        super("BookletSyncIntentService");
+        super(LOG_TAG);
     }
 
     @Override
@@ -37,8 +37,6 @@ public class BookletSyncIntentService extends IntentService implements HasServic
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(LOG_TAG, "Intent service started");
-
         repository.fetchBooklet();
     }
 

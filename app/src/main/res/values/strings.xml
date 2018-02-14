@@ -245,5 +245,16 @@
     <string name="prompt_exam_cfu">CFU</string>
     <string name="label_exam_projection_data">Exam projection data</string>
     <string name="label_projection_added">Exam\'s projection added</string>
+    <string name="label_enrollment_started">Enrollment started.</string>
+    <string name="label_enrollment_confirmed">Enrollment confirmed.</string>
+    <string name="label_certificate_downloaded">Certificate downloaded.</string>
+    <string name="error_generic">ERROR: general.</string>
+    <string name="error_certificate_not_found">ERROR: certificate not found.</string>
+    <string name="label_enrollment_in_progress">Enrollment in progress..</string>
+    <string name="prompt_enrollment_confirm">Do you really want to enroll in this exam?</string>
+    <string name="label_unenrollment_started">Un-enrollment started.</string>
+    <string name="label_unenrollment_confirmed">Un-enrollment confirmed.</string>
+    <string name="action_undo">Undo</string>
+    <string name="label_item_removed">%1$s removed!</string>
 
 </resources>

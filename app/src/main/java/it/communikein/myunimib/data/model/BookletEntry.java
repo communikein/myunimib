@@ -182,8 +182,7 @@ public class BookletEntry {
         if (! (obj instanceof BookletEntry)) return false;
         BookletEntry entry = (BookletEntry) obj;
 
-        return this.equals(entry) &&
-                this.getAdsceId() == entry.getAdsceId() &&
+        return this.getAdsceId() == entry.getAdsceId() &&
                 this.getState().equals(entry.getState()) &&
                 this.getCfu() == entry.getCfu() &&
                 this.getCode().equals(entry.getCode()) &&

@@ -102,7 +102,6 @@ public class DayFragment extends Fragment implements
 
             getParentViewModel().getTimetable(day_of_week.getDay()).observe(this, list -> {
                 if (list != null) {
-                    Log.d(LOG_TAG, "Updating the booklet list. " + list.size() + " elements.");
                     mAdapter.setList((ArrayList<Lesson>) list);
                 }
             });
@@ -167,9 +166,9 @@ public class DayFragment extends Fragment implements
             if (getParentViewModel() != null) {
                 getParentViewModel().deleteLesson(lesson, () -> {
                     // showing snack bar with Undo option
-                    Snackbar snackbar = Snackbar.make(
-                            getParentCoordinatorLayout(), name + " removed!", Snackbar.LENGTH_LONG);
-                    snackbar.setAction("UNDO", view -> {
+                    Snackbar snackbar = Snackbar.make(getParentCoordinatorLayout(),
+                            getString(R.string.label_item_removed, name), Snackbar.LENGTH_LONG);
+                    snackbar.setAction(R.string.action_undo, view -> {
                         // undo is selected, restore the deleted item
                         getParentViewModel().restoreLesson(lesson,
                                 () -> adapter.restoreItem(lesson, position));

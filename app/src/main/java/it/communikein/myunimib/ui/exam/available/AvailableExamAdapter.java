@@ -33,11 +33,6 @@ public class AvailableExamAdapter extends RecyclerView.Adapter<ExamAdapterViewHo
     }
 
 
-    /**
-     * Creates a BookletAdapter.
-     *
-     * @param examClickCallback Used to talk to the UI and app resources
-     */
     AvailableExamAdapter(@Nullable ExamClickCallback examClickCallback) {
         mExamClickCallback = examClickCallback;
     }

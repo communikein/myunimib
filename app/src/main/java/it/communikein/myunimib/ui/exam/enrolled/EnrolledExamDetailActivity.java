@@ -284,17 +284,17 @@ public class EnrolledExamDetailActivity extends FragmentAppCompatActivity implem
         switch (status) {
             case EnrollLoader.STATUS_STARTED:
                 Snackbar.make(mBinding.container,
-                        "Un-enrollment started.", Snackbar.LENGTH_LONG).show();
+                        R.string.label_unenrollment_started, Snackbar.LENGTH_LONG).show();
                 break;
 
             case EnrollLoader.STATUS_ENROLLMENT_OK:
                 Snackbar.make(mBinding.container,
-                        "Un-enrollment confirmed.", Snackbar.LENGTH_LONG).show();
+                        R.string.label_unenrollment_confirmed, Snackbar.LENGTH_LONG).show();
                 break;
 
             case EnrollLoader.STATUS_ERROR_GENERAL:
                 Snackbar.make(mBinding.container,
-                        "ERROR: general.", Snackbar.LENGTH_LONG).show();
+                        R.string.error_generic, Snackbar.LENGTH_LONG).show();
                 break;
         }
     }

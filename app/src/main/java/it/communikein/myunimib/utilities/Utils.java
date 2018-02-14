@@ -14,6 +14,7 @@ import java.text.DecimalFormat;
 
 public class Utils {
 
+    public static final String UNIMIB_WEBSITE = "https://s3w.si.unimib.it/esse3/";
     private static final String PLAY_STORE_URL =
             "https://play.google.com/store/apps/details?id=it.communikein.myunimib";
     private static final String PLAY_STORE_URI = "market://details?id=it.communikein.myunimib";

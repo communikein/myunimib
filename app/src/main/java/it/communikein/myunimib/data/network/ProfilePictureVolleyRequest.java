@@ -32,6 +32,8 @@ import javax.inject.Singleton;
 @Singleton
 public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
 
+    private final static String LOG_TAG = ProfilePictureVolleyRequest.class.getSimpleName();
+
     private final UnimibRepository mRepository;
 
     private RequestQueue mRequestQueue;
@@ -54,14 +56,14 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
     public Bitmap getBitmap(String url) {
         Bitmap match = cache.get(url);
         if (match != null)
-            Log.d(ProfilePictureRequest.class.getSimpleName(), "Found image in cache.");
+            Log.d(LOG_TAG, "Found image in cache.");
 
         return match;
     }
 
     @Override
     public void putBitmap(String url, Bitmap bitmap) {
-        Log.d(ProfilePictureRequest.class.getSimpleName(), "Saving bitmap in cache (" + url + ").");
+        Log.d(LOG_TAG, "Saving bitmap in cache (" + url + ").");
         cache.put(url, bitmap);
     }
 

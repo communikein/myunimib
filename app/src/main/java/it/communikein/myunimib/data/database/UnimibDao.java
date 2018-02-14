@@ -40,8 +40,11 @@ public interface UnimibDao {
     @Query("SELECT * FROM booklet WHERE fake = 1")
     LiveData<List<BookletEntry>> getObservableFakeBooklet();
 
-    @Query("SELECT * FROM booklet")
-    List<BookletEntry> getBooklet();
+    @Query("SELECT * FROM booklet WHERE fake = 0")
+    List<BookletEntry> getRealBooklet();
+
+    @Query("SELECT * FROM booklet WHERE fake = 1")
+    List<BookletEntry> getFakeBooklet();
 
     @Query("SELECT * FROM booklet WHERE adsceId = :adsceId")
     BookletEntry getBookletEntry(int adsceId);

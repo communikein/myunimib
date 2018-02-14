@@ -188,7 +188,7 @@ public class UnimibRepository {
             Log.d(LOG_TAG, "New booklet entry inserted.");
         }
         else if (newOnlineData != null) {
-            ArrayList<BookletEntry> oldExams = getCurrentBooklet();
+            ArrayList<BookletEntry> oldExams = getRealBooklet();
 
             if (oldExams != null) {
                 for (BookletEntry newEntry : newOnlineData) {
@@ -208,6 +208,7 @@ public class UnimibRepository {
 
                         /* If the booklet entry's data has been modified */
                         if (!newEntry.isIdentic(oldEntry)) {
+                            /* Update the DB entry */
                             mUnimibDao.updateBookletEntry(newEntry);
 
                             Log.d(LOG_TAG, "Booklet entry updated.");
@@ -353,10 +354,10 @@ public class UnimibRepository {
         return mUnimibDao.getObservableFakeBooklet();
     }
 
-    private ArrayList<BookletEntry> getCurrentBooklet() {
+    private ArrayList<BookletEntry> getRealBooklet() {
         initializeData();
 
-        return (ArrayList<BookletEntry>) mUnimibDao.getBooklet();
+        return (ArrayList<BookletEntry>) mUnimibDao.getRealBooklet();
     }
 
     public LiveData<Boolean> getBookletLoading() {

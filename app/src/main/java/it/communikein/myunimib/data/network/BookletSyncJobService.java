@@ -45,13 +45,9 @@ public class BookletSyncJobService extends JobService implements HasServiceInjec
      */
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        Log.d(LOG_TAG, "Scheduled booklet job started.");
-
         repository.fetchBooklet();
 
         jobFinished(jobParameters, false);
-
-        Log.d(LOG_TAG, "Scheduled booklet job finished.");
 
         return true;
     }

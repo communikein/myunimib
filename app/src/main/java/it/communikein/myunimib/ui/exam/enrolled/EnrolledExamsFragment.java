@@ -113,7 +113,6 @@ public class EnrolledExamsFragment extends Fragment implements
 
             mViewModel.getEnrolledExams().observe(this, list -> {
                 if (list != null) {
-                    Log.d(LOG_TAG, "Updating the enrolled exams list. " + list.size() + " elements.");
                     mExamsAdapter.setList((ArrayList<EnrolledExam>) list);
                 }
             });

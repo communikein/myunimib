@@ -41,7 +41,6 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        /* Inflate the layout for this fragment */
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_buildings_map, container, false);
 
         initMap(savedInstanceState);

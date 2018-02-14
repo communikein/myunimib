@@ -3,25 +3,20 @@ package it.communikein.myunimib.ui.graduation.projection;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.bumptech.glide.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +30,9 @@ import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.FragmentGraduationProjectionBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.ui.RecyclerItemTouchHelper;
-import it.communikein.myunimib.ui.exam.booklet.BookletAdapter;
 import it.communikein.myunimib.ui.exam.booklet.BookletFragment;
-import it.communikein.myunimib.ui.timetable.AddLessonActivity;
-import it.communikein.myunimib.ui.timetable.DayFragment;
-import it.communikein.myunimib.ui.timetable.LessonsListAdapter;
-import it.communikein.myunimib.ui.timetable.TimetableFragment;
 import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.viewmodel.GraduationProjectionViewModel;
-import it.communikein.myunimib.viewmodel.TimetableViewModel;
 import it.communikein.myunimib.viewmodel.factory.GraduationProjectionViewModelFactory;
 
 /**
@@ -164,7 +153,7 @@ public class GraduationProjectionFragment extends Fragment implements
 
             mViewModel.getCoursesNames().observe(this, dialog::setCoursesNames);
 
-            dialog.show(getChildFragmentManager(), "AddProjectionDialog");
+            dialog.show(getChildFragmentManager(), AddProjectionDialog.class.getSimpleName());
         });
     }
 
@@ -250,8 +239,8 @@ public class GraduationProjectionFragment extends Fragment implements
         mViewModel.deleteExamProjection(entry, () -> {
             // showing snack bar with Undo option
             Snackbar snackbar = Snackbar.make(mBinding.coordinatorLayout,
-                    name + " removed!", Snackbar.LENGTH_LONG);
-            snackbar.setAction("UNDO", view -> {
+                    getString(R.string.label_item_removed, name), Snackbar.LENGTH_LONG);
+            snackbar.setAction(R.string.action_undo, view -> {
                 // undo is selected, restore the deleted item
                 mViewModel.restoreExamProjection(entry,
                         () -> adapter.restoreItem(entry, position));
