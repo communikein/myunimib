@@ -123,5 +123,4 @@ public class EnrollLoader extends AsyncTaskLoader<Boolean> {
         return false;
     }
 
-
 }
