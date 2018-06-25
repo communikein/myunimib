@@ -23,7 +23,7 @@ public class TimetableViewModel extends ViewModel {
     }
 
     public User getUser() {
-        return mRepository.getUser();
+        return mRepository.getUser(null);
     }
 
     public LiveData<List<Lesson>> getTimetable(String day) {

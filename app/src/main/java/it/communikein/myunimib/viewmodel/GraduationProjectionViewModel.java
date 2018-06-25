@@ -1,6 +1,7 @@
 package it.communikein.myunimib.viewmodel;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import java.util.List;
@@ -20,12 +21,15 @@ public class GraduationProjectionViewModel extends ViewModel {
     private final UnimibRepository mRepository;
 
     private final LiveData<List<BookletEntry>> mData;
+    private MutableLiveData<User> mUser;
 
     @Inject
     public GraduationProjectionViewModel(UnimibRepository repository) {
         mRepository = repository;
 
         mData = mRepository.getObservableFakeExams();
+        mUser = new MutableLiveData<>();
+        mRepository.getUser((user -> mUser.postValue(user)));
     }
 
     public LiveData<List<BookletEntry>> getExams() {
@@ -45,8 +49,8 @@ public class GraduationProjectionViewModel extends ViewModel {
     }
 
 
-    public User getUser() {
-        return mRepository.getUser();
+    public LiveData<User> getUser() {
+        return mUser;
     }
 
     public LiveData<List<String>> getCoursesNames() {

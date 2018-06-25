@@ -36,11 +36,11 @@ public class EnrolledExamsListViewModel extends ViewModel {
     }
 
     public void refreshEnrolledExams() {
-        mRepository.startFetchEnrolledExamsService();
+        mRepository.fetchEnrolledExams();
     }
 
     public User getUser() {
-        return mRepository.getUser();
+        return mRepository.getUser(null);
     }
 
 }

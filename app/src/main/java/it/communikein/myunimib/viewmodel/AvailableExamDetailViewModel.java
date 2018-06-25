@@ -39,7 +39,7 @@ public class AvailableExamDetailViewModel extends ViewModel {
     }
 
     public User getUser() {
-        return mRepository.getUser();
+        return mRepository.getUser(null);
     }
 
 
@@ -50,10 +50,10 @@ public class AvailableExamDetailViewModel extends ViewModel {
     }
 
     public void refreshAvailableExams() {
-        mRepository.startFetchAvailableExamsService();
+        mRepository.fetchAvailableExams();
     }
 
     public void refreshEnrolledExams() {
-        mRepository.startFetchEnrolledExamsService();
+        mRepository.fetchEnrolledExams();
     }
 }

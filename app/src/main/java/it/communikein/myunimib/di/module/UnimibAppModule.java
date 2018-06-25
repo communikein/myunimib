@@ -2,6 +2,8 @@ package it.communikein.myunimib.di.module;
 
 import android.app.Application;
 import android.arch.persistence.room.Room;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import javax.inject.Singleton;
 
@@ -11,8 +13,14 @@ import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.UniversityUtils;
 import it.communikein.myunimib.data.UserHelper;
-import it.communikein.myunimib.data.database.UnimibDao;
+import it.communikein.myunimib.data.database.AvailableExamsDao;
+import it.communikein.myunimib.data.database.BookletDao;
+import it.communikein.myunimib.data.database.EnrolledExamsDao;
+import it.communikein.myunimib.data.database.FacultiesDao;
+import it.communikein.myunimib.data.database.LessonsDao;
 import it.communikein.myunimib.data.database.UnimibDatabase;
+import it.communikein.myunimib.data.database.UserDao;
+import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.utilities.NotificationHelper;
@@ -34,11 +42,16 @@ public class UnimibAppModule {
 
 
     @Singleton @Provides
-    UnimibRepository provideRepository(Application application, UnimibDao dao,
+    UnimibRepository provideRepository(Application application, UserDao userDao,
+                                       BookletDao bookletDao, AvailableExamsDao availableExamsDao,
+                                       EnrolledExamsDao enrolledExamsDao, LessonsDao lessonsDao,
+                                       FacultiesDao facultiesDao, SharedPreferences preferences,
                                        UnimibNetworkDataSource networkDataSource,
                                        UniversityUtils universityHelper, AppExecutors executors,
                                        UserHelper userHelper, NotificationHelper notificationHelper) {
-        return new UnimibRepository(application, dao, networkDataSource, universityHelper,
+        return new UnimibRepository(application, userDao,
+                bookletDao, availableExamsDao, enrolledExamsDao, lessonsDao, facultiesDao,
+                preferences, networkDataSource, universityHelper,
                 userHelper, executors, notificationHelper);
     }
 
@@ -56,8 +69,33 @@ public class UnimibAppModule {
     }
 
     @Singleton @Provides
-    UnimibDao provideDao(UnimibDatabase database) {
-        return database.unimibDao();
+    UserDao provideUserDao(UnimibDatabase database) {
+        return database.userDao();
+    }
+
+    @Singleton @Provides
+    BookletDao provideBookletDao(UnimibDatabase database) {
+        return database.bookletDao();
+    }
+
+    @Singleton @Provides
+    AvailableExamsDao provideAvailableExamsDao(UnimibDatabase database) {
+        return database.availableExamsDao();
+    }
+
+    @Singleton @Provides
+    EnrolledExamsDao provideEnrolledExamsDao(UnimibDatabase database) {
+        return database.enrolledExamsDao();
+    }
+
+    @Singleton @Provides
+    LessonsDao provideLessonsDao(UnimibDatabase database) {
+        return database.lessonsDao();
+    }
+
+    @Singleton @Provides
+    FacultiesDao provideFacultiesDao(UnimibDatabase database) {
+        return database.facultyDao();
     }
 
     @Singleton @Provides
@@ -79,6 +117,11 @@ public class UnimibAppModule {
     @Singleton @Provides
     UserHelper provideUserHelper(Application application) {
         return new UserHelper(application);
+    }
+
+    @Singleton @Provides
+    SharedPreferences provideSharedPreferences(Application application) {
+        return application.getSharedPreferences("myunimib", Context.MODE_PRIVATE);
     }
 
 }

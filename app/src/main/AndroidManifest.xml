@@ -122,19 +122,23 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <!-- This is required for immediate syncs -->
+        <receiver android:name=".ui.widget.CareerStatusWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_career_status_info" />
+        </receiver>
+
         <service
-            android:name=".data.network.BookletSyncIntentService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".data.network.ExamAvailableSyncIntentService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".data.network.ExamEnrolledSyncIntentService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:name=".ui.widget.WidgetUpdateService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="it.communikein.myunimib.ui.widget.WidgetUpdateService.update_app_widget_list"/>
+            </intent-filter>
+        </service>
 
         <!-- This is the Service declaration used in conjunction with FirebaseJobDispatcher -->
         <service

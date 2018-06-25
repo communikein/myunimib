@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1"
-    style="?android:attr/spinnerItemStyle"
-    android:padding="10dp"
-    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/textView"
+    android:padding="8dp"
+    tools:text="Prova"
+    android:gravity="center_vertical"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:ellipsize="marquee"/>
+    android:minHeight="48dp"
+    android:textSize="17sp"
+    android:textColor="@color/primary_text"
+    android:ellipsize="marquee" />

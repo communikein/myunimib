@@ -10,6 +10,7 @@ import android.util.SparseArray;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.Exam;
+import it.communikein.myunimib.data.model.Faculty;
 import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.data.model.User;
@@ -27,12 +28,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -82,9 +83,9 @@ public class S3Helper {
     }
 
     private static URL buildUrl(UserAuthentication user, String url, String query, boolean queryOperator) {
-        String url_string = url + "JSESSIONID=" + user.getSessionID();
+        String url_string = url + "JSESSIONID=" + user.getSessionId();
         if (user.isFacultyChosen())
-            url_string += "?stu_id=" + user.getSelectedFaculty();
+            url_string += "?stu_id=" + user.getSelectedFaculty().getCode();
         if (query != null) {
             if (queryOperator) url_string += "?";
             else url_string += "&";
@@ -174,8 +175,8 @@ public class S3Helper {
         con.setRequestProperty("Connection", "keep-alive");
         if (user.getAuthToken() != null)
             con.setRequestProperty("Authorization", "Basic " + user.getAuthToken());
-        if (user.getSessionID() != null)
-            con.setRequestProperty("Cookie", "JSESSIONID=" + user.getSessionID());
+        if (user.getSessionId() != null)
+            con.setRequestProperty("Cookie", "JSESSIONID=" + user.getSessionId());
         con.setConnectTimeout(5000);
         if (!get)
             con.setDoOutput(true);
@@ -187,7 +188,7 @@ public class S3Helper {
         String cookie = con.getHeaderField("Set-Cookie");
         String sessionID = parseSessionID(cookie);
         if (sessionID != null) {
-            user.setSessionID(sessionID);
+            user.setSessionId(sessionID);
             listener.onNewSessionID(sessionID);
             con = getPage(user, url, query, queryOperator, get, context, listener);
         }
@@ -237,8 +238,8 @@ public class S3Helper {
         User userData = (User) user;
         if (userData.isFake()) {
             userData.setMatricola("293640");
-            userData.setName("Pippo Pluto");
-            userData.setTotalCFU(42);
+            userData.setRealName("Pippo Pluto");
+            userData.setTotalCfu(42);
             userData.setAverageMark(24);
 
             return userData;
@@ -269,7 +270,7 @@ public class S3Helper {
             Element el = doc.select("div#sottotitolo-menu-principale").first();
 
             String name = el.text();
-            userData.setName(name);
+            userData.setRealName(name);
             Log.d("LOGIN_USER_DATA", "Name: " + name);
 
             Elements els = doc.select("div#gu-boxRiepilogoEsami dl.record-riga dd");
@@ -279,23 +280,20 @@ public class S3Helper {
             cfuTmp = cfuTmp.substring(0, cfuTmp.indexOf("/"));
             float averageMark = Float.parseFloat(averageTmp);
             int totalCfu = Integer.parseInt(cfuTmp);
-            userData.setTotalCFU(totalCfu);
+            userData.setTotalCfu(totalCfu);
             userData.setAverageMark(averageMark);
 
             Log.d("LOGIN_USER_DATA", "Average mark: " + averageTmp);
             Log.d("LOGIN_USER_DATA", "CFU: " + cfuTmp);
 
             return userData;
-        } catch (SocketTimeoutException e) {
-            throw e;
         } catch (IOException e){
-            Utils.saveBugReport(e, TAG);
-
+            Utils.saveBugReport(e, TAG, "S3Handler.downloadUserData");
             throw e;
         }
     }
 
-    public static SparseArray<String> hasMultiFaculty(UserAuthentication user, Document document) {
+    public static ArrayList<Faculty> hasMultiFaculty(UserAuthentication user, Document document) {
         if (user.isFake()) return downloadFacultiesList(user, null);
 
         Element el1 = document.select("#titolo-menu-principale").first();
@@ -307,15 +305,15 @@ public class S3Helper {
             return null;
     }
 
-    private static SparseArray<String> downloadFacultiesList(UserAuthentication user, Document document) {
-        SparseArray<String> courses = new SparseArray<>();
+    private static ArrayList<Faculty> downloadFacultiesList(UserAuthentication user, Document document) {
+        ArrayList<Faculty> faculties = new ArrayList<>();
 
         if (user.isFake()) {
-            courses.put(34829, "Faculty of IT");
-            courses.put(19347, "Faculty of Science");
-            courses.put(58240, "Faculty of Chemistry");
+            faculties.add(new Faculty("Faculty of IT", 34829, user.getUsername()));
+            faculties.add(new Faculty("Faculty of Science", 19347, user.getUsername()));
+            faculties.add(new Faculty("Faculty of Chemistry", 58240, user.getUsername()));
 
-            return courses;
+            return faculties;
         }
 
         Elements els = document.select("table#gu_table_sceltacarriera tbody tr");
@@ -327,11 +325,11 @@ public class S3Helper {
                 relativeUrl = relativeUrl.substring(relativeUrl.indexOf("?stu_id=") + 8);
                 int stu_id = Integer.parseInt(relativeUrl);
 
-                courses.put(stu_id, name);
+                faculties.add(new Faculty(name, stu_id, user.getUsername()));
             }
         }
 
-        return courses;
+        return faculties;
     }
 
     public static boolean downloadCertificate(UserAuthentication user, Exam exam, Context context,

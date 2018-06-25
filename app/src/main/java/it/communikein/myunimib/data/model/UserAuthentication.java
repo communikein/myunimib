@@ -1,18 +1,18 @@
 package it.communikein.myunimib.data.model;
 
-import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.SparseArray;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 
@@ -29,45 +29,45 @@ public class UserAuthentication {
     public static final String PREF_FAKE = "user_fake";
 
 
-    private static final int FACULTY_NOT_CHOSEN = -1;
-
     @PrimaryKey
     @NonNull
-    @ColumnInfo(name = "username")
-    private String mUsername;
-    @Ignore
-    private String mPassword;
-    @Ignore
-    private String mAuthToken;
-    @ColumnInfo(name = "sessionID")
-    private String mSessionID;
-    @ColumnInfo(name = "faculties")
-    private SparseArray<String> mFaculties;
-    @ColumnInfo(name = "selectedFaculty")
-    private int mSelectedFaculty;
-    @ColumnInfo(name = "fake")
-    private boolean mFake;
+    private String username;
 
-    public UserAuthentication(String username, String sessionID,
-                              SparseArray<String> faculties, int selectedFaculty,
-                              boolean fake) {
+    @Ignore // Stored in Account Manager
+    private String password;
+
+    @Ignore // Computed from username and password
+    private String authToken;
+
+    @Ignore // Stored in SharedPreferences
+    private String sessionId;
+
+    @Ignore
+    private ArrayList<Faculty> faculties;
+
+    @Ignore // Stored in SharedPreferences
+    private Faculty selectedFaculty;
+
+    private boolean fake;
+
+    public UserAuthentication(String username, boolean fake) {
         setUsername(username);
         setPassword("");
-        setAuthToken(username, "");
-        setSessionID(sessionID);
-        setFaculties(faculties);
-        setSelectedFaculty(selectedFaculty);
+        setAuthToken("", "");
+        setSessionId("");
+        setFaculties(new ArrayList<>());
+        setSelectedFaculty(null);
         setFake(fake);
     }
 
     @Ignore
     UserAuthentication(String username, String password, String sessionID,
-                       SparseArray<String> faculties, int selectedFaculty,
+                       ArrayList<Faculty> faculties, Faculty selectedFaculty,
                        boolean isFake) {
         setUsername(username);
         setPassword(password);
         setAuthToken(username, password);
-        setSessionID(sessionID);
+        setSessionId(sessionID);
         setFaculties(faculties);
         setSelectedFaculty(selectedFaculty);
         setFake(isFake);
@@ -75,115 +75,118 @@ public class UserAuthentication {
 
 
 
+    @NonNull
     public String getUsername() {
-        return mUsername;
+        return username;
     }
 
-    private void setUsername(String username) {
-        if (username != null) this.mUsername = username;
-        else this.mUsername = "";
+    public void setUsername(String username) {
+        if (username != null) this.username = username;
+        else this.username = "";
     }
 
+    @Ignore
     public String getPassword() {
-        return mPassword;
+        return password;
     }
 
-    private void setPassword(String password) {
+    @Ignore
+    public void setPassword(String password) {
         if (password != null) {
-            this.mPassword = password;
+            this.password = password;
             setAuthToken(getUsername(), password);
         }
-        else this.mPassword = "";
+        else this.password = "";
     }
 
+    @Ignore
     public String getAuthToken() {
-        return mAuthToken;
+        return authToken;
     }
 
+    @Ignore
     public void setAuthToken(String authToken) {
-        this.mAuthToken = authToken;
+        this.authToken = authToken;
     }
 
+    @Ignore
     public boolean isAuthTokenSet() {
         return !TextUtils.isEmpty(getAuthToken());
     }
 
     @Ignore
     private void setAuthToken(String username, String password) {
-        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) this.mAuthToken = null;
+        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) this.authToken = null;
 
         String authString = username + ":" + password;
         byte[] authEncBytes = Base64.encode(authString.getBytes(), Base64.NO_WRAP);
-        this.mAuthToken = new String(authEncBytes);
+        this.authToken = new String(authEncBytes);
     }
 
-    public String getSessionID() {
-        return mSessionID;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setSessionID(String sessionID) {
-        if (sessionID != null) this.mSessionID = sessionID;
-        else this.mSessionID = "";
+    public void setSessionId(String sessionID) {
+        if (sessionID != null) this.sessionId = sessionID;
+        else this.sessionId = "";
     }
 
-    public SparseArray<String> getFaculties() {
-        return mFaculties;
+    @Ignore
+    public ArrayList<Faculty> getFaculties() {
+        return faculties;
     }
 
-    public void setFaculties(SparseArray<String> faculties) {
-        this.mFaculties = faculties;
+    @Ignore
+    public void setFaculties(ArrayList<Faculty> faculties) {
+        this.faculties = faculties;
+    }
+
+    @Ignore
+    public void setFacultiesFromJson(String json) {
+        Type collectionType = new TypeToken<ArrayList<Faculty>>(){}.getType();
+        this.faculties = new Gson().fromJson(json, collectionType);
     }
 
     public void setFake(boolean fake) {
-        this.mFake = fake;
+        this.fake = fake;
     }
 
     public boolean isFake() {
-        return this.mFake;
+        return this.fake;
     }
 
-
-
-
-    public JSONObject getFacultiesJSON() {
-        JSONObject obj = new JSONObject();
-        JSONArray keys_array = getFacultiesKeysJSON();
-        JSONArray vals_array = getFacultiesValuesJSON();
-
-        try {
-            obj.put(PREF_FACULTIES_KEYS, keys_array);
-            obj.put(PREF_FACULTIES_VALUES, vals_array);
-        } catch (JSONException e) {
-            obj = new JSONObject();
-        }
-
-        return obj;
+    public void setSelectedFaculty(Faculty selectedFaculty) {
+        this.selectedFaculty = selectedFaculty;
     }
 
-    private JSONArray getFacultiesKeysJSON() {
-        JSONArray array = new JSONArray();
+    public Faculty getSelectedFaculty() { return this.selectedFaculty; }
 
-        if (getFaculties()!= null) for (int i=0; i<getFaculties().size(); i++)
-            array.put(getFaculties().keyAt(i));
 
-        return array;
+
+    @Ignore
+    public String getFacultiesJSON() {
+        return new Gson().toJson(getFaculties());
     }
 
-    public String getFacultiesKeys() {
-        return getFacultiesKeysJSON().toString();
+    @Ignore
+    private String getFacultiesCodes() {
+        ArrayList<Integer> result = new ArrayList<>();
+
+        if (getFaculties()!= null) for (Faculty faculty : getFaculties())
+            result.add(faculty.getCode());
+
+        return new Gson().toJson(result);
     }
 
-    private JSONArray getFacultiesValuesJSON() {
-        JSONArray array = new JSONArray();
+    @Ignore
+    private String getFacultiesValues() {
+        ArrayList<String> result = new ArrayList<>();
 
-        if (getFaculties()!= null) for (int i=0; i<getFaculties().size(); i++)
-            array.put(getFaculties().valueAt(i));
+        if (getFaculties()!= null) for (Faculty faculty : getFaculties())
+            result.add(faculty.getName());
 
-        return array;
-    }
-
-    public String getFacultiesValues() {
-        return getFacultiesValuesJSON().toString();
+        return new Gson().toJson(result);
     }
 
     @Ignore
@@ -192,53 +195,20 @@ public class UserAuthentication {
     }
 
     @Ignore
-    public void setFaculties(JSONObject obj) {
-        ArrayList<Integer> keys = new ArrayList<>();
-        ArrayList<String> vals = new ArrayList<>();
-
-        try {
-            if (obj.has(PREF_FACULTIES_KEYS)) {
-                JSONArray keys_array = obj.getJSONArray(PREF_FACULTIES_KEYS);
-                for (int i=0; i<keys_array.length(); i++)
-                    keys.add(keys_array.getInt(i));
-            }
-            if (obj.has(PREF_FACULTIES_VALUES)) {
-                JSONArray vals_array = obj.getJSONArray(PREF_FACULTIES_VALUES);
-                for (int i=0; i<vals_array.length(); i++)
-                    vals.add(vals_array.getString(i));
-            }
-
-            SparseArray<String> result = new SparseArray<>();
-            for (int i=0; i<keys.size(); i++)
-                result.put(keys.get(i), vals.get(i));
-
-            setFaculties(result);
-
-        } catch (JSONException e) {
-            setFaculties(new SparseArray<>());
-        }
+    public void setFaculties(String source) {
+        Type collectionType = new TypeToken<ArrayList<Faculty>>(){}.getType();
+        this.faculties = new Gson().fromJson(source, collectionType);
     }
 
     @Ignore
     public String getSelectedFacultyUrl() {
-        if (mSelectedFaculty != -1)
+        if (isFacultyChosen())
             return S3Helper.URL_CAREER_BASE +
-                    "jsessionid=" + getSessionID() +
-                    "?stu_id=" + mSelectedFaculty;
+                    "jsessionid=" + getSessionId() +
+                    "?stu_id=" + selectedFaculty.getCode();
         else
             return null;
     }
-
-    @Ignore
-    public String getSelectedFacultyName() {
-        return getFaculties().get(mSelectedFaculty);
-    }
-
-    public void setSelectedFaculty(int selectedFaculty) {
-        this.mSelectedFaculty = selectedFaculty;
-    }
-
-    public int getSelectedFaculty() { return this.mSelectedFaculty; }
 
     @Ignore
     public boolean shouldChooseFaculty() { return !isFacultyChosen() && hasMultiFaculty(); }
@@ -253,7 +223,7 @@ public class UserAuthentication {
 
     @Ignore
     public boolean isFacultyChosen() {
-        return mSelectedFaculty != FACULTY_NOT_CHOSEN;
+        return selectedFaculty != null;
     }
 
 }

@@ -102,6 +102,9 @@ public class MainActivity extends AppCompatActivity implements
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+        mBinding.startupProgressbar.show();
+        mBinding.tabContainer.setVisibility(View.INVISIBLE);
+
         mViewModel = ViewModelProviders
                 .of(this, viewModelFactory)
                 .get(MainActivityViewModel.class);
@@ -109,6 +112,13 @@ public class MainActivity extends AppCompatActivity implements
         parseIntent();
         restoreInstanceState(savedInstanceState);
         initUI(savedInstanceState);
+
+        mBinding.startupProgressbar.hide();
+        mBinding.tabContainer.setVisibility(View.VISIBLE);
+    }
+
+    public MainActivityViewModel getViewModel() {
+        return mViewModel;
     }
 
     @Override
@@ -145,15 +155,6 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(mBinding.toolbar);
 
         initDrawerNavigation(savedInstanceState);
-
-        Window w = getWindow();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
     }
 
     private void initProgressDialog() {
@@ -220,10 +221,12 @@ public class MainActivity extends AppCompatActivity implements
         userNameTextView.setVisibility(View.VISIBLE);
         userEmailTextView.setVisibility(View.VISIBLE);
 
-        User user = mViewModel.getUser();
-
-        userNameTextView.setText(user.getName());
-        userEmailTextView.setText(user.getUniversityMail());
+        mViewModel.getUser().observe(this, (user) -> {
+            if (user != null) {
+                userNameTextView.setText(user.getRealName());
+                userEmailTextView.setText(user.getUniversityMail());
+            }
+        });
 
         mViewModel.loadProfilePicture(userImageView);
     }

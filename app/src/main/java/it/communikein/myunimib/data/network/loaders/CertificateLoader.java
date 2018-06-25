@@ -42,7 +42,7 @@ public class CertificateLoader extends AsyncTaskLoader<Cursor> {
         } catch (SocketTimeoutException e) {
             return null;
         } catch (IOException e) {
-            Utils.saveBugReport(e, TAG);
+            Utils.saveBugReport(e, TAG, "CertificateLoader.loadInBackground");
         }
 
         return null;

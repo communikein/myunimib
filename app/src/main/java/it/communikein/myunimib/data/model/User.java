@@ -1,10 +1,10 @@
 package it.communikein.myunimib.data.model;
 
-import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.support.annotation.NonNull;
-import android.util.SparseArray;
+
+import java.util.ArrayList;
 
 import javax.inject.Singleton;
 
@@ -25,82 +25,89 @@ public class User extends UserAuthentication {
     public static final float ERROR_AVERAGE_MARK = -1;
     public static final int ERROR_TOTAL_CFU = -1;
 
-    @ColumnInfo(name = "name")
-    private String mName;
-    @ColumnInfo(name = "matricola")
-    private String mMatricola;
-    @ColumnInfo(name = "averageMark")
-    private float mAverageMark;
-    @ColumnInfo(name = "totalCFU")
-    private int mTotalCFU;
+    private String realName;
+    private String matricola;
+    private float averageMark;
+    private int totalCfu;
     @Ignore
     private Object mTag;
 
     @Ignore
     public User(String username, String password){
-        super(username, password, null, null, -1, false);
+        super(username, password, null, null, null, false);
 
         setMatricola(null);
-        setName(null);
+        setRealName(null);
         setAverageMark(ERROR_AVERAGE_MARK);
-        setTotalCFU(ERROR_TOTAL_CFU);
+        setTotalCfu(ERROR_TOTAL_CFU);
     }
 
     @Ignore
-    public User(@NonNull String username, String password, String name, float averageMark,
-                int totalCFU, String matricola) {
-        super(username, password, null, null, -1, false);
+    public User(@NonNull String username, String password, String realName, float averageMark,
+                int totalCfu, String matricola) {
+        super(username, password, null, null, null, false);
 
-        setName(name);
+        setRealName(realName);
         setMatricola(matricola);
-        setTotalCFU(totalCFU);
+        setTotalCfu(totalCfu);
         setAverageMark(averageMark);
     }
 
-    public User(@NonNull String username, String sessionID, SparseArray<String> faculties,
-                int selectedFaculty, String name, String matricola, float averageMark,
-                int totalCFU, boolean fake) {
-        super(username, null, sessionID, faculties, selectedFaculty, fake);
+    @Ignore
+    public User(@NonNull String username, String sessionId, ArrayList<Faculty> faculties,
+                Faculty selectedFaculty, String realName, String matricola, float averageMark,
+                int totalCfu, boolean fake) {
+        super(username, null, sessionId, faculties, selectedFaculty, fake);
 
-        setName(name);
+        setRealName(realName);
         setMatricola(matricola);
         setAverageMark(averageMark);
-        setTotalCFU(totalCFU);
+        setTotalCfu(totalCfu);
+    }
+
+    public User(@NonNull String username, String realName, String matricola, float averageMark,
+                int totalCfu, boolean fake) {
+        super(username, null, "", new ArrayList<>(), null, fake);
+
+        setRealName(realName);
+        setMatricola(matricola);
+        setAverageMark(averageMark);
+        setTotalCfu(totalCfu);
     }
 
 
     public float getAverageMark() {
-        return mAverageMark;
+        return averageMark;
     }
 
     public void setAverageMark(float averageMark) {
-        this.mAverageMark = averageMark;
+        this.averageMark = averageMark;
     }
 
-    public int getTotalCFU() {
-        return mTotalCFU;
+    public int getTotalCfu() {
+        return totalCfu;
     }
 
-    public void setTotalCFU(int totalCFU) {
-        this.mTotalCFU = totalCFU;
+    public void setTotalCfu(int totalCFU) {
+        this.totalCfu = totalCFU;
     }
 
-    public String getName() {
-        return mName;
+    public String getRealName() {
+        return realName;
     }
 
-    public void setName(String name) {
-        if (name != null) this.mName = name;
-        else this.mName = "";
+    public void setRealName(String name) {
+        if (name != null) this.realName = name;
+        else this.realName = "";
     }
 
     public String getMatricola() {
-        return mMatricola;
+        return matricola;
     }
 
     public void setMatricola(String matricola) {
-        if (matricola != null) this.mMatricola = matricola;
-        else this.mMatricola = "";
+        if (matricola != null) this.matricola = matricola;
+        else this.matricola = "";
     }
 
     @Ignore

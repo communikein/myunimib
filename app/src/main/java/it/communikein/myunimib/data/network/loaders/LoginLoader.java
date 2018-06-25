@@ -17,11 +17,13 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.UserHelper;
+import it.communikein.myunimib.data.model.Faculty;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
@@ -73,12 +75,9 @@ public class LoginLoader extends AsyncTaskLoader<User> {
             String facultiesString = result.getString(User.PREF_FACULTIES);
 
             if (sessionId != null)
-                mUser.setSessionID(sessionId);
-            if (facultiesString != null) {
-                JSONObject facultiesJson = new JSONObject(facultiesString);
-
-                mUser.setFaculties(facultiesJson);
-            }
+                mUser.setSessionId(sessionId);
+            if (facultiesString != null)
+                mUser.setFacultiesFromJson(facultiesString);
 
             if (loggedIn == ERROR_FACULTY_TO_CHOOSE) {
                 createAccount(mUser, context);
@@ -98,9 +97,10 @@ public class LoginLoader extends AsyncTaskLoader<User> {
             }
         } catch (SocketTimeoutException e){
             loggedIn = ERROR_CONNECTION_TIMEOUT;
+            Utils.saveBugReport(e, TAG, "LoginLoader.loadInBackground");
         } catch (Exception e) {
             loggedIn = ERROR_GENERIC;
-            Utils.saveBugReport(e, TAG);
+            Utils.saveBugReport(e, TAG, "LoginLoader.loadInBackground");
         }
 
         mUser.setTag(loggedIn);
@@ -156,7 +156,7 @@ public class LoginLoader extends AsyncTaskLoader<User> {
                     if (resp != null && resp.getHeaderField("Set-Cookie") != null) {
                         /* Update the user's session ID */
                         String jsessionid = resp.getHeaderField("Set-Cookie");
-                        user.setSessionID(jsessionid);
+                        user.setSessionId(jsessionid);
 
                         result.putString(User.PREF_SESSION_ID, jsessionid);
                         //user = UserHelper.updateSessionId(user, jsessionid, context);
@@ -170,7 +170,7 @@ public class LoginLoader extends AsyncTaskLoader<User> {
                         else
                             respCode = ERROR_RESPONSE_NULL;
                     }
-                    Log.d(TAG, "SESSION ID = " + user.getSessionID());
+                    Log.d(TAG, "SESSION ID = " + user.getSessionId());
                     Log.d(TAG, "AUTH TOKEN = " + user.getAuthToken());
 
                     /* Get and parse the HTML from the response */
@@ -230,7 +230,7 @@ public class LoginLoader extends AsyncTaskLoader<User> {
                          */
                         else {
                             /* Try to get the user list of faculties */
-                            SparseArray<String> faculties = S3Helper.hasMultiFaculty(user, document);
+                            ArrayList<Faculty> faculties = S3Helper.hasMultiFaculty(user, document);
 
                             /* If the user has only one faculty */
                             if (faculties == null) {
@@ -241,12 +241,12 @@ public class LoginLoader extends AsyncTaskLoader<User> {
                             /* If the user has multiple faculties */
                             else {
                                 Log.d(TAG, "Multiple faculties found.");
-                                for (int i=0; i<faculties.size(); i++)
-                                    Log.d(TAG, "Faculty: " + faculties.valueAt(i));
+                                for (Faculty faculty : faculties)
+                                    Log.d(TAG, "Faculty: " + faculty.getName());
 
                                 /* Set the user's faculties and save it. */
                                 user.setFaculties(faculties);
-                                result.putString(User.PREF_FACULTIES, user.getFacultiesJSON().toString());
+                                result.putString(User.PREF_FACULTIES, Faculty.toJson(faculties));
 
                                 ris = ERROR_FACULTY_TO_CHOOSE;
                             }

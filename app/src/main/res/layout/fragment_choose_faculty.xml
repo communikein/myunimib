@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/faculty_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="true">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/window_padding_16"
+            android:paddingEnd="@dimen/window_padding_16"
+            android:paddingTop="@dimen/window_padding_32"
+            android:paddingBottom="@dimen/window_padding_16">
+
+            <TextView
+                android:id="@+id/coursesLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/choose_faculty"
+                android:textSize="17sp"/>
+
+            <Spinner
+                android:id="@+id/coursesSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/faculties_spinner_height"
+                android:layout_marginTop="@dimen/window_padding_8"
+                app:layout_constraintEnd_toEndOf="@+id/coursesLabel"
+                app:layout_constraintStart_toStartOf="@+id/coursesLabel"
+                app:layout_constraintTop_toBottomOf="@id/coursesLabel"/>
+
+            <Button
+                android:id="@+id/dialogButtonOK"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/action_confirm"
+                android:layout_marginTop="@dimen/window_padding_16"
+                app:layout_constraintEnd_toEndOf="@+id/coursesSpinner"
+                app:layout_constraintStart_toStartOf="@+id/coursesSpinner"
+                app:layout_constraintTop_toBottomOf="@id/coursesSpinner"
+                android:theme="@style/MyButton"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
+
+</layout>

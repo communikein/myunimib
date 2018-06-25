@@ -46,14 +46,14 @@ public class UserDataLoader extends AsyncTaskLoader<User> {
             Log.d(TAG, "Downloading user data");
 
             user = S3Helper.downloadUserData(user, context, userHelper::updateSessionId);
-            userHelper.saveUser(user);
 
             loggedIn = OK_UPDATED;
         } catch (SocketTimeoutException e){
             loggedIn = ERROR_CONNECTION_TIMEOUT;
+            Utils.saveBugReport(e, TAG, "UserDataLoader.loadInBackground");
         } catch (IOException e) {
             loggedIn = ERROR_GENERIC;
-            Utils.saveBugReport(e, TAG);
+            Utils.saveBugReport(e, TAG, "UserDataLoader.loadInBackground");
         }
 
         user.setTag(loggedIn);

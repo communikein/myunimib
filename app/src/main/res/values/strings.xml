@@ -41,7 +41,7 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="label_do_fake_login">Do fake login</string>
-    <string name="terms_and_conditions">I accept this service\'s Terms and Conditions.</string>
+    <string name="terms_and_conditions">By proceeding you accept this service\'s Terms and Conditions.</string>
     <integer name="start_terms_and_conditions">24</integer>
     <integer name="end_terms_and_conditions">44</integer>
 
@@ -256,5 +256,12 @@
     <string name="label_unenrollment_confirmed">Un-enrollment confirmed.</string>
     <string name="action_undo">Undo</string>
     <string name="label_item_removed">%1$s removed!</string>
+    <string name="student_summary_title">Career summary</string>
+    <string name="action_guest">Guest</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="prompt_name">Name</string>
+    <string name="prompt_email">Email</string>
+    <string name="fake_email">elia.maracani@gmail.com</string>
+    <string name="personal_data_label">Personal Data</string>
 
 </resources>

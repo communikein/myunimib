@@ -52,7 +52,7 @@ public class EnrolledExamDetailViewModel extends ViewModel {
 
 
     public User getUser() {
-        return mRepository.getUser();
+        return mRepository.getUser(null);
     }
 
 }

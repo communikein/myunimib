@@ -115,9 +115,10 @@ public class EnrollLoader extends AsyncTaskLoader<Boolean> {
 
         } catch (SocketTimeoutException e) {
             mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_GENERAL);
+            Utils.saveBugReport(e, TAG, "EnrollLoader.loadInBackground");
         } catch (IOException e) {
             mEnrollUpdatesListener.onEnrollmentUpdate(STATUS_ERROR_GENERAL);
-            Utils.saveBugReport(e, TAG);
+            Utils.saveBugReport(e, TAG, "EnrollLoader.loadInBackground");
         }
 
         return false;

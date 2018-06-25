@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -14,15 +15,22 @@ import javax.inject.Singleton;
 
 import it.communikein.myunimib.AppExecutors;
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.database.AvailableExamsDao;
+import it.communikein.myunimib.data.database.BookletDao;
+import it.communikein.myunimib.data.database.EnrolledExamsDao;
+import it.communikein.myunimib.data.database.FacultiesDao;
+import it.communikein.myunimib.data.database.LessonsDao;
+import it.communikein.myunimib.data.database.UserDao;
 import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.BookletEntry;
 import it.communikein.myunimib.data.model.Building;
 import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.Exam;
 import it.communikein.myunimib.data.model.ExamID;
-import it.communikein.myunimib.data.database.UnimibDao;
+import it.communikein.myunimib.data.model.Faculty;
 import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
+import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.data.network.loaders.CertificateLoader;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
@@ -42,7 +50,15 @@ public class UnimibRepository {
     private static final String LOG_TAG = UnimibRepository.class.getSimpleName();
 
     private final Context mContext;
-    private final UnimibDao mUnimibDao;
+
+    private final UserDao mUserDao;
+    private final BookletDao mBookletDao;
+    private final AvailableExamsDao mAvailableExamsDao;
+    private final EnrolledExamsDao mEnrolledExamsDao;
+    private final LessonsDao mLessonsDao;
+    private final FacultiesDao mFacultiesDao;
+
+    private final SharedPreferences mSharedPreferences;
     private final UnimibNetworkDataSource mUnimibNetworkDataSource;
     private final UniversityUtils mUniversityHelper;
     private final UserHelper mUserHelper;
@@ -63,12 +79,23 @@ public class UnimibRepository {
 
 
     @Inject
-    public UnimibRepository(Context application, UnimibDao unimibDao,
+    public UnimibRepository(Context application, UserDao userDao,
+                            BookletDao bookletDao, AvailableExamsDao availableExamsDao,
+                            EnrolledExamsDao enrolledExamsDao, LessonsDao lessonsDao,
+                            FacultiesDao facultiesDao, SharedPreferences preferences,
                             UnimibNetworkDataSource unimibNetworkDataSource,
                             UniversityUtils universityHelper, UserHelper userHelper,
                             AppExecutors executors, NotificationHelper notificationHelper) {
         mContext = application;
-        mUnimibDao = unimibDao;
+
+        mUserDao = userDao;
+        mBookletDao = bookletDao;
+        mAvailableExamsDao = availableExamsDao;
+        mEnrolledExamsDao = enrolledExamsDao;
+        mLessonsDao = lessonsDao;
+        mFacultiesDao = facultiesDao;
+
+        mSharedPreferences = preferences;
         mUnimibNetworkDataSource = unimibNetworkDataSource;
         mUniversityHelper = universityHelper;
         mUserHelper = userHelper;
@@ -173,16 +200,16 @@ public class UnimibRepository {
         mUnimibNetworkDataSource.scheduleRecurringFetchEnrolledExamsSync();
 
         mExecutors.diskIO().execute(() ->{
-            startFetchBookletService();
-            startFetchAvailableExamsService();
-            startFetchEnrolledExamsService();
+            fetchBooklet();
+            fetchAvailableExams();
+            fetchEnrolledExams();
         });
     }
 
     private void handleBookletReceived(ArrayList<BookletEntry> newOnlineData) {
         int changes = 0;
         if (isBookletEmpty() && newOnlineData != null) {
-            mUnimibDao.bulkInsertBooklet(newOnlineData);
+            mBookletDao.add(newOnlineData);
             changes = newOnlineData.size();
 
             Log.d(LOG_TAG, "New booklet entry inserted.");
@@ -196,7 +223,7 @@ public class UnimibRepository {
 
                     /* If there is a new booklet entry */
                     if (oldEntry == null) {
-                        mUnimibDao.addBookletEntry(newEntry);
+                        mBookletDao.add(newEntry);
 
                         Log.d(LOG_TAG, "New booklet entry inserted.");
                         changes++;
@@ -209,7 +236,7 @@ public class UnimibRepository {
                         /* If the booklet entry's data has been modified */
                         if (!newEntry.isIdentic(oldEntry)) {
                             /* Update the DB entry */
-                            mUnimibDao.updateBookletEntry(newEntry);
+                            mBookletDao.update(newEntry);
 
                             Log.d(LOG_TAG, "Booklet entry updated.");
                             changes++;
@@ -233,7 +260,7 @@ public class UnimibRepository {
     private void handleAvailableExamsReceived(ArrayList<AvailableExam> newOnlineData) {
         int changes = 0;
         if (isAvailableExamsEmpty() && newOnlineData != null) {
-            mUnimibDao.bulkInsertAvailableExams(newOnlineData);
+            mAvailableExamsDao.add(newOnlineData);
             changes = newOnlineData.size();
 
             Log.d(LOG_TAG, "New available exams inserted.");
@@ -247,7 +274,7 @@ public class UnimibRepository {
 
                     /* If there is a new available exam */
                     if (oldEntry == null) {
-                        mUnimibDao.addAvailableExam(newEntry);
+                        mAvailableExamsDao.add(newEntry);
 
                         Log.d(LOG_TAG, "New available exam inserted.");
                         changes++;
@@ -259,7 +286,7 @@ public class UnimibRepository {
 
                         /* If the available exam's data has been modified */
                         if (!newEntry.isIdentic(oldEntry)) {
-                            mUnimibDao.updateAvailableExam(newEntry);
+                            mAvailableExamsDao.update(newEntry);
 
                             Log.d(LOG_TAG, "Available exam updated.");
                             changes++;
@@ -283,7 +310,7 @@ public class UnimibRepository {
     private void handleEnrolledExamsReceived(ArrayList<EnrolledExam> newOnlineData) {
         int changes = 0;
         if (isEnrolledExamsEmpty() && newOnlineData != null) {
-            mUnimibDao.bulkInsertEnrolledExams(newOnlineData);
+            mEnrolledExamsDao.add(newOnlineData);
             changes = newOnlineData.size();
 
             Log.d(LOG_TAG, "New enrolled exams inserted.");
@@ -297,7 +324,7 @@ public class UnimibRepository {
 
                     /* If there is a new enrolled exam */
                     if (oldEntry == null) {
-                        mUnimibDao.addEnrolledExam(newEntry);
+                        mEnrolledExamsDao.add(newEntry);
 
                         Log.d(LOG_TAG, "New enrolled exam inserted.");
                         changes++;
@@ -309,7 +336,7 @@ public class UnimibRepository {
 
                         /* If the enrolled exam's data has been modified */
                         if (!newEntry.isIdentic(oldEntry)) {
-                            mUnimibDao.updateEnrolledExam(newEntry);
+                            mEnrolledExamsDao.update(newEntry);
 
                             Log.d(LOG_TAG, "Enrolled exam updated.");
                             changes++;
@@ -339,7 +366,7 @@ public class UnimibRepository {
 
     public void addBookletEntry(BookletEntry entry, GraduationProjectionFragment.AddProjectionListener listener) {
         mExecutors.diskIO().execute(() -> {
-            mUnimibDao.addBookletEntry(entry);
+            mBookletDao.add(entry);
             listener.onProjectionAddComplete();
         });
     }
@@ -347,17 +374,17 @@ public class UnimibRepository {
     public LiveData<List<BookletEntry>> getObservableCurrentBooklet() {
         initializeData();
 
-        return mUnimibDao.getObservableBooklet();
+        return mBookletDao.getObservableBooklet();
     }
 
     public LiveData<List<BookletEntry>> getObservableFakeExams() {
-        return mUnimibDao.getObservableFakeBooklet();
+        return mBookletDao.getObservableFakeBooklet();
     }
 
     private ArrayList<BookletEntry> getRealBooklet() {
         initializeData();
 
-        return (ArrayList<BookletEntry>) mUnimibDao.getRealBooklet();
+        return (ArrayList<BookletEntry>) mBookletDao.getRealBooklet();
     }
 
     public LiveData<Boolean> getBookletLoading() {
@@ -367,39 +394,34 @@ public class UnimibRepository {
     private BookletEntry getBookletEntry(int adsceId) {
         initializeData();
 
-        return mUnimibDao.getBookletEntry(adsceId);
+        return mBookletDao.getBookletEntry(adsceId);
     }
 
     private boolean isBookletEmpty() {
-        return mUnimibDao.getBookletSize() == 0;
+        return mBookletDao.getBookletSize() == 0;
     }
 
     private void deleteBooklet() {
-        mUnimibDao.deleteBooklet();
+        mBookletDao.delete();
     }
 
     public void deleteBookletEntry(BookletEntry entry, GraduationProjectionFragment.DeleteProjectionListener listener) {
         mExecutors.diskIO().execute(() -> {
-            mUnimibDao.deleteBookletEntry(entry.getId());
+            mBookletDao.delete(entry.getId());
             listener.onProjectionDeleteComplete();
         });
     }
 
     public void deleteBookletEntry(BookletEntry entry) {
-        mUnimibDao.deleteBookletEntry(entry.getId());
+        mBookletDao.delete(entry.getId());
     }
 
     private void deleteBookletEntries(ArrayList<BookletEntry> exams) {
-        for (BookletEntry exam : exams)
-            deleteBookletEntry(exam);
-    }
-
-    public void startFetchBookletService() {
-        mUnimibNetworkDataSource.startFetchBookletService();
+        mBookletDao.delete(exams);
     }
 
     public void fetchBooklet() {
-        mUnimibNetworkDataSource.fetchBooklet(getUser(),
+        mUnimibNetworkDataSource.fetchBooklet(getUserAuth(),
                 sessionID -> mExecutors.diskIO().execute(() -> updateUserSessionId(sessionID)));
     }
 
@@ -412,13 +434,13 @@ public class UnimibRepository {
     public LiveData<List<AvailableExam>> getObservableCurrentAvailableExams() {
         initializeData();
 
-        return mUnimibDao.getObservableAvailableExams();
+        return mAvailableExamsDao.getObservableAvailableExams();
     }
 
     private ArrayList<AvailableExam> getCurrentAvailableExams() {
         initializeData();
 
-        return (ArrayList<AvailableExam>) mUnimibDao.getAvailableExams();
+        return (ArrayList<AvailableExam>) mAvailableExamsDao.getAvailableExams();
     }
 
     public LiveData<Boolean> getAvailableExamsLoading() {
@@ -428,42 +450,38 @@ public class UnimibRepository {
     public LiveData<AvailableExam> getObservableAvailableExam(ExamID examID) {
         initializeData();
 
-        return mUnimibDao.getObservableAvailableExam(examID.getAdsceId(), examID.getAppId(),
+        return mAvailableExamsDao.getObservableAvailableExam(examID.getAdsceId(), examID.getAppId(),
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
     private AvailableExam getAvailableExam(ExamID examID) {
         initializeData();
 
-        return mUnimibDao.getAvailableExam(examID.getAdsceId(), examID.getAppId(),
+        return mAvailableExamsDao.getAvailableExam(examID.getAdsceId(), examID.getAppId(),
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
     private boolean isAvailableExamsEmpty() {
-        return mUnimibDao.getAvailableExamsSize() == 0;
+        return mAvailableExamsDao.getAvailableExamsSize() == 0;
     }
 
     private void deleteAvailableExams() {
-        mUnimibDao.deleteAvailableExams();
+        mAvailableExamsDao.delete();
     }
 
     private void deleteAvailableExam(ExamID examId) {
-        mUnimibDao.deleteAvailableExam(examId.getAdsceId(), examId.getAppId(),
+        mAvailableExamsDao.delete(examId.getAdsceId(), examId.getAppId(),
                 examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
 
     private void deleteAvailableExams(ArrayList<AvailableExam> exams) {
-        for (AvailableExam exam : exams)
-            deleteAvailableExam(exam);
+        mAvailableExamsDao.delete(exams);
     }
 
 
-    public void startFetchAvailableExamsService() {
-        mUnimibNetworkDataSource.startFetchAvailableExamsService();
-    }
 
     public void fetchAvailableExams() {
-        mUnimibNetworkDataSource.fetchAvailableExams(getUser(),
+        mUnimibNetworkDataSource.fetchAvailableExams(getUserAuth(),
                 sessionID -> mExecutors.diskIO().execute(() -> updateUserSessionId(sessionID)));
     }
 
@@ -472,8 +490,8 @@ public class UnimibRepository {
         return mUnimibNetworkDataSource.enrollExam(exam, activity,
                 (/*Enrollment complete*/) -> {
                     mExecutors.diskIO().execute(() -> deleteAvailableExam(exam));
-                    startFetchEnrolledExamsService();
-                    startFetchAvailableExamsService();
+                    fetchEnrolledExams();
+                    fetchAvailableExams();
                 },
                 enrollUpdatesListener);
     }
@@ -488,13 +506,13 @@ public class UnimibRepository {
     public LiveData<List<EnrolledExam>> getObservableCurrentEnrolledExams() {
         initializeData();
 
-        return mUnimibDao.getObservableEnrolledExams();
+        return mEnrolledExamsDao.getObservableEnrolledExams();
     }
 
     private ArrayList<EnrolledExam> getCurrentEnrolledExams() {
         initializeData();
 
-        return (ArrayList<EnrolledExam>) mUnimibDao.getEnrolledExams();
+        return (ArrayList<EnrolledExam>) mEnrolledExamsDao.getEnrolledExams();
     }
 
     public LiveData<Boolean> getEnrolledExamsLoading() {
@@ -504,42 +522,38 @@ public class UnimibRepository {
     public LiveData<EnrolledExam> getObservableEnrolledExam(ExamID examID) {
         initializeData();
 
-        return mUnimibDao.getObservableEnrolledExam(examID.getAdsceId(), examID.getAppId(),
+        return mEnrolledExamsDao.getObservableEnrolledExam(examID.getAdsceId(), examID.getAppId(),
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
     private EnrolledExam getEnrolledExam(ExamID examID) {
         initializeData();
 
-        return mUnimibDao.getEnrolledExam(examID.getAdsceId(), examID.getAppId(),
+        return mEnrolledExamsDao.getEnrolledExam(examID.getAdsceId(), examID.getAppId(),
                 examID.getAttDidEsaId(), examID.getCdsEsaId());
     }
 
     private boolean isEnrolledExamsEmpty() {
-        return mUnimibDao.getEnrolledExamsSize() == 0;
+        return mEnrolledExamsDao.getEnrolledExamsSize() == 0;
     }
 
     private void deleteEnrolledExams() {
-        mUnimibDao.deleteEnrolledExams();
+        mEnrolledExamsDao.delete();
     }
 
     private void deleteEnrolledExam(ExamID examId) {
-        mUnimibDao.deleteAvailableExam(examId.getAdsceId(), examId.getAppId(),
+        mEnrolledExamsDao.delete(examId.getAdsceId(), examId.getAppId(),
                 examId.getAttDidEsaId(), examId.getCdsEsaId());
     }
 
     private void deleteEnrolledExams(ArrayList<EnrolledExam> exams) {
-        for (EnrolledExam exam : exams)
-            deleteEnrolledExam(exam);
+        mEnrolledExamsDao.delete(exams);
     }
 
 
-    public void startFetchEnrolledExamsService() {
-        mUnimibNetworkDataSource.startFetchEnrolledExamsService();
-    }
 
     public void fetchEnrolledExams() {
-        mUnimibNetworkDataSource.fetchEnrolledExams(getUser(),
+        mUnimibNetworkDataSource.fetchEnrolledExams(getUserAuth(),
                 sessionID -> mExecutors.diskIO().execute(() -> updateUserSessionId(sessionID)));
     }
 
@@ -552,8 +566,8 @@ public class UnimibRepository {
         return mUnimibNetworkDataSource.unEnrollExam(exam, activity,
                 (/*Un-enrollment complete*/) -> {
                     mExecutors.diskIO().execute(() -> deleteEnrolledExam(exam));
-                    startFetchEnrolledExamsService();
-                    startFetchAvailableExamsService();
+                    fetchEnrolledExams();
+                    fetchAvailableExams();
                 },
                 unEnrollUpdatesListener);
     }
@@ -566,61 +580,120 @@ public class UnimibRepository {
 
     public void addLesson(Lesson lesson, AddLessonActivity.AddLessonListener listener) {
         mExecutors.diskIO().execute(() -> {
-            mUnimibDao.addLesson(lesson);
+            mLessonsDao.add(lesson);
             listener.onLessonAddComplete();
         });
     }
 
     public LiveData<List<Lesson>> getObservableTimetable() {
-        return mUnimibDao.getObservableTimetable();
+        return mLessonsDao.getObservableTimetable();
     }
 
     public LiveData<List<Lesson>> getObservableTimetable(String dayOfWeek) {
-        return mUnimibDao.getObservableTimetableOfDay(dayOfWeek);
+        return mLessonsDao.getObservableTimetableOfDay(dayOfWeek);
     }
 
     public List<Lesson> getTimetable() {
-        return mUnimibDao.getTimetable();
+        return mLessonsDao.getTimetable();
     }
 
     public List<Lesson> getTimetable(String dayOfWeek) {
-        return mUnimibDao.getTimetableOfDay(dayOfWeek);
+        return mLessonsDao.getTimetableOfDay(dayOfWeek);
     }
 
     public LiveData<Lesson> getObservableLesson(int id) {
-        return mUnimibDao.getObservableLesson(id);
+        return mLessonsDao.getObservableLesson(id);
     }
 
     public Lesson getLesson(int id) {
-        return mUnimibDao.getLesson(id);
+        return mLessonsDao.getLesson(id);
     }
 
     public boolean isTimetableEmpty() {
-        return mUnimibDao.getTimetableSize() == 0;
+        return mLessonsDao.getTimetableSize() == 0;
     }
 
     public void deleteTimetable() {
-        mUnimibDao.deleteTimetable();
+        mLessonsDao.delete();
     }
 
     public void deleteLesson(int id, DayFragment.DeleteLessonListener listener) {
         mExecutors.diskIO().execute(() -> {
-            mUnimibDao.deleteLesson(id);
+            mLessonsDao.delete(id);
             listener.onDeleteLessonComplete();
         });
     }
 
-    public void deleteLessons(List<Lesson> lessons) {
-        for (Lesson lesson : lessons)
-            mUnimibDao.deleteLesson(lesson.getId());
+    public void deleteLessons(ArrayList<Lesson> lessons) {
+        mLessonsDao.delete(lessons);
     }
 
     public int updateLesson(Lesson lesson) {
-        return mUnimibDao.updateLesson(lesson);
+        return mLessonsDao.update(lesson);
     }
 
     public LiveData<List<String>> getCoursesNames(String like) {
-        return mUnimibDao.getCoursesNames(like + '%');
+        return mLessonsDao.getCoursesNames(like + '%');
+    }
+
+
+
+    /*****************
+     * FACULTIES *****
+     *****************/
+
+    public void addFaculty(Faculty lesson, AddLessonActivity.AddLessonListener listener) {
+        mExecutors.diskIO().execute(() -> {
+            mFacultiesDao.add(lesson);
+            listener.onLessonAddComplete();
+        });
+    }
+
+    public LiveData<List<Faculty>> getObservableFaculties() {
+        return mFacultiesDao.getObservableAllFaculties();
+    }
+
+    public LiveData<List<Faculty>> getObservableFaculties(String userId) {
+        return mFacultiesDao.getObservableFacultiesForUser(userId);
+    }
+
+    public List<Faculty> getFaculties() {
+        return mFacultiesDao.getAllFaculties();
+    }
+
+    public List<Faculty> getFaculties(String userId) {
+        return mFacultiesDao.getFacultiesForUser(userId);
+    }
+
+    public LiveData<Faculty> getObservableFaculty(int code) {
+        return mFacultiesDao.getObservableFaculty(code);
+    }
+
+    public Faculty getFaculty(int code) {
+        return mFacultiesDao.getFaculty(code);
+    }
+
+    public boolean hasUserFaculties(String username) {
+        return mFacultiesDao.getNumberOfFacultiesForUser(username) == 0;
+    }
+
+    public void deleteFaculties() {
+        mFacultiesDao.delete();
+    }
+
+    public void deleteFaculty(int id, DayFragment.DeleteLessonListener listener) {
+        mExecutors.diskIO().execute(() -> {
+            mFacultiesDao.delete(id);
+            listener.onDeleteLessonComplete();
+        });
+    }
+
+    public void deleteFaculties(ArrayList<Faculty> faculties) {
+        mFacultiesDao.delete(faculties);
+    }
+
+    public int updatefaculty(Faculty faculty) {
+        return mFacultiesDao.update(faculty);
     }
 
 
@@ -643,24 +716,43 @@ public class UnimibRepository {
      * USERS *****
      *************/
 
+    public interface UserOperationsListener {
+        void onUserLoaded(User user);
+    }
+
     public void saveUser(User user) {
-        mUserHelper.saveUser(user);
+        mExecutors.diskIO().execute(() -> {
+            mUserDao.add(user);
+            mUserHelper.saveUser(user);
+        });
     }
 
     public void updateUserSessionId(String sessionID) {
         mUserHelper.updateSessionId(sessionID);
     }
 
-    public void updateChosenFaculty(int chosenFaculty) {
+    public void updateChosenFaculty(Faculty chosenFaculty) {
         mUserHelper.updateChosenFaculty(chosenFaculty);
     }
 
-    public User getUser() {
+    public User getUserAuth() {
         return mUserHelper.getUser();
     }
 
-    public LiveData<User> getObservableUser() {
-        return mUserHelper.getObservableUser();
+    public User getUser(final UserOperationsListener listener) {
+        User user = mUserHelper.getUser();
+
+        mExecutors.diskIO().execute(() -> {
+            User userDb = mUserDao.getUser(user.getUsername());
+            userDb.setUsername(user.getUsername());
+            userDb.setPassword(user.getPassword());
+            userDb.setSessionId(user.getSessionId());
+            userDb.setSelectedFaculty(user.getSelectedFaculty());
+
+            if (listener != null) listener.onUserLoaded(userDb);
+        });
+
+        return user;
     }
 
     public void deleteUser(Activity activity, AccountRemovedListener accountRemovedListener,

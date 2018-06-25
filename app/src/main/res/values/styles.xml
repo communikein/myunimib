@@ -31,6 +31,18 @@
         <item name="android:textColor">@color/primary_text</item>
     </style>
 
+    <style name="MyButton.Dark" parent="MyButton">
+        <item name="colorControlHighlight">@color/colorPrimaryDark</item>
+        <item name="colorButtonNormal">@color/colorAccentDark</item>
+        <item name="android:textColor">@color/primary_text</item>
+    </style>
+
+    <style name="MyButton.Light" parent="MyButton">
+        <item name="colorControlHighlight">@color/colorPrimaryDark</item>
+        <item name="colorButtonNormal">@color/colorAccentLight</item>
+        <item name="android:textColor">@color/primary_text</item>
+    </style>
+
     <style name="ErrorText" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">@color/dark_red</item>
     </style>

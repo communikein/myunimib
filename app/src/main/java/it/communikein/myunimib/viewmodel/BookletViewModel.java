@@ -36,11 +36,11 @@ public class BookletViewModel extends ViewModel {
     }
 
     public void refreshBooklet() {
-        mRepository.startFetchBookletService();
+        mRepository.fetchBooklet();
     }
 
     public User getUser() {
-        return mRepository.getUser();
+        return mRepository.getUser(null);
     }
 
 }

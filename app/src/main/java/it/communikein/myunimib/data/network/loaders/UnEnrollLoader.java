@@ -101,7 +101,7 @@ public class UnEnrollLoader extends AsyncTaskLoader<Boolean> {
             }
         } catch (Exception e) {
             mUnEnrollUpdatesListener.onUnEnrollmentUpdate(STATUS_ERROR_GENERAL);
-            Utils.saveBugReport(e, TAG);
+            Utils.saveBugReport(e, TAG, "UnEnrollLoader.loadInBackground");
         }
 
         return false;

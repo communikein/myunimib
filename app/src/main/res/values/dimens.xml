@@ -15,4 +15,10 @@
 
     <dimen name="header_padding_top">50dp</dimen>
     <dimen name="header_padding_bottom">10dp</dimen>
+
+    <dimen name="window_padding_8">8dp</dimen>
+    <dimen name="window_padding_16">16dp</dimen>
+    <dimen name="window_padding_32">32dp</dimen>
+    <dimen name="window_padding_48">48dp</dimen>
+    <dimen name="faculties_spinner_height">48dp</dimen>
 </resources>

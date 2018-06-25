@@ -72,13 +72,16 @@ public class HomeFragment extends Fragment {
         hideTabs();
         showBottomNavigation();
 
-        User user = mViewModel.getUser();
-        mBinding.userNameTextView.setText(user.getName());
+        User user = mViewModel.getUser(this::updateUI);
+        updateUI(user);
+        mViewModel.loadProfilePicture(mBinding.userImageView);
+    }
+
+    private void updateUI(User user) {
+        mBinding.userNameTextView.setText(user.getRealName());
         mBinding.matricolaTextView.setText(user.getMatricola());
         mBinding.averageMarkTextView.setText(Utils.markFormat.format(user.getAverageMark()));
-        mBinding.cfuTextView.setText(String.valueOf(user.getTotalCFU()));
-
-        mViewModel.loadProfilePicture(mBinding.userImageView);
+        mBinding.cfuTextView.setText(String.valueOf(user.getTotalCfu()));
     }
 
     /**

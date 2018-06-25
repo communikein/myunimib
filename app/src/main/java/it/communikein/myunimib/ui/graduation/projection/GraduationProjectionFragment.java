@@ -33,6 +33,7 @@ import it.communikein.myunimib.ui.RecyclerItemTouchHelper;
 import it.communikein.myunimib.ui.exam.booklet.BookletFragment;
 import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.viewmodel.GraduationProjectionViewModel;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 import it.communikein.myunimib.viewmodel.factory.GraduationProjectionViewModelFactory;
 
 /**
@@ -72,6 +73,10 @@ public class GraduationProjectionFragment extends Fragment implements
     public void onAttach(Context context) {
         AndroidSupportInjection.inject(this);
         super.onAttach(context);
+    }
+
+    private MainActivityViewModel getViewModel() {
+        return ((MainActivity) getActivity()).getViewModel();
     }
 
     @Override
@@ -125,7 +130,7 @@ public class GraduationProjectionFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (getActivity() != null && !mViewModel.getUser().isFake()) {
+        if (getActivity() != null) {
 
             final GraduationProjectionListAdapter mAdapter =
                     new GraduationProjectionListAdapter(null);
@@ -158,19 +163,22 @@ public class GraduationProjectionFragment extends Fragment implements
     }
 
     private void updateProjection(List<BookletEntry> exams) {
-        User user = mViewModel.getUser();
-        double result = user.getAverageMark() * user.getTotalCFU();
+        mViewModel.getUser().observe(this, (user) -> {
+            if (user != null) {
+                double result = user.getAverageMark() * user.getTotalCfu();
 
-        int fakeCFU = 0;
-        for (BookletEntry exam : exams) {
-            if (exam.getScoreValue() != 0)
-                fakeCFU += exam.getCfu();
+                int fakeCFU = 0;
+                for (BookletEntry exam : exams) {
+                    if (exam.getScoreValue() != 0)
+                        fakeCFU += exam.getCfu();
 
-            result += exam.getScoreValue() * exam.getCfu();
-        }
-        result = result / (fakeCFU + user.getTotalCFU()) * 110 / 30;
+                    result += exam.getScoreValue() * exam.getCfu();
+                }
+                result = result / (fakeCFU + user.getTotalCfu()) * 110 / 30;
 
-        mBinding.futureProjectionTextview.setText(Utils.markFormat.format(result));
+                mBinding.futureProjectionTextview.setText(Utils.markFormat.format(result));
+            }
+        });
     }
 
     /**

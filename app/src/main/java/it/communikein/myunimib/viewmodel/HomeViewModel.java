@@ -25,8 +25,8 @@ public class HomeViewModel extends ViewModel {
         this.mProfilePictureRequest = profilePictureRequest;
     }
 
-    public User getUser() {
-        return mRepository.getUser();
+    public User getUser(UnimibRepository.UserOperationsListener listener) {
+        return mRepository.getUser(listener);
     }
 
     public void loadProfilePicture(NetworkImageView target) {

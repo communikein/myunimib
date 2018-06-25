@@ -46,7 +46,7 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
     public ProfilePictureVolleyRequest(UnimibRepository repository, Context context) {
         this.mRepository = repository;
         this.mRequestQueue = getRequestQueue(context);
-        this.userAuthentication = mRepository.getUser();
+        this.userAuthentication = mRepository.getUserAuth();
 
         this.mImageLoader = new ProfilePictureLoader(mRequestQueue, this);
     }
@@ -122,7 +122,7 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
                             // Save it
                             cookie = cookie.substring(cookie.indexOf("JSESSIONID=") + 11);
                             cookie = cookie.substring(0, cookie.indexOf(";"));
-                            userAuthentication.setSessionID(cookie);
+                            userAuthentication.setSessionId(cookie);
                             mRepository.updateUserSessionId(cookie);
                         }
                     });
@@ -148,7 +148,7 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
         public Map<String, String> getHeaders() {
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Basic " + userAuthentication.getAuthToken());
-            headers.put("Cookie", "JSESSIONID=" + userAuthentication.getSessionID());
+            headers.put("Cookie", "JSESSIONID=" + userAuthentication.getSessionId());
             return headers;
         }
 

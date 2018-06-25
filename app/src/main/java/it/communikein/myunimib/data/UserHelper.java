@@ -8,19 +8,20 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
+import java.security.KeyStore;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.model.Faculty;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
@@ -32,8 +33,8 @@ public class UserHelper {
 
     private final String ACCOUNT_TYPE;
 
+    private final SharedPreferences mSharedPreferences;
     private final AccountManager mAccountManager;
-    private final MutableLiveData<User> mUser;
 
     public interface AccountRemovedListener {
         void onAccountRemoved(boolean removed);
@@ -46,82 +47,37 @@ public class UserHelper {
 
     @Inject
     public UserHelper(Context context) {
+        this.mSharedPreferences = context.getSharedPreferences("myunimib", Context.MODE_PRIVATE);
         this.mAccountManager = AccountManager.get(context.getApplicationContext());
         this.ACCOUNT_TYPE = context.getString(R.string.account_type);
-        this.mUser = new MutableLiveData<>();
-
-        initUser();
     }
 
-    private void initUser() {
-        mUser.postValue(getUser());
-    }
 
     public void updateSessionId(String sessionID) {
-        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
-        Account selected;
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
 
-        if (accounts.length > 0) {
-            selected = accounts[0];
+        editor.putString(User.PREF_SESSION_ID, sessionID);
 
-            mAccountManager.setUserData(selected,
-                    UserAuthentication.PREF_SESSION_ID, sessionID);
-        }
+        editor.apply();
     }
 
-    public void updateChosenFaculty(int chosenFaculty) {
-        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
-        Account selected;
+    public void updateChosenFaculty(Faculty chosenFaculty) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
 
-        if (accounts.length > 0) {
-            selected = accounts[0];
+        if (chosenFaculty != null)
+            editor.putString(User.PREF_SELECTED_FACULTY, chosenFaculty.toJson());
 
-            mAccountManager.setUserData(selected,
-                    UserAuthentication.PREF_SELECTED_FACULTY, String.valueOf(chosenFaculty));
-        }
-    }
-
-    public void saveUserAuth(UserAuthentication user){
-        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
-        Account selected;
-
-        if (accounts.length > 0) {
-            selected = accounts[0];
-
-            mAccountManager.setUserData(selected,
-                    UserAuthentication.PREF_SESSION_ID, user.getSessionID());
-            mAccountManager.setUserData(selected,
-                    UserAuthentication.PREF_FACULTIES, user.getFacultiesJSON().toString());
-            mAccountManager.setUserData(selected,
-                    UserAuthentication.PREF_SELECTED_FACULTY, String.valueOf(user.getSelectedFaculty()));
-        }
+        editor.apply();
     }
 
     public void saveUser(User user){
-        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
-        Account selected;
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
 
-        if (accounts.length > 0) {
-            selected = accounts[0];
+        editor.putString(User.PREF_SESSION_ID, user.getSessionId());
+        if (user.getSelectedFaculty() != null)
+            editor.putString(User.PREF_SELECTED_FACULTY, user.getSelectedFaculty().toJson());
 
-            mAccountManager.setUserData(selected,
-                    User.PREF_SESSION_ID, user.getSessionID());
-            mAccountManager.setUserData(selected,
-                    User.PREF_FACULTIES, user.getFacultiesJSON().toString());
-            mAccountManager.setUserData(selected,
-                    User.PREF_SELECTED_FACULTY, String.valueOf(user.getSelectedFaculty()));
-
-            mAccountManager.setUserData(selected,
-                    User.PREF_NAME, user.getName());
-            mAccountManager.setUserData(selected,
-                    User.PREF_MATRICOLA, user.getMatricola());
-            mAccountManager.setUserData(selected,
-                    User.PREF_TOTAL_CFU, String.valueOf(user.getTotalCFU()));
-            mAccountManager.setUserData(selected,
-                    User.PREF_AVERAGE_MARK, String.valueOf(user.getAverageMark()));
-            mAccountManager.setUserData(selected,
-                    User.PREF_FAKE, String.valueOf(user.isFake()));
-        }
+        editor.apply();
     }
 
     public User getUser(){
@@ -133,36 +89,17 @@ public class UserHelper {
 
             String password = mAccountManager.getPassword(selected);
             String username = selected.name;
-            String sessionID = mAccountManager.getUserData(selected, User.PREF_SESSION_ID);
 
-            String name = mAccountManager.getUserData(selected, User.PREF_NAME);
-            String matricola = mAccountManager.getUserData(selected, User.PREF_MATRICOLA);
+            String sessionID = mSharedPreferences.getString(User.PREF_SESSION_ID, "");
+            String selected_faculty = mSharedPreferences.getString(User.PREF_SELECTED_FACULTY, "");
 
-            String cfu = mAccountManager.getUserData(selected, User.PREF_TOTAL_CFU);
-            int totalCFU = TextUtils.isEmpty(cfu) ? User.ERROR_TOTAL_CFU : Integer.parseInt(cfu);
-            String score = mAccountManager.getUserData(selected, User.PREF_AVERAGE_MARK);
-            float averageScore = TextUtils.isEmpty(score) ? User.ERROR_AVERAGE_MARK : Float.parseFloat(score);
+            User user = new User(username, password);
+            user.setSessionId(sessionID);
 
-            String fake = mAccountManager.getUserData(selected, User.PREF_FAKE);
-            boolean isFake = !TextUtils.isEmpty(fake) && Boolean.parseBoolean(fake);
-
-            User user = new User(username, password, name, averageScore, totalCFU, matricola);
-            user.setSessionID(sessionID);
-            user.setFake(isFake);
-
-            String faculties_tmp = mAccountManager.getUserData(selected, User.PREF_FACULTIES);
-            if (!TextUtils.isEmpty(faculties_tmp)) {
-                try {
-                    JSONObject faculties_json = new JSONObject(faculties_tmp);
-                    user.setFaculties(faculties_json);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            String selected_faculty = mAccountManager.getUserData(selected, User.PREF_SELECTED_FACULTY);
-            int selectedFaculty = TextUtils.isEmpty(selected_faculty) ? -1 : Integer.parseInt(selected_faculty);
-            user.setSelectedFaculty(selectedFaculty);
+            if (!TextUtils.isEmpty(selected_faculty))
+                user.setSelectedFaculty(new Faculty(selected_faculty));
+            else
+                user.setSelectedFaculty(null);
 
             return user;
         }
@@ -170,9 +107,6 @@ public class UserHelper {
         return null;
     }
 
-    public LiveData<User> getObservableUser() {
-        return mUser;
-    }
 
     public void deleteUser(Activity activity, AccountRemovedListener listener,
                            AccountRemoveErrorListener errorListener) {
@@ -196,15 +130,15 @@ public class UserHelper {
 
                                 listener.onAccountRemoved(isRemoved);
                             } catch (IOException e) {
-                                Utils.saveBugReport(e, TAG);
+                                Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
                                 errorListener.onAccountRemoveError(null);
                             } catch (OperationCanceledException e) {
-                                Utils.saveBugReport(e, TAG);
+                                Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
 
                                 String error = activity.getString(R.string.error_logout_cancelled);
                                 errorListener.onAccountRemoveError(error);
                             } catch (AuthenticatorException e) {
-                                Utils.saveBugReport(e, TAG);
+                                Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
                                 errorListener.onAccountRemoveError(null);
                             }
                         }, null);
@@ -216,15 +150,15 @@ public class UserHelper {
 
                         listener.onAccountRemoved(isRemoved);
                     } catch (IOException e) {
-                        Utils.saveBugReport(e, TAG);
+                        Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
                         errorListener.onAccountRemoveError(null);
                     } catch (OperationCanceledException e) {
-                        Utils.saveBugReport(e, TAG);
+                        Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
 
                         String error = activity.getString(R.string.error_logout_cancelled);
                         errorListener.onAccountRemoveError(error);
                     } catch (AuthenticatorException e) {
-                        Utils.saveBugReport(e, TAG);
+                        Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
                         errorListener.onAccountRemoveError(null);
                     }
                 }, null);
