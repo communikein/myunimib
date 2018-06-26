@@ -31,7 +31,7 @@
                 android:paddingEnd="16dp"
                 android:paddingStart="16dp"
                 app:srcCompat="@drawable/ic_delete_gray"
-                android:contentDescription="@string/action_delete_lesson"/>
+                android:contentDescription="@string/action_delete_exam"/>
 
         </android.support.constraint.ConstraintLayout>
 
@@ -45,6 +45,7 @@
                 android:id="@+id/exam_icon"
                 android:layout_height="0dp"
                 android:layout_width="10dp"
+                android:contentDescription="@string/exam_status_description"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"

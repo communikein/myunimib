@@ -127,6 +127,7 @@
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:contentDescription="@string/action_add_exam"
             app:srcCompat="@drawable/ic_add_black_24dp"
             app:fabSize="normal"/>
 

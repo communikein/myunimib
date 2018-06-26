@@ -4,6 +4,7 @@ package it.communikein.myunimib.ui.login;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,4 +41,14 @@ public class PersonalDataFragment extends Fragment {
         return mBinding.getRoot();
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mBinding.confirmButton.setOnClickListener((v) -> savePersonalData());
+    }
+
+    public void savePersonalData() {
+
+    }
 }

@@ -1,8 +1,6 @@
 package it.communikein.myunimib.ui.home;
 
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,16 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.Utils;
-import it.communikein.myunimib.viewmodel.HomeViewModel;
-import it.communikein.myunimib.viewmodel.factory.HomeViewModelFactory;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 
 /**
@@ -34,21 +27,11 @@ public class HomeFragment extends Fragment {
     /*  */
     private FragmentHomeBinding mBinding;
 
-    /* */
-    @Inject
-    HomeViewModelFactory viewModelFactory;
-
-    /* */
-    private HomeViewModel mViewModel;
-
     /* Required empty public constructor */
     public HomeFragment() {}
 
-
-    @Override
-    public void onAttach(Context context) {
-        AndroidSupportInjection.inject(this);
-        super.onAttach(context);
+    private MainActivityViewModel getViewModel() {
+        return ((MainActivity) getActivity()).getViewModel();
     }
 
     @Override
@@ -64,24 +47,23 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mViewModel = ViewModelProviders
-                .of(this, viewModelFactory)
-                .get(HomeViewModel.class);
-
         setTitle();
         hideTabs();
         showBottomNavigation();
 
-        User user = mViewModel.getUser(this::updateUI);
-        updateUI(user);
-        mViewModel.loadProfilePicture(mBinding.userImageView);
+        updateUI();
+        getViewModel().loadProfilePicture(mBinding.userImageView);
     }
 
-    private void updateUI(User user) {
-        mBinding.userNameTextView.setText(user.getRealName());
-        mBinding.matricolaTextView.setText(user.getMatricola());
-        mBinding.averageMarkTextView.setText(Utils.markFormat.format(user.getAverageMark()));
-        mBinding.cfuTextView.setText(String.valueOf(user.getTotalCfu()));
+    private void updateUI() {
+        getViewModel().getUser().observe(this, (user) -> {
+            if (user != null) {
+                mBinding.userNameTextView.setText(user.getRealName());
+                mBinding.matricolaTextView.setText(user.getMatricola());
+                mBinding.averageMarkTextView.setText(Utils.markFormat.format(user.getAverageMark()));
+                mBinding.cfuTextView.setText(String.valueOf(user.getTotalCfu()));
+            }
+        });
     }
 
     /**

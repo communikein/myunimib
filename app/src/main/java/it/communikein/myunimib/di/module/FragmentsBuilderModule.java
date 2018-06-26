@@ -14,9 +14,6 @@ import it.communikein.myunimib.ui.timetable.TimetableFragment;
 public abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
-    abstract HomeFragment contributeHomeFragment();
-
-    @ContributesAndroidInjector
     abstract BookletFragment contributeBookletFragment();
 
     @ContributesAndroidInjector

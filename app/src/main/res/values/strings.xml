@@ -263,5 +263,11 @@
     <string name="prompt_email">Email</string>
     <string name="fake_email">elia.maracani@gmail.com</string>
     <string name="personal_data_label">Personal Data</string>
+    <string name="choose_lesson_name_description">Choose lesson name</string>
+    <string name="action_unenroll_exam">Unenroll exam</string>
+    <string name="action_add_exam">Add exam</string>
+    <string name="action_add_lesson">Add lesson</string>
+    <string name="exam_status_description">Exam status</string>
+    <string name="action_delete_exam">Remove exam</string>
 
 </resources>
