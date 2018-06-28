@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.Building;
 import it.communikein.myunimib.databinding.FragmentBuildingsListBinding;
-import it.communikein.myunimib.viewmodel.BuildingsViewModel;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,11 +54,11 @@ public class BuildingsListFragment extends Fragment implements BuildingsListAdap
         BuildingsListAdapter mAdapter = new BuildingsListAdapter(this);
         mBinding.listRecyclerview.setAdapter(mAdapter);
 
-        if (getParentViewModel() != null)
-            mAdapter.setList(getParentViewModel().getBuildings());
+        if (getViewModel() != null)
+            mAdapter.setList(getViewModel().getBuildings());
     }
 
-    private BuildingsViewModel getParentViewModel() {
+    private MainActivityViewModel getViewModel() {
         if (getParentFragment() != null)
             return ((BuildingsFragment) getParentFragment()).getViewModel();
         else
@@ -74,8 +74,8 @@ public class BuildingsListFragment extends Fragment implements BuildingsListAdap
 
     @Override
     public void onListPoiClick(Building building) {
-        if (getParentViewModel() != null)
-            getParentViewModel().setSelectedBuilding(building);
+        if (getViewModel() != null)
+            getViewModel().setSelectedBuilding(building);
 
         if (getParentViewPager() != null)
             getParentViewPager().setCurrentItem(0);

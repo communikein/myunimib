@@ -31,6 +31,7 @@ import dagger.android.AndroidInjection;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
 import it.communikein.myunimib.ui.graduation.projection.GraduationProjectionFragment;
@@ -52,7 +53,7 @@ import javax.inject.Inject;
 public class MainActivity extends AppCompatActivity implements
         HasSupportFragmentInjector, NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     private ActivityMainBinding mBinding;
 
@@ -79,14 +80,6 @@ public class MainActivity extends AppCompatActivity implements
     private static final int INDEX_FRAGMENT_BUILDINGS = 4;
     private static final int INDEX_FRAGMENT_TIMETABLE = 5;
     private static final int INDEX_FRAGMENT_GRADUATION_PROJECTION = 6;
-
-    private static final String TAG_FRAGMENT_HOME = "tab-home";
-    public static final String TAG_FRAGMENT_BOOKLET = "tab-booklet";
-    public static final String TAG_FRAGMENT_EXAMS_AVAILABLE = "tab-exams-available";
-    public static final String TAG_FRAGMENT_EXAMS_ENROLLED = "tab-exams-enrolled";
-    private static final String TAG_FRAGMENT_BUILDINGS = "tab-buildings";
-    private static final String TAG_FRAGMENT_TIMETABLE = "tab-timetable";
-    private static final String TAG_FRAGMENT_GRADUATION_PROJECTION = "tab-graduation-projection";
 
     private static final long DRAWER_CLOSE_DELAY_MS = 250;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -147,13 +140,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initUI(Bundle savedInstanceState){
-        buildFragmentsList();
+        mBinding.startupProgressbar.show();
 
+        buildFragmentsList();
         initBottomNavigation();
         initProgressDialog();
 
         setSupportActionBar(mBinding.toolbar);
-
         initDrawerNavigation(savedInstanceState);
     }
 
@@ -224,37 +217,28 @@ public class MainActivity extends AppCompatActivity implements
         mViewModel.getUser().observe(this, (user) -> {
             if (user != null) {
                 userNameTextView.setText(user.getRealName());
-                userEmailTextView.setText(user.getUniversityMail());
+                if (user.getUsername().contains("@"))
+                    userEmailTextView.setText(user.getUsername());
+                else
+                    userEmailTextView.setText(user.getUniversityMail());
             }
         });
 
-        mViewModel.loadProfilePicture(userImageView);
+        mViewModel.loadProfilePicturePicasso(userImageView);
     }
 
     private int getNavIdFromFragmentTag(String tag) {
         int id = R.id.navigation_home;
+        if (tag == null) return id;
 
-        if (tag != null) switch(tag) {
-            case TAG_FRAGMENT_HOME:
-                id = R.id.navigation_home;
-                break;
-
-            case TAG_FRAGMENT_BOOKLET:
-                id = R.id.navigation_booklet;
-                break;
-
-            case TAG_FRAGMENT_EXAMS_AVAILABLE:
-                id = R.id.navigation_exams_available;
-                break;
-
-            case TAG_FRAGMENT_EXAMS_ENROLLED:
-                id = R.id.navigation_exams_enrolled;
-                break;
-
-            default:
-                id = R.id.navigation_home;
-                break;
-        }
+        if (tag.equals(HomeFragment.TAG))
+            id = R.id.navigation_home;
+        else if (tag.equals(BookletFragment.TAG))
+            id = R.id.navigation_booklet;
+        else if (tag.equals(AvailableExamsFragment.TAG))
+            id = R.id.navigation_exams_available;
+        else if (tag.equals(EnrolledExamsFragment.TAG))
+            id = R.id.navigation_exams_enrolled;
 
         return id;
     }
@@ -326,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements
         if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.START))
             mBinding.drawerLayout.closeDrawer(GravityCompat.START);
 
-        if (getSupportFragmentManager().findFragmentByTag(TAG_FRAGMENT_HOME) == null)
+        if (getSupportFragmentManager().findFragmentByTag(HomeFragment.TAG) == null)
             navigate(R.id.navigation_home);
     }
 
@@ -361,31 +345,31 @@ public class MainActivity extends AppCompatActivity implements
         switch (tab_id) {
             case R.id.navigation_home:
                 index = INDEX_FRAGMENT_HOME;
-                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_HOME;
+                FRAGMENT_SELECTED_TAG = HomeFragment.TAG;
                 break;
             case R.id.navigation_booklet:
                 index = INDEX_FRAGMENT_BOOKLET;
-                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_BOOKLET;
+                FRAGMENT_SELECTED_TAG = BookletFragment.TAG;
                 break;
             case R.id.navigation_exams_available:
                 index = INDEX_FRAGMENT_EXAMS_AVAILABLE;
-                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_EXAMS_AVAILABLE;
+                FRAGMENT_SELECTED_TAG = AvailableExamsFragment.TAG;
                 break;
             case R.id.navigation_exams_enrolled:
                 index = INDEX_FRAGMENT_EXAMS_ENROLLED;
-                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_EXAMS_ENROLLED;
+                FRAGMENT_SELECTED_TAG = EnrolledExamsFragment.TAG;
                 break;
             case R.id.navigation_buildings:
                 index = INDEX_FRAGMENT_BUILDINGS;
-                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_BUILDINGS;
+                FRAGMENT_SELECTED_TAG = BuildingsFragment.TAG;
                 break;
             case R.id.navigation_timetable:
                 index = INDEX_FRAGMENT_TIMETABLE;
-                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_TIMETABLE;
+                FRAGMENT_SELECTED_TAG = TimetableFragment.TAG;
                 break;
             case R.id.navigation_graduation_score:
                 index = INDEX_FRAGMENT_GRADUATION_PROJECTION;
-                FRAGMENT_SELECTED_TAG = TAG_FRAGMENT_GRADUATION_PROJECTION;
+                FRAGMENT_SELECTED_TAG = GraduationProjectionFragment.TAG;
                 break;
             case R.id.navigation_logout:
                 return tryLogout();
@@ -399,6 +383,7 @@ public class MainActivity extends AppCompatActivity implements
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.tab_container, fragments.get(index), FRAGMENT_SELECTED_TAG)
+                .addToBackStack(FRAGMENT_SELECTED_TAG)
                 .commit();
         return true;
     }

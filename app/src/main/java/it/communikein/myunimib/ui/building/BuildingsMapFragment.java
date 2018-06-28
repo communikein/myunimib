@@ -23,7 +23,7 @@ import java.util.List;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.Building;
 import it.communikein.myunimib.databinding.FragmentBuildingsMapBinding;
-import it.communikein.myunimib.viewmodel.BuildingsViewModel;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 
 public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback {
@@ -52,10 +52,10 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (getParentViewModel() != null) {
-            updateMap(getParentViewModel().getBuildings());
+        if (getViewModel() != null) {
+            updateMap(getViewModel().getBuildings());
 
-            getParentViewModel().getSelectedBuilding().observe(this, building -> {
+            getViewModel().getSelectedBuilding().observe(this, building -> {
                 if (building != null) {
                     moveCamera(building.getLatitude(), building.getLongitude(), 6f);
                 }
@@ -63,7 +63,7 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
         }
     }
 
-    private BuildingsViewModel getParentViewModel() {
+    private MainActivityViewModel getViewModel() {
         if (getParentFragment() != null)
             return ((BuildingsFragment) getParentFragment()).getViewModel();
         else
@@ -74,11 +74,11 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
 
-        if (getParentViewModel() != null) {
-            updateMap(getParentViewModel().getBuildings());
+        if (getViewModel() != null) {
+            updateMap(getViewModel().getBuildings());
 
-            if (getParentViewModel().getSelectedBuilding().getValue() != null) {
-                Building b = getParentViewModel().getSelectedBuilding().getValue();
+            if (getViewModel().getSelectedBuilding().getValue() != null) {
+                Building b = getViewModel().getSelectedBuilding().getValue();
                 moveCamera(b.getLatitude(), b.getLongitude(), 6f);
             }
         }

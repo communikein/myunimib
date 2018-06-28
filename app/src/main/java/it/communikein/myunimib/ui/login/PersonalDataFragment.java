@@ -1,6 +1,7 @@
 package it.communikein.myunimib.ui.login;
 
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.FragmentPersonalDataBinding;
 import it.communikein.myunimib.viewmodel.LoginViewModel;
 
@@ -21,6 +23,11 @@ import it.communikein.myunimib.viewmodel.LoginViewModel;
 public class PersonalDataFragment extends Fragment {
 
     public static final String TAG = PersonalDataFragment.class.getName();
+
+    public PersonalDataCallback mCallback;
+    public interface PersonalDataCallback {
+        void onPersonalDataComplete(User user);
+    }
 
     FragmentPersonalDataBinding mBinding;
 
@@ -42,13 +49,41 @@ public class PersonalDataFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof PersonalDataCallback) {
+            mCallback = (PersonalDataCallback) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement PersonalDataCallback");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        initUI();
+    }
+
+    private void initUI() {
         mBinding.confirmButton.setOnClickListener((v) -> savePersonalData());
     }
 
     public void savePersonalData() {
+        String email = mBinding.emailEdittext.getText().toString();
+        String password = mBinding.passwordEdittext.getText().toString();
+        String name = mBinding.nameEdittext.getText().toString();
 
+        User user = new User(email, password);
+        user.setRealName(name);
+
+        mCallback.onPersonalDataComplete(user);
     }
 }

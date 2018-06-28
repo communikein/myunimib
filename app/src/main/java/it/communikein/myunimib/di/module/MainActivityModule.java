@@ -7,7 +7,7 @@ import it.communikein.myunimib.ui.MainActivity;
 @Module
 public abstract class MainActivityModule {
 
-    @ContributesAndroidInjector(modules = FragmentsBuilderModule.class)
+    @ContributesAndroidInjector()
     abstract MainActivity contributeMainActivity();
 
 }

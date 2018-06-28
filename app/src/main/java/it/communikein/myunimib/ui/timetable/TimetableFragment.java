@@ -1,7 +1,6 @@
 package it.communikein.myunimib.ui.timetable;
 
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -24,15 +23,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.databinding.FragmentTimetableBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.DAY_OF_WEEK;
-import it.communikein.myunimib.viewmodel.TimetableViewModel;
-import it.communikein.myunimib.viewmodel.factory.TimetableViewModelFactory;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
@@ -42,7 +37,7 @@ import static android.app.Activity.RESULT_OK;
  */
 public class TimetableFragment extends Fragment {
 
-    private static final String LOG_TAG = TimetableFragment.class.getSimpleName();
+    public static final String TAG = TimetableFragment.class.getSimpleName();
 
     public static final int CODE_CREATE_LESSON = 254;
 
@@ -58,13 +53,6 @@ public class TimetableFragment extends Fragment {
     /*  */
     private FragmentTimetableBinding mBinding;
 
-    /* */
-    @Inject
-    TimetableViewModelFactory viewModelFactory;
-
-    /* */
-    private TimetableViewModel mViewModel;
-
     /* Required empty public constructor */
     public TimetableFragment() {
         TABS_TITLE.add(FRAGMENT_MONDAY);
@@ -79,7 +67,6 @@ public class TimetableFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
-        AndroidSupportInjection.inject(this);
         super.onAttach(context);
 
         FRAGMENT_MONDAY = getString(R.string.monday);
@@ -91,8 +78,8 @@ public class TimetableFragment extends Fragment {
         FRAGMENT_SUNDAY = getString(R.string.sunday);
     }
 
-    public TimetableViewModel getViewModel() {
-        return mViewModel;
+    public MainActivityViewModel getViewModel() {
+        return ((MainActivity) getActivity()).getViewModel();
     }
 
     public CoordinatorLayout getCoordinatorLayout() {
@@ -112,10 +99,6 @@ public class TimetableFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setTitle();
-
-        mViewModel = ViewModelProviders
-                .of(this, viewModelFactory)
-                .get(TimetableViewModel.class);
 
         showTabs();
         hideBottomNavigation();

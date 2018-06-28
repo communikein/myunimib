@@ -1,8 +1,6 @@
 package it.communikein.myunimib.ui.exam.enrolled;
 
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -12,24 +10,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentEnrolledExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.viewmodel.EnrolledExamsListViewModel;
-import it.communikein.myunimib.viewmodel.factory.EnrolledExamsViewModelFactory;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 
 /**
@@ -38,26 +31,16 @@ import it.communikein.myunimib.viewmodel.factory.EnrolledExamsViewModelFactory;
 public class EnrolledExamsFragment extends Fragment implements
         EnrolledExamAdapter.ExamClickCallback, SwipeRefreshLayout.OnRefreshListener {
 
-    private static final String LOG_TAG = EnrolledExamsFragment.class.getSimpleName();
+    public static final String TAG = EnrolledExamsFragment.class.getSimpleName();
 
     /*  */
     private FragmentEnrolledExamsBinding mBinding;
 
-    /* */
-    @Inject
-    EnrolledExamsViewModelFactory viewModelFactory;
-
-    /* */
-    private EnrolledExamsListViewModel mViewModel;
-
     /* Required empty public constructor */
     public EnrolledExamsFragment() {}
 
-
-    @Override
-    public void onAttach(Context context) {
-        AndroidSupportInjection.inject(this);
-        super.onAttach(context);
+    public MainActivityViewModel getViewModel() {
+        return ((MainActivity) getActivity()).getViewModel();
     }
 
     @Override
@@ -98,34 +81,28 @@ public class EnrolledExamsFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
-        mViewModel = ViewModelProviders
-                .of(this, viewModelFactory)
-                .get(EnrolledExamsListViewModel.class);
+        /* Create a new EnrolledExamAdapter. It will be responsible for displaying the list's items */
+        final EnrolledExamAdapter mExamsAdapter = new EnrolledExamAdapter(this);
 
-        if (!mViewModel.getUser().isFake()) {
-            /* Create a new EnrolledExamAdapter. It will be responsible for displaying the list's items */
-            final EnrolledExamAdapter mExamsAdapter = new EnrolledExamAdapter(this);
+        getViewModel().getEnrolledExamsLoading().observe(this, loading -> {
+            if (loading != null)
+                mBinding.swipeRefresh.setRefreshing(loading);
+        });
 
-            mViewModel.getEnrolledExamsLoading().observe(this, loading -> {
-                if (loading != null)
-                    mBinding.swipeRefresh.setRefreshing(loading);
-            });
+        getViewModel().getEnrolledExams().observe(this, list -> {
+            if (list != null) {
+                mExamsAdapter.setList((ArrayList<EnrolledExam>) list);
+            }
+        });
 
-            mViewModel.getEnrolledExams().observe(this, list -> {
-                if (list != null) {
-                    mExamsAdapter.setList((ArrayList<EnrolledExam>) list);
-                }
-            });
-
-            /* Setting the adapter attaches it to the RecyclerView in our layout. */
-            mBinding.rvList.setAdapter(mExamsAdapter);
-        }
+        /* Setting the adapter attaches it to the RecyclerView in our layout. */
+        mBinding.rvList.setAdapter(mExamsAdapter);
     }
 
 
     @Override
     public void onRefresh() {
-        mViewModel.refreshEnrolledExams();
+        getViewModel().refreshEnrolledExams();
     }
 
     /**

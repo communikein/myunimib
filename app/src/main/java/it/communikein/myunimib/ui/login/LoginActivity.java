@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 
 
@@ -39,6 +40,7 @@ import android.widget.Spinner;
 
 import dagger.android.AndroidInjection;
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 import it.communikein.myunimib.databinding.ActivityLoginBinding;
@@ -59,7 +61,9 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class LoginActivity extends AuthAppCompatActivity implements
         LoaderManager.LoaderCallbacks, EasyPermissions.PermissionCallbacks,
-        FacultyFragment.FacultyChooseProcessCallback, LoginFragment.LoginProcessCallback {
+        FacultyFragment.FacultyChooseProcessCallback,
+        LoginFragment.LoginProcessCallback,
+        PersonalDataFragment.PersonalDataCallback {
 
     private ActivityLoginBinding mBinding;
 
@@ -74,6 +78,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
     private static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1001;
     private static final String ARG_USERNAME = "arg_username";
     private static final String ARG_PASSWORD = "arg_password";
+    private static final String ARG_NAME = "arg_name";
 
     private static final int LOADER_LOGIN_ID = 2100;
     private static final int LOADER_FAKE_LOGIN_ID = 2101;
@@ -122,6 +127,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
             if (S3_accounts.length == 0) {
                 if (!isLoginVisible) showLoginView();
+                mViewModel.deleteUser();
             }
             else {
                 User user = mViewModel.getUser();
@@ -157,11 +163,6 @@ public class LoginActivity extends AuthAppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_fake_login:
-
-                getSupportLoaderManager()
-                        .initLoader(LOADER_FAKE_LOGIN_ID, null, this)
-                        .forceLoad();
-
                 return true;
         }
 
@@ -169,7 +170,9 @@ public class LoginActivity extends AuthAppCompatActivity implements
     }
 
     @Override
-    public void onBackPressed() {}
+    public void onBackPressed() {
+        mFragmentManager.popBackStackImmediate();
+    }
 
     private void initUI() {
         mLoginFragment = LoginFragment.newInstance();
@@ -298,7 +301,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
                     android.R.anim.slide_out_right,
                     R.anim.slide_in_right,
                     R.anim.slide_out_left);
-            fragmentTransaction.replace(R.id.container, mFacultyFragment, PersonalDataFragment.TAG);
+            fragmentTransaction.replace(R.id.container, mPersonalDataFragment, PersonalDataFragment.TAG);
             fragmentTransaction.addToBackStack(PersonalDataFragment.TAG);
             fragmentTransaction.commit();
         }
@@ -343,6 +346,23 @@ public class LoginActivity extends AuthAppCompatActivity implements
         showPersonalDataView();
     }
 
+    @Override
+    public void onPersonalDataComplete(User user) {
+        /* Show a progress dialog and start the Loader for the login. */
+        showProgress(true);
+
+        Bundle args = new Bundle();
+        args.putString(ARG_USERNAME, user.getUsername());
+        args.putString(ARG_PASSWORD, user.getPassword());
+        args.putString(ARG_NAME, user.getRealName());
+
+        getSupportLoaderManager()
+                .initLoader(LOADER_FAKE_LOGIN_ID, args, this)
+                .forceLoad();
+    }
+
+
+
 
     @NonNull
     @Override
@@ -358,7 +378,9 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
             case LOADER_FAKE_LOGIN_ID:
                 /* Create a fake user and start the fake login process. */
-                return mViewModel.doFakeLogin(this);
+                return mViewModel.doFakeLogin(this,
+                        args.getString(ARG_USERNAME), args.getString(ARG_PASSWORD),
+                        args.getString(ARG_NAME));
 
             case LOADER_CONFIRM_FACULTY_ID:
                 /* Get the user, save the chosen faculty, then complete the login process. */

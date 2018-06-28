@@ -18,20 +18,21 @@
             android:paddingBottom="@dimen/window_padding_16">
 
             <TextView
-                android:id="@+id/coursesLabel"
+                android:id="@+id/choose_faculty_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/choose_faculty"
-                android:textSize="17sp"/>
+                android:textSize="17sp"
+                android:textColor="@color/primary_text"/>
 
             <Spinner
                 android:id="@+id/coursesSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/faculties_spinner_height"
-                android:layout_marginTop="@dimen/window_padding_8"
-                app:layout_constraintEnd_toEndOf="@+id/coursesLabel"
-                app:layout_constraintStart_toStartOf="@+id/coursesLabel"
-                app:layout_constraintTop_toBottomOf="@id/coursesLabel"/>
+                android:layout_marginTop="@dimen/window_padding_16"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/choose_faculty_title"/>
 
             <Button
                 android:id="@+id/dialogButtonOK"

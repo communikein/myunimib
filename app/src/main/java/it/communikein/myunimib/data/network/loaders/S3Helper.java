@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.SparseArray;
 
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.EnrolledExam;
@@ -40,6 +39,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 
 public class S3Helper {
@@ -103,6 +104,37 @@ public class S3Helper {
     public static SSLSocketFactory getSocketFactory(Context context) {
 
         try {
+            TrustManager[] trustManagers = getTrustManagers(context);
+
+            HostnameVerifier hostnameVerifier = (hostname, session) -> {
+                Log.e("CipherUsed", session.getCipherSuite());
+                return hostname.compareTo("s3w.si.unimib.it") == 0;
+            };
+            HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagers, null);
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+
+            return sslContext.getSocketFactory();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return  null;
+    }
+
+    public static X509TrustManager getX509TrustManager(Context context) {
+        TrustManager[] trustManagers = getTrustManagers(context);
+        if (trustManagers != null)
+            return (X509TrustManager) trustManagers[0];
+        else
+            return null;
+    }
+
+    private static TrustManager[] getTrustManagers(Context context) {
+        try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             Certificate ca;
             try (InputStream caInput = context.getResources().openRawResource(R.raw.terenasslca3)) {
@@ -119,23 +151,12 @@ public class S3Helper {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
             tmf.init(keyStore);
 
-            HostnameVerifier hostnameVerifier = (hostname, session) -> {
-                Log.e("CipherUsed", session.getCipherSuite());
-                return hostname.compareTo("s3w.si.unimib.it") == 0;
-            };
-            HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, tmf.getTrustManagers(), null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-
-            return sslContext.getSocketFactory();
-
+            return tmf.getTrustManagers();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return  null;
+        return null;
     }
 
 

@@ -13,7 +13,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +24,7 @@ import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.databinding.FragmentDayBinding;
 import it.communikein.myunimib.ui.RecyclerItemTouchHelper;
 import it.communikein.myunimib.utilities.DAY_OF_WEEK;
-import it.communikein.myunimib.viewmodel.TimetableViewModel;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -97,10 +96,10 @@ public class DayFragment extends Fragment implements
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (getParentViewModel() != null && !getParentViewModel().getUser().isFake()) {
+        if (getViewModel() != null) {
             LessonsListAdapter mAdapter = new LessonsListAdapter(this);
 
-            getParentViewModel().getTimetable(day_of_week.getDay()).observe(this, list -> {
+            getViewModel().getTimetable(day_of_week.getDay()).observe(this, list -> {
                 if (list != null) {
                     mAdapter.setList((ArrayList<Lesson>) list);
                 }
@@ -111,7 +110,7 @@ public class DayFragment extends Fragment implements
         }
     }
 
-    private TimetableViewModel getParentViewModel() {
+    private MainActivityViewModel getViewModel() {
         if (getParentFragment() != null)
             return ((TimetableFragment) getParentFragment()).getViewModel();
         else
@@ -163,14 +162,14 @@ public class DayFragment extends Fragment implements
 
             // remove the item from recycler view
             adapter.removeItem(position);
-            if (getParentViewModel() != null) {
-                getParentViewModel().deleteLesson(lesson, () -> {
+            if (getViewModel() != null) {
+                getViewModel().deleteLesson(lesson, () -> {
                     // showing snack bar with Undo option
                     Snackbar snackbar = Snackbar.make(getParentCoordinatorLayout(),
                             getString(R.string.label_item_removed, name), Snackbar.LENGTH_LONG);
                     snackbar.setAction(R.string.action_undo, view -> {
                         // undo is selected, restore the deleted item
-                        getParentViewModel().restoreLesson(lesson,
+                        getViewModel().restoreLesson(lesson,
                                 () -> adapter.restoreItem(lesson, position));
                     });
                     snackbar.setActionTextColor(Color.YELLOW);

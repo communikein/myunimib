@@ -1,8 +1,6 @@
 package it.communikein.myunimib.ui.graduation.projection;
 
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -21,20 +19,13 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.BookletEntry;
-import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.FragmentGraduationProjectionBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.ui.RecyclerItemTouchHelper;
-import it.communikein.myunimib.ui.exam.booklet.BookletFragment;
 import it.communikein.myunimib.utilities.Utils;
-import it.communikein.myunimib.viewmodel.GraduationProjectionViewModel;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
-import it.communikein.myunimib.viewmodel.factory.GraduationProjectionViewModelFactory;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,17 +36,10 @@ public class GraduationProjectionFragment extends Fragment implements
         GraduationProjectionListAdapter.ListItemViewHolder.OnItemActionListener{
 
 
-    private static final String LOG_TAG = BookletFragment.class.getSimpleName();
+    public static final String TAG = GraduationProjectionFragment.class.getSimpleName();
 
     /*  */
     private FragmentGraduationProjectionBinding mBinding;
-
-    /* */
-    @Inject
-    GraduationProjectionViewModelFactory viewModelFactory;
-
-    /* */
-    private GraduationProjectionViewModel mViewModel;
 
     public interface AddProjectionListener {
         void onProjectionAddComplete();
@@ -68,12 +52,6 @@ public class GraduationProjectionFragment extends Fragment implements
     /* Required empty public constructor */
     public GraduationProjectionFragment() { }
 
-
-    @Override
-    public void onAttach(Context context) {
-        AndroidSupportInjection.inject(this);
-        super.onAttach(context);
-    }
 
     private MainActivityViewModel getViewModel() {
         return ((MainActivity) getActivity()).getViewModel();
@@ -121,10 +99,6 @@ public class GraduationProjectionFragment extends Fragment implements
         hideBottomNavigation();
         hideTabs();
 
-        mViewModel = ViewModelProviders
-                .of(this, viewModelFactory)
-                .get(GraduationProjectionViewModel.class);
-
         /*
          * Ensures a loader is initialized and active and shows the loading view.
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
@@ -135,7 +109,7 @@ public class GraduationProjectionFragment extends Fragment implements
             final GraduationProjectionListAdapter mAdapter =
                     new GraduationProjectionListAdapter(null);
 
-            mViewModel.getExams().observe(this, list -> {
+            getViewModel().getFakeExams().observe(this, list -> {
                 if (list != null) {
                     mAdapter.setList((ArrayList<BookletEntry>) list);
 
@@ -156,27 +130,34 @@ public class GraduationProjectionFragment extends Fragment implements
             final AddProjectionDialog dialog = new AddProjectionDialog()
                     .setActionListener(this);
 
-            mViewModel.getCoursesNames().observe(this, dialog::setCoursesNames);
+            getViewModel().getCoursesNames().observe(this, dialog::setCoursesNames);
 
             dialog.show(getChildFragmentManager(), AddProjectionDialog.class.getSimpleName());
         });
     }
 
     private void updateProjection(List<BookletEntry> exams) {
-        mViewModel.getUser().observe(this, (user) -> {
+        getViewModel().getUser().observe(this, (user) -> {
             if (user != null) {
-                double result = user.getAverageMark() * user.getTotalCfu();
+                double result = -1;
 
-                int fakeCFU = 0;
-                for (BookletEntry exam : exams) {
-                    if (exam.getScoreValue() != 0)
-                        fakeCFU += exam.getCfu();
+                if (user.getAverageMark() != -1 && user.getTotalCfu() != -1) {
+                    result = user.getAverageMark() * user.getTotalCfu();
 
-                    result += exam.getScoreValue() * exam.getCfu();
+                    int fakeCFU = 0;
+                    for (BookletEntry exam : exams) {
+                        if (exam.getScoreValue() != 0)
+                            fakeCFU += exam.getCfu();
+
+                        result += exam.getScoreValue() * exam.getCfu();
+                    }
+                    result = result / (fakeCFU + user.getTotalCfu()) * 110 / 30;
                 }
-                result = result / (fakeCFU + user.getTotalCfu()) * 110 / 30;
 
-                mBinding.futureProjectionTextview.setText(Utils.markFormat.format(result));
+                if (result == -1)
+                    mBinding.futureProjectionTextview.setText("-");
+                else
+                    mBinding.futureProjectionTextview.setText(Utils.markFormat.format(result));
             }
         });
     }
@@ -208,7 +189,7 @@ public class GraduationProjectionFragment extends Fragment implements
 
     @Override
     public void onAddClick(BookletEntry entry) {
-        mViewModel.addExamProjection(entry, () -> {
+        getViewModel().addExamProjection(entry, () -> {
             Snackbar.make(mBinding.coordinatorLayout,
                     R.string.label_projection_added, Snackbar.LENGTH_LONG).show();
         });
@@ -244,13 +225,13 @@ public class GraduationProjectionFragment extends Fragment implements
 
         // remove the item from recycler view
         adapter.removeItem(position);
-        mViewModel.deleteExamProjection(entry, () -> {
+        getViewModel().deleteExamProjection(entry, () -> {
             // showing snack bar with Undo option
             Snackbar snackbar = Snackbar.make(mBinding.coordinatorLayout,
                     getString(R.string.label_item_removed, name), Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.action_undo, view -> {
                 // undo is selected, restore the deleted item
-                mViewModel.restoreExamProjection(entry,
+                getViewModel().restoreExamProjection(entry,
                         () -> adapter.restoreItem(entry, position));
             });
             snackbar.setActionTextColor(Color.YELLOW);

@@ -24,6 +24,8 @@ import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 public class HomeFragment extends Fragment {
 
+    public static final String TAG = HomeFragment.class.getName();
+
     /*  */
     private FragmentHomeBinding mBinding;
 
@@ -52,7 +54,7 @@ public class HomeFragment extends Fragment {
         showBottomNavigation();
 
         updateUI();
-        getViewModel().loadProfilePicture(mBinding.userImageView);
+        getViewModel().loadProfilePicturePicasso(mBinding.userImageView);
     }
 
     private void updateUI() {

@@ -3,8 +3,6 @@ package it.communikein.myunimib.ui.exam.available;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -19,7 +17,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +24,6 @@ import android.view.ViewGroup;
 import java.io.File;
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.AvailableExam;
 import it.communikein.myunimib.data.model.Exam;
@@ -39,8 +33,7 @@ import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.databinding.FragmentAvailableExamsBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.Utils;
-import it.communikein.myunimib.viewmodel.AvailableExamsListViewModel;
-import it.communikein.myunimib.viewmodel.factory.AvailableExamsViewModelFactory;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 
 /**
@@ -50,19 +43,12 @@ public class AvailableExamsFragment extends Fragment implements
         AvailableExamAdapter.ExamClickCallback, LoaderManager.LoaderCallbacks,
         EnrollLoader.EnrollUpdatesListener, SwipeRefreshLayout.OnRefreshListener {
 
-    private static final String LOG_TAG = AvailableExamsFragment.class.getSimpleName();
+    public static final String TAG = AvailableExamsFragment.class.getSimpleName();
 
     private final static int LOADER_ENROLL_ID = 4001;
 
     /*  */
     private FragmentAvailableExamsBinding mBinding;
-
-    /* */
-    @Inject
-    AvailableExamsViewModelFactory viewModelFactory;
-
-    /* */
-    private AvailableExamsListViewModel mViewModel;
 
     private Exam chosenExam = null;
     private ProgressDialog progress;
@@ -70,11 +56,8 @@ public class AvailableExamsFragment extends Fragment implements
     /* Required empty public constructor */
     public AvailableExamsFragment() {}
 
-
-    @Override
-    public void onAttach(Context context) {
-        AndroidSupportInjection.inject(this);
-        super.onAttach(context);
+    public MainActivityViewModel getViewModel() {
+        return ((MainActivity) getActivity()).getViewModel();
     }
 
     @Override
@@ -118,39 +101,28 @@ public class AvailableExamsFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
-        mViewModel = ViewModelProviders
-                .of(this, viewModelFactory)
-                .get(AvailableExamsListViewModel.class);
+        /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
+        final AvailableExamAdapter mExamsAdapter = new AvailableExamAdapter(this);
 
-        /*
-         * Ensures a loader is initialized and active and shows the loading view.
-         * If the loader doesn't already exist, one is created and (if the activity/fragment is
-         * currently started) starts the loader. Otherwise the last created loader is re-used.
-         */
-        if (getActivity() != null && !mViewModel.getUser().isFake()) {
-            /* Create a new AvailableExamAdapter. It will be responsible for displaying the list's items */
-            final AvailableExamAdapter mExamsAdapter = new AvailableExamAdapter(this);
+        getViewModel().getAvailableExamsLoading().observe(this, loading -> {
+            if (loading != null)
+                mBinding.swipeRefresh.setRefreshing(loading);
+        });
 
-            mViewModel.getAvailableExamsLoading().observe(this, loading -> {
-                if (loading != null)
-                    mBinding.swipeRefresh.setRefreshing(loading);
-            });
+        getViewModel().getAvailableExams().observe(this, list -> {
+            if (list != null) {
+                mExamsAdapter.setList((ArrayList<AvailableExam>) list);
+            }
+        });
 
-            mViewModel.getAvailableExams().observe(this, list -> {
-                if (list != null) {
-                    mExamsAdapter.setList((ArrayList<AvailableExam>) list);
-                }
-            });
-
-            /* Setting the adapter attaches it to the RecyclerView in our layout. */
-            mBinding.rvList.setAdapter(mExamsAdapter);
-        }
+        /* Setting the adapter attaches it to the RecyclerView in our layout. */
+        mBinding.rvList.setAdapter(mExamsAdapter);
     }
 
 
     @Override
     public void onRefresh() {
-        mViewModel.refreshAvailableExams();
+        getViewModel().refreshAvailableExams();
     }
 
     @Override
@@ -187,6 +159,7 @@ public class AvailableExamsFragment extends Fragment implements
 
 
 
+    @NonNull
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
         switch (id) {
@@ -194,17 +167,15 @@ public class AvailableExamsFragment extends Fragment implements
                 if (chosenExam != null) {
                     showProgress(true);
 
-                    return mViewModel.enrollExam(chosenExam, getActivity(), this);
+                    return getViewModel().enrollExam(chosenExam, getActivity(), this);
                 }
-                else return null;
-
             default:
                 throw new RuntimeException("Loader Not Implemented: " + id);
         }
     }
 
     @Override
-    public void onLoadFinished(Loader loader, Object result) {
+    public void onLoadFinished(@NonNull Loader loader, Object result) {
         showProgress(false);
 
         switch (loader.getId()) {
@@ -229,8 +200,8 @@ public class AvailableExamsFragment extends Fragment implements
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
 
-            mViewModel.refreshAvailableExams();
-            mViewModel.refreshEnrolledExams();
+            getViewModel().refreshAvailableExams();
+            getViewModel().refreshEnrolledExams();
         }
         else {
             new AlertDialog.Builder(getActivity())
@@ -243,7 +214,7 @@ public class AvailableExamsFragment extends Fragment implements
     }
 
     @Override
-    public void onLoaderReset(Loader loader) {}
+    public void onLoaderReset(@NonNull Loader loader) {}
 
     @Override
     public void onEnrollmentUpdate(int status) {

@@ -757,6 +757,7 @@ public class UnimibRepository {
 
     public void deleteUser(Activity activity, AccountRemovedListener accountRemovedListener,
                            AccountRemoveErrorListener accountRemoveErrorListener) {
+        mExecutors.diskIO().execute(mUserDao::delete);
         mUserHelper.deleteUser(activity, accountRemovedListener, accountRemoveErrorListener);
     }
 

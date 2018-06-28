@@ -23,7 +23,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/personal_data_label"
-                android:textSize="17sp"/>
+                android:textSize="17sp"
+                android:textColor="@color/primary_text"/>
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/name_text_input_layout"
@@ -41,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="textCapWords"
-                    tools:text="Elia"
+                    tools:text="@tools:sample/full_names"
                     android:hint="@string/prompt_name"
                     android:theme="@style/LoginEditText"/>
 
@@ -67,7 +68,7 @@
                     android:ems="10"
                     android:hint="@string/prompt_email"
                     android:inputType="textEmailAddress"
-                    tools:text="@string/fake_email"
+                    tools:text="@string/holder_user_email"
                     android:theme="@style/LoginEditText"/>
 
             </android.support.design.widget.TextInputLayout>

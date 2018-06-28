@@ -1,8 +1,6 @@
 package it.communikein.myunimib.ui.building;
 
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,19 +18,15 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.databinding.FragmentBuildingsBinding;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.viewmodel.BuildingsViewModel;
-import it.communikein.myunimib.viewmodel.factory.BuildingsViewModelFactory;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 
 public class BuildingsFragment extends Fragment {
 
-    private static final String TAG = BuildingsFragment.class.getSimpleName();
+    public static final String TAG = BuildingsFragment.class.getSimpleName();
 
     private static final ArrayList<String> TABS_TITLE = new ArrayList<>();
     private static final String FRAGMENT_MAP_TITLE = "Map";
@@ -41,27 +35,13 @@ public class BuildingsFragment extends Fragment {
     /* */
     private FragmentBuildingsBinding mBinding;
 
-    /* */
-    @Inject
-    BuildingsViewModelFactory viewModelFactory;
-
-    /* */
-    private BuildingsViewModel mViewModel;
-
     public BuildingsFragment() {
         TABS_TITLE.add(FRAGMENT_MAP_TITLE);
         TABS_TITLE.add(FRAGMENT_LIST_TITLE);
     }
 
-
-    @Override
-    public void onAttach(Context context) {
-        AndroidSupportInjection.inject(this);
-        super.onAttach(context);
-    }
-
-    public BuildingsViewModel getViewModel() {
-        return mViewModel;
+    public MainActivityViewModel getViewModel() {
+        return ((MainActivity) getActivity()).getViewModel();
     }
 
     @Override
@@ -76,10 +56,6 @@ public class BuildingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setTitle();
-
-        mViewModel = ViewModelProviders
-                .of(this, viewModelFactory)
-                .get(BuildingsViewModel.class);
 
         showTabs();
         hideBottomNavigation();

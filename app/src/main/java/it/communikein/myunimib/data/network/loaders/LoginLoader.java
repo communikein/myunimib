@@ -64,24 +64,29 @@ public class LoginLoader extends AsyncTaskLoader<User> {
         Context context = mActivity.get();
         if (context == null) return null;
 
-        UserHelper userHelper = new UserHelper(context);
         int loggedIn;
         try {
-            /* Try logging in the user */
-            Bundle result = doLogin(mUser, context, userHelper);
-            loggedIn = result.getInt(RESULT);
+            UserHelper userHelper = new UserHelper(context);
 
-            String sessionId = result.getString(User.PREF_SESSION_ID);
-            String facultiesString = result.getString(User.PREF_FACULTIES);
+            if (!mUser.isFake()) {
+                /* Try logging in the user */
+                Bundle result = doLogin(mUser, context, userHelper);
+                loggedIn = result.getInt(RESULT);
 
-            if (sessionId != null)
-                mUser.setSessionId(sessionId);
-            if (facultiesString != null)
-                mUser.setFacultiesFromJson(facultiesString);
+                String sessionId = result.getString(User.PREF_SESSION_ID);
+                String facultiesString = result.getString(User.PREF_FACULTIES);
 
-            if (loggedIn == ERROR_FACULTY_TO_CHOOSE) {
-                createAccount(mUser, context);
+                if (sessionId != null)
+                    mUser.setSessionId(sessionId);
+                if (facultiesString != null)
+                    mUser.setFacultiesFromJson(facultiesString);
+
+                if (loggedIn == ERROR_FACULTY_TO_CHOOSE) {
+                    createAccount(mUser, context);
+                }
             }
+            else
+                loggedIn = OK_LOGGED_IN;
 
             /*
              * If the server recognise the user as logged in, download the user's data and
@@ -90,8 +95,10 @@ public class LoginLoader extends AsyncTaskLoader<User> {
             if (loggedIn == OK_LOGGED_IN) {
                 Log.d(TAG, "RESULT: LOGIN COMPLETED. (" + loggedIn + ")");
 
-                Log.d(TAG, "Downloading user data");
-                mUser = S3Helper.downloadUserData(mUser, context, userHelper::updateSessionId);
+                if (!mUser.isFake()) {
+                    Log.d(TAG, "Downloading user data");
+                    mUser = S3Helper.downloadUserData(mUser, context, userHelper::updateSessionId);
+                }
 
                 createAccount(mUser, context);
             }

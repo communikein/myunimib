@@ -33,6 +33,10 @@ public class LoginViewModel extends ViewModel {
         mRepository.saveUser(user);
     }
 
+    public void deleteUser() {
+        mRepository.deleteUser(null, null, null);
+    }
+
     public String getAccountType() {
         return mRepository.getAccountType();
     }
@@ -55,18 +59,20 @@ public class LoginViewModel extends ViewModel {
 
 
 
-    public LoginLoader doLogin(Activity activity, String username, String password) {
+    public LoginLoader doLogin(Activity activity, String username, String password, String name, boolean fake) {
         User temp_user = new User(username, password);
-        temp_user.setFake(false);
+        temp_user.setRealName(name);
+        temp_user.setFake(fake);
 
         return mRepository.loginUser(temp_user, activity);
     }
 
-    public LoginLoader doFakeLogin(Activity activity) {
-        User temp_user = new User("fake", "fake");
-        temp_user.setFake(true);
+    public LoginLoader doLogin(Activity activity, String username, String password) {
+        return doLogin(activity, username, password, "", false);
+    }
 
-        return mRepository.loginUser(temp_user, activity);
+    public LoginLoader doFakeLogin(Activity activity, String username, String password, String name) {
+        return doLogin(activity, username, password, name, true);
     }
 
     public UserDataLoader downloadUserData(Activity activity) {

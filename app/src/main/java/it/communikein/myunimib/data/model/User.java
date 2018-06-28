@@ -14,7 +14,8 @@ import javax.inject.Singleton;
 public class User extends UserAuthentication {
 
     public static final String PREFERENCES_USER = "user_details";
-    public static final String SAVED_PROFILE_PICTURE = "/profile_picture.png";
+    public static final String PROFILE_PICTURE_PATH = "profile-picture";
+    public static final String PROFILE_PICTURE_EXT = ".png";
 
     public static final String PREF_MATRICOLA = "user_matricola";
     public static final String PREF_NAME = "user_name";

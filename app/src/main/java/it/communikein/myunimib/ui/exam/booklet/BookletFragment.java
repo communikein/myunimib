@@ -1,8 +1,6 @@
 package it.communikein.myunimib.ui.exam.booklet;
 
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,22 +9,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.BookletEntry;
 import it.communikein.myunimib.databinding.FragmentBookletBinding;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.viewmodel.BookletViewModel;
-import it.communikein.myunimib.viewmodel.factory.BookletViewModelFactory;
+import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 
 /**
@@ -35,26 +28,16 @@ import it.communikein.myunimib.viewmodel.factory.BookletViewModelFactory;
 public class BookletFragment extends Fragment implements
         SwipeRefreshLayout.OnRefreshListener, BookletAdapter.ExamClickCallback {
 
-    private static final String LOG_TAG = BookletFragment.class.getSimpleName();
+    public static final String TAG = BookletFragment.class.getSimpleName();
 
     /*  */
     private FragmentBookletBinding mBinding;
 
-    /* */
-    @Inject
-    BookletViewModelFactory viewModelFactory;
-
-    /* */
-    private BookletViewModel mViewModel;
-
     /* Required empty public constructor */
     public BookletFragment() {}
 
-
-    @Override
-    public void onAttach(Context context) {
-        AndroidSupportInjection.inject(this);
-        super.onAttach(context);
+    public MainActivityViewModel getViewModel() {
+        return ((MainActivity) getActivity()).getViewModel();
     }
 
     @Override
@@ -95,26 +78,22 @@ public class BookletFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
-        mViewModel = ViewModelProviders
-                .of(this, viewModelFactory)
-                .get(BookletViewModel.class);
-
         /*
          * Ensures a loader is initialized and active and shows the loading view.
          * If the loader doesn't already exist, one is created and (if the activity/fragment is
          * currently started) starts the loader. Otherwise the last created loader is re-used.
          */
-        if (getActivity() != null && !mViewModel.getUser().isFake()) {
+        if (getActivity() != null) {
 
             /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
             final BookletAdapter mAdapter = new BookletAdapter(this);
 
-            mViewModel.getBookletLoading().observe(this, loading -> {
+            getViewModel().getBookletLoading().observe(this, loading -> {
                 if (loading != null)
                     mBinding.swipeRefresh.setRefreshing(loading);
             });
 
-            mViewModel.getBooklet().observe(this, list -> {
+            getViewModel().getBooklet().observe(this, list -> {
                 if (list != null) {
                     mAdapter.setList((ArrayList<BookletEntry>) list);
                 }
@@ -128,7 +107,7 @@ public class BookletFragment extends Fragment implements
 
     @Override
     public void onRefresh() {
-        mViewModel.refreshBooklet();
+        getViewModel().refreshBooklet();
     }
 
     /**

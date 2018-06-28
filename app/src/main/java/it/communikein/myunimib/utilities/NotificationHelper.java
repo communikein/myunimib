@@ -16,6 +16,9 @@ import javax.inject.Singleton;
 
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.ui.MainActivity;
+import it.communikein.myunimib.ui.exam.available.AvailableExamsFragment;
+import it.communikein.myunimib.ui.exam.booklet.BookletFragment;
+import it.communikein.myunimib.ui.exam.enrolled.EnrolledExamsFragment;
 
 /**
  * Created by eliam on 12/22/2017.
@@ -94,7 +97,7 @@ public class NotificationHelper extends ContextWrapper {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MainActivity.INTENT_PARAM_SHOW_FRAGMENT,
-                MainActivity.TAG_FRAGMENT_BOOKLET);
+                BookletFragment.TAG);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 BOOKLET_CHANGES_NOTIFICATION_ID,
@@ -111,7 +114,7 @@ public class NotificationHelper extends ContextWrapper {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MainActivity.INTENT_PARAM_SHOW_FRAGMENT,
-                MainActivity.TAG_FRAGMENT_EXAMS_AVAILABLE);
+                AvailableExamsFragment.TAG);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 AVAILABLE_EXAMS_CHANGES_NOTIFICATION_ID,
@@ -128,7 +131,7 @@ public class NotificationHelper extends ContextWrapper {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MainActivity.INTENT_PARAM_SHOW_FRAGMENT,
-                MainActivity.TAG_FRAGMENT_EXAMS_ENROLLED);
+                EnrolledExamsFragment.TAG);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 ENROLLED_EXAMS_CHANGES_NOTIFICATION_ID,

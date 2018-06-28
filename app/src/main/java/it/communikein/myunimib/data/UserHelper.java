@@ -128,18 +128,18 @@ public class UserHelper {
                                 Bundle data = accountManagerFuture.getResult();
                                 boolean isRemoved = data.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
 
-                                listener.onAccountRemoved(isRemoved);
+                                if(listener != null) listener.onAccountRemoved(isRemoved);
                             } catch (IOException e) {
                                 Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
-                                errorListener.onAccountRemoveError(null);
+                                if(errorListener != null) errorListener.onAccountRemoveError(null);
                             } catch (OperationCanceledException e) {
                                 Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
 
                                 String error = activity.getString(R.string.error_logout_cancelled);
-                                errorListener.onAccountRemoveError(error);
+                                if(errorListener != null) errorListener.onAccountRemoveError(error);
                             } catch (AuthenticatorException e) {
                                 Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
-                                errorListener.onAccountRemoveError(null);
+                                if(errorListener != null) errorListener.onAccountRemoveError(null);
                             }
                         }, null);
             } else {
@@ -148,22 +148,27 @@ public class UserHelper {
                     try {
                         boolean isRemoved = accountManagerFuture.getResult();
 
-                        listener.onAccountRemoved(isRemoved);
+                        if(listener != null) listener.onAccountRemoved(isRemoved);
                     } catch (IOException e) {
                         Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
-                        errorListener.onAccountRemoveError(null);
+                        if(errorListener != null) errorListener.onAccountRemoveError(null);
                     } catch (OperationCanceledException e) {
                         Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
 
                         String error = activity.getString(R.string.error_logout_cancelled);
-                        errorListener.onAccountRemoveError(error);
+                        if(errorListener != null) errorListener.onAccountRemoveError(error);
                     } catch (AuthenticatorException e) {
                         Utils.saveBugReport(e, TAG, "UserHelper.deleteUser");
-                        errorListener.onAccountRemoveError(null);
+                        if(errorListener != null) errorListener.onAccountRemoveError(null);
                     }
                 }, null);
             }
         }
+
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.remove(User.PREF_SESSION_ID);
+        editor.remove(User.PREF_SELECTED_FACULTY);
+        editor.apply();
     }
 
 }
