@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.TrustManager;
@@ -101,15 +102,37 @@ public class S3Helper {
     }
 
     @Nullable
-    public static SSLSocketFactory getSocketFactory(Context context) {
+    public static SSLSocketFactory getSocketFactory(Context context, boolean secure) {
 
         try {
             TrustManager[] trustManagers = getTrustManagers(context);
-
             HostnameVerifier hostnameVerifier = (hostname, session) -> {
                 Log.e("CipherUsed", session.getCipherSuite());
                 return hostname.compareTo("s3w.si.unimib.it") == 0;
             };
+
+            if (!secure) {
+                // Create a trust manager that does not validate certificate chains
+                trustManagers = new TrustManager[]{
+                        new X509TrustManager() {
+                            @Override
+                            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                            }
+
+                            @Override
+                            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                            }
+
+                            @Override
+                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                                return null;
+                            }
+                        }
+                };
+
+                hostnameVerifier = (hostname, session) -> true;
+            }
+
             HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
             SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -125,8 +148,28 @@ public class S3Helper {
         return  null;
     }
 
-    public static X509TrustManager getX509TrustManager(Context context) {
+    public static X509TrustManager getX509TrustManager(Context context, boolean secure) {
         TrustManager[] trustManagers = getTrustManagers(context);
+        if (!secure) {
+            // Create a trust manager that does not validate certificate chains
+            trustManagers = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+                    }
+            };
+        }
+
         if (trustManagers != null)
             return (X509TrustManager) trustManagers[0];
         else
@@ -204,7 +247,7 @@ public class S3Helper {
 
         /* For devices running Nougat (API 24) or above, use the network_security_config.xml */
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-            con.setSSLSocketFactory(getSocketFactory(context));
+            con.setSSLSocketFactory(getSocketFactory(context, true));
 
         String cookie = con.getHeaderField("Set-Cookie");
         String sessionID = parseSessionID(cookie);

@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        mViewModel.loadProfilePicturePicasso(userImageView);
+        mViewModel.loadProfilePictureVolley(userImageView);
     }
 
     private int getNavIdFromFragmentTag(String tag) {

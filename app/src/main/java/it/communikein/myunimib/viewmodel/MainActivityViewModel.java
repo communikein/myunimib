@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
 import android.widget.ImageView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -94,7 +95,7 @@ public class MainActivityViewModel extends ViewModel {
         return mUser;
     }
 
-    public void loadProfilePicture(NetworkImageView target) {
+    public void loadProfilePictureVolley(NetworkImageView target) {
         this.mProfilePictureRequest.changeUser(mRepository.getUserAuth());
 
         ProfilePictureVolleyRequest.ProfilePictureLoader imageLoader =
@@ -110,12 +111,17 @@ public class MainActivityViewModel extends ViewModel {
         target.setImageUrl(S3Helper.URL_PROFILE_PICTURE, imageLoader);
     }
 
-    public void loadProfilePicturePicasso(ImageView target) {
+    public void loadProfilePicturePicasso(ProfilePicturePicassoRequest.ImageDownloadCallback callback) {
         this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
 
-        this.mProfilePicturePicassoRequest.displayProfilePicture(target,
-                R.drawable.ic_person_black_24dp,
-                android.R.drawable.ic_dialog_alert);
+        this.mProfilePicturePicassoRequest.setImageDownloadCallback(callback);
+        this.mProfilePicturePicassoRequest.displayProfilePicture();
+    }
+
+    public void loadProfilePicturePicassoTwo(Context app, ImageView target) {
+        this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
+
+        this.mProfilePicturePicassoRequest.displayProfilePicturePicasso(app, target);
     }
 
 

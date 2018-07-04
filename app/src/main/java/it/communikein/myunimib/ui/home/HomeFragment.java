@@ -2,6 +2,7 @@ package it.communikein.myunimib.ui.home;
 
 
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import it.communikein.myunimib.R;
+import it.communikein.myunimib.data.network.ProfilePicturePicassoRequest;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.Utils;
@@ -54,7 +56,21 @@ public class HomeFragment extends Fragment {
         showBottomNavigation();
 
         updateUI();
-        getViewModel().loadProfilePicturePicasso(mBinding.userImageView);
+
+        getViewModel().loadProfilePictureVolley(mBinding.userImageView);
+        /*
+        getViewModel().loadProfilePicturePicasso(new ProfilePicturePicassoRequest.ImageDownloadCallback() {
+            @Override
+            public void onImageReady(Bitmap bitmap) {
+                mBinding.userImageView.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void onImageError(Exception e) {
+
+            }
+        });
+        */
     }
 
     private void updateUI() {
