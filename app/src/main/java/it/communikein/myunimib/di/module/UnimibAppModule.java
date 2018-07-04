@@ -65,7 +65,7 @@ public class UnimibAppModule {
     @Singleton @Provides
     UnimibDatabase provideDatabase(Application application) {
         return Room.databaseBuilder(application, UnimibDatabase.class, UnimibDatabase.NAME)
-                .fallbackToDestructiveMigration()
+                .addMigrations(UnimibDatabase.MIGRATION_29_30)
                 .build();
     }
 

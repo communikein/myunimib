@@ -160,4 +160,16 @@ public class BuildingsMapFragment extends Fragment implements OnMapReadyCallback
         mBinding.map.onLowMemory();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        mBinding.map.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mBinding.map.onStop();
+    }
+
 }

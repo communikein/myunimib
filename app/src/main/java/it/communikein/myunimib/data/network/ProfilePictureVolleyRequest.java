@@ -117,13 +117,15 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
                     error -> {
                         onGetImageError(cacheKey, error);
 
-                        String cookie = error.networkResponse.headers.get("Set-Cookie");
-                        if (cookie != null && cookie.contains("JSESSIONID")) {
-                            // Save it
-                            cookie = cookie.substring(cookie.indexOf("JSESSIONID=") + 11);
-                            cookie = cookie.substring(0, cookie.indexOf(";"));
-                            userAuthentication.setSessionId(cookie);
-                            mRepository.updateUserSessionId(cookie);
+                        if (error.networkResponse != null) {
+                            String cookie = error.networkResponse.headers.get("Set-Cookie");
+                            if (cookie != null && cookie.contains("JSESSIONID")) {
+                                // Save it
+                                cookie = cookie.substring(cookie.indexOf("JSESSIONID=") + 11);
+                                cookie = cookie.substring(0, cookie.indexOf(";"));
+                                userAuthentication.setSessionId(cookie);
+                                mRepository.updateUserSessionId(cookie);
+                            }
                         }
                     });
             request.setRetryPolicy(new DefaultRetryPolicy(

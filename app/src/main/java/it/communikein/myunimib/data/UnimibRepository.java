@@ -744,10 +744,14 @@ public class UnimibRepository {
 
         mExecutors.diskIO().execute(() -> {
             User userDb = mUserDao.getUser(user.getUsername());
-            userDb.setUsername(user.getUsername());
-            userDb.setPassword(user.getPassword());
-            userDb.setSessionId(user.getSessionId());
-            userDb.setSelectedFaculty(user.getSelectedFaculty());
+            if (userDb != null) {
+                userDb.setUsername(user.getUsername());
+                userDb.setPassword(user.getPassword());
+                userDb.setSessionId(user.getSessionId());
+                userDb.setSelectedFaculty(user.getSelectedFaculty());
+            }
+            else
+                userDb = user;
 
             if (listener != null) listener.onUserLoaded(userDb);
         });

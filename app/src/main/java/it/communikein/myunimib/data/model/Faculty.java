@@ -3,6 +3,7 @@ package it.communikein.myunimib.data.model;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -20,7 +21,7 @@ import static android.arch.persistence.room.ForeignKey.CASCADE;
 @Entity(tableName = "faculties", foreignKeys = @ForeignKey(entity = User.class,
             parentColumns = "username",
             childColumns = "userId",
-            onDelete = CASCADE))
+            onDelete = CASCADE), indices = {@Index("userId")})
 public class Faculty implements Parcelable {
 
     public static final String FACULTY_NAME = "faculty_name";
