@@ -10,9 +10,11 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.ImageView;
 
+/*
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestHandler;
+*/
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 
+/*
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -37,6 +40,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
+*/
 
 @Singleton
 public class ProfilePicturePicassoRequest {
@@ -48,9 +52,11 @@ public class ProfilePicturePicassoRequest {
     private UnimibRepository mRepository;
     private UserAuthentication mUserAuthentication;
 
+    /*
     private OkHttpClient mOkHttpClient;
     private Picasso mPicasso;
     private Request mRequest;
+    */
 
     private ImageDownloadCallback mImageDownloadCallback;
     public interface ImageDownloadCallback {
@@ -90,6 +96,7 @@ public class ProfilePicturePicassoRequest {
         this.mImageDownloadCallback = callback;
     }
 
+    /*
     private final Interceptor onlineInterceptor = new Interceptor() {
         @Override
         public Response intercept(Chain chain) throws IOException {
@@ -236,5 +243,6 @@ public class ProfilePicturePicassoRequest {
             return response;
         }
     }
+    */
 
 }

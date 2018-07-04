@@ -2,7 +2,6 @@ package it.communikein.myunimib.ui.home;
 
 
 import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.network.ProfilePicturePicassoRequest;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
 import it.communikein.myunimib.ui.MainActivity;
 import it.communikein.myunimib.utilities.Utils;
@@ -78,8 +76,8 @@ public class HomeFragment extends Fragment {
             if (user != null) {
                 mBinding.userNameTextView.setText(user.getRealName());
                 mBinding.matricolaTextView.setText(user.getMatricola());
-                mBinding.averageMarkTextView.setText(Utils.markFormat.format(user.getAverageMark()));
-                mBinding.cfuTextView.setText(String.valueOf(user.getTotalCfu()));
+                mBinding.averageMarkTextView.setText(user.printAverageScore());
+                mBinding.cfuTextView.setText(user.printTotalCfu());
             }
         });
     }

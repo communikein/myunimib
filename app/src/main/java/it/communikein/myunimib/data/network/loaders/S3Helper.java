@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.TrustManager;
@@ -304,7 +303,7 @@ public class S3Helper {
             userData.setMatricola("293640");
             userData.setRealName("Pippo Pluto");
             userData.setTotalCfu(42);
-            userData.setAverageMark(24);
+            userData.setAverageScore(24);
 
             return userData;
         }
@@ -345,7 +344,7 @@ public class S3Helper {
             float averageMark = Float.parseFloat(averageTmp);
             int totalCfu = Integer.parseInt(cfuTmp);
             userData.setTotalCfu(totalCfu);
-            userData.setAverageMark(averageMark);
+            userData.setAverageScore(averageMark);
 
             Log.d("LOGIN_USER_DATA", "Average mark: " + averageTmp);
             Log.d("LOGIN_USER_DATA", "CFU: " + cfuTmp);

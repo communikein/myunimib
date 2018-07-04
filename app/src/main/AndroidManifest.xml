@@ -91,14 +91,6 @@
             android:label="@string/title_home"
             android:launchMode="standard" />
         <activity
-            android:name=".ui.settings.SettingsActivity"
-            android:label="@string/title_settings"
-            android:parentActivityName=".ui.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MainActivity" />
-        </activity>
-        <activity
             android:name=".ui.exam.available.AvailableExamDetailActivity"
             android:parentActivityName=".ui.MainActivity">
             <meta-data

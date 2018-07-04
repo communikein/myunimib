@@ -112,16 +112,16 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void loadProfilePicturePicasso(ProfilePicturePicassoRequest.ImageDownloadCallback callback) {
-        this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
+        //this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
 
-        this.mProfilePicturePicassoRequest.setImageDownloadCallback(callback);
-        this.mProfilePicturePicassoRequest.displayProfilePicture();
+        //this.mProfilePicturePicassoRequest.setImageDownloadCallback(callback);
+        //this.mProfilePicturePicassoRequest.displayProfilePicture();
     }
 
     public void loadProfilePicturePicassoTwo(Context app, ImageView target) {
-        this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
+        //this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
 
-        this.mProfilePicturePicassoRequest.displayProfilePicturePicasso(app, target);
+        //this.mProfilePicturePicassoRequest.displayProfilePicturePicasso(app, target);
     }
 
 

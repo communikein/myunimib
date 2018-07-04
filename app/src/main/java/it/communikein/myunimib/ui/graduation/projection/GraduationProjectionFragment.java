@@ -141,8 +141,8 @@ public class GraduationProjectionFragment extends Fragment implements
             if (user != null) {
                 double result = -1;
 
-                if (user.getAverageMark() != -1 && user.getTotalCfu() != -1) {
-                    result = user.getAverageMark() * user.getTotalCfu();
+                if (user.getAverageScore() != -1 && user.getTotalCfu() != -1) {
+                    result = user.getAverageScore() * user.getTotalCfu();
 
                     int fakeCFU = 0;
                     for (BookletEntry exam : exams) {

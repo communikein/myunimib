@@ -33,6 +33,8 @@ public class BookletFragment extends Fragment implements
     /*  */
     private FragmentBookletBinding mBinding;
 
+    private BookletAdapter mAdapter;
+
     /* Required empty public constructor */
     public BookletFragment() {}
 
@@ -61,6 +63,9 @@ public class BookletFragment extends Fragment implements
                 false);
         mBinding.rvList.setLayoutManager(layoutManager);
 
+        /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
+        mAdapter = new BookletAdapter(this);
+
         /*
          * Use this setting to improve performance if you know that changes in content do not
          * change the child layout size in the RecyclerView
@@ -70,6 +75,9 @@ public class BookletFragment extends Fragment implements
         /* Show data downloading */
         mBinding.swipeRefresh.setOnRefreshListener(this);
 
+        /* Hide FAB until we know if the user is guest or not */
+        mBinding.fab.setVisibility(View.GONE);
+
         return mBinding.getRoot();
     }
 
@@ -78,30 +86,25 @@ public class BookletFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         setTitle();
 
-        /*
-         * Ensures a loader is initialized and active and shows the loading view.
-         * If the loader doesn't already exist, one is created and (if the activity/fragment is
-         * currently started) starts the loader. Otherwise the last created loader is re-used.
-         */
-        if (getActivity() != null) {
+        getViewModel().getUser().observe(this, (user) -> {
+            if (user != null) {
+                if (!user.isFake()) mBinding.fab.setVisibility(View.VISIBLE);
 
-            /* Create a new BookletAdapter. It will be responsible for displaying the list's items */
-            final BookletAdapter mAdapter = new BookletAdapter(this);
+                getViewModel().getBookletLoading().observe(this, loading -> {
+                    if (loading != null)
+                        mBinding.swipeRefresh.setRefreshing(loading);
+                });
 
-            getViewModel().getBookletLoading().observe(this, loading -> {
-                if (loading != null)
-                    mBinding.swipeRefresh.setRefreshing(loading);
-            });
+                getViewModel().getBooklet().observe(this, list -> {
+                    if (list != null) {
+                        mAdapter.setList((ArrayList<BookletEntry>) list);
+                    }
+                });
 
-            getViewModel().getBooklet().observe(this, list -> {
-                if (list != null) {
-                    mAdapter.setList((ArrayList<BookletEntry>) list);
-                }
-            });
-
-            /* Setting the adapter attaches it to the RecyclerView in our layout. */
-            mBinding.rvList.setAdapter(mAdapter);
-        }
+                /* Setting the adapter attaches it to the RecyclerView in our layout. */
+                mBinding.rvList.setAdapter(mAdapter);
+            }
+        });
     }
 
 

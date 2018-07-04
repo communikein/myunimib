@@ -6,11 +6,11 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.TaskStackBuilder;
@@ -21,8 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
@@ -31,8 +29,6 @@ import dagger.android.AndroidInjection;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.model.EnrolledExam;
-import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.databinding.ActivityMainBinding;
 import it.communikein.myunimib.ui.graduation.projection.GraduationProjectionFragment;
 import it.communikein.myunimib.ui.home.HomeFragment;
@@ -40,7 +36,6 @@ import it.communikein.myunimib.ui.exam.available.AvailableExamsFragment;
 import it.communikein.myunimib.ui.exam.booklet.BookletFragment;
 import it.communikein.myunimib.ui.building.BuildingsFragment;
 import it.communikein.myunimib.ui.exam.enrolled.EnrolledExamsFragment;
-import it.communikein.myunimib.ui.settings.SettingsActivity;
 import it.communikein.myunimib.ui.timetable.TimetableFragment;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 import it.communikein.myunimib.viewmodel.factory.MainActivityViewModelFactory;
@@ -374,7 +369,9 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.navigation_logout:
                 return tryLogout();
             case R.id.navigation_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
+            case R.id.navigation_share:
+                Snackbar.make(mBinding.container, R.string.not_implemented,
+                        Snackbar.LENGTH_LONG).show();
                 return true;
             default:
                 return false;

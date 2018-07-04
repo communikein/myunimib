@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 import javax.inject.Singleton;
 
+import it.communikein.myunimib.utilities.Utils;
+
 @SuppressWarnings({"WeakerAccess", "unused"})
 @Entity(tableName = "user")
 @Singleton
@@ -19,7 +21,7 @@ public class User extends UserAuthentication {
 
     public static final String PREF_MATRICOLA = "user_matricola";
     public static final String PREF_NAME = "user_name";
-    public static final String PREF_AVERAGE_MARK = "user_average_mark";
+    public static final String PREF_AVERAGE_SCORE = "user_average_score";
     public static final String PREF_TOTAL_CFU = "user_total_cfu";
     public static final String PREF_TAG = "user_tag";
 
@@ -28,7 +30,7 @@ public class User extends UserAuthentication {
 
     private String realName;
     private String matricola;
-    private float averageMark;
+    private float averageScore;
     private int totalCfu;
     @Ignore
     private Object mTag;
@@ -39,54 +41,64 @@ public class User extends UserAuthentication {
 
         setMatricola(null);
         setRealName(null);
-        setAverageMark(ERROR_AVERAGE_MARK);
+        setAverageScore(ERROR_AVERAGE_MARK);
         setTotalCfu(ERROR_TOTAL_CFU);
     }
 
     @Ignore
-    public User(@NonNull String username, String password, String realName, float averageMark,
+    public User(@NonNull String username, String password, String realName, float averageScore,
                 int totalCfu, String matricola) {
         super(username, password, null, null, null, false);
 
         setRealName(realName);
         setMatricola(matricola);
         setTotalCfu(totalCfu);
-        setAverageMark(averageMark);
+        setAverageScore(averageScore);
     }
 
     @Ignore
     public User(@NonNull String username, String sessionId, ArrayList<Faculty> faculties,
-                Faculty selectedFaculty, String realName, String matricola, float averageMark,
+                Faculty selectedFaculty, String realName, String matricola, float averageScore,
                 int totalCfu, boolean fake) {
         super(username, null, sessionId, faculties, selectedFaculty, fake);
 
         setRealName(realName);
         setMatricola(matricola);
-        setAverageMark(averageMark);
+        setAverageScore(averageScore);
         setTotalCfu(totalCfu);
     }
 
-    public User(@NonNull String username, String realName, String matricola, float averageMark,
+    public User(@NonNull String username, String realName, String matricola, float averageScore,
                 int totalCfu, boolean fake) {
         super(username, null, "", new ArrayList<>(), null, fake);
 
         setRealName(realName);
         setMatricola(matricola);
-        setAverageMark(averageMark);
+        setAverageScore(averageScore);
         setTotalCfu(totalCfu);
     }
 
 
-    public float getAverageMark() {
-        return averageMark;
+    public float getAverageScore() {
+        return averageScore;
     }
 
-    public void setAverageMark(float averageMark) {
-        this.averageMark = averageMark;
+    public String printAverageScore() {
+        if (getAverageScore() < 0) return "-";
+        return Utils.markFormat.format(getAverageScore());
+    }
+
+    public void setAverageScore(float averageScore) {
+        this.averageScore = averageScore;
     }
 
     public int getTotalCfu() {
         return totalCfu;
+    }
+
+    public String printTotalCfu() {
+        if (getTotalCfu() < 0) return "-";
+        return String.valueOf(getTotalCfu());
     }
 
     public void setTotalCfu(int totalCFU) {

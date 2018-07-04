@@ -83,8 +83,8 @@ public class WidgetUpdateService extends IntentService implements HasServiceInje
         views.setOnClickPendingIntent(R.id.widget_container, pendingIntent);
 
         repository.getUser((user) -> {
-            views.setTextViewText(R.id.averageMarkTextView, Utils.markFormat.format(user.getAverageMark()));
-            views.setTextViewText(R.id.cfuTextView, String.valueOf(user.getTotalCfu()));
+            views.setTextViewText(R.id.averageMarkTextView, user.printAverageScore());
+            views.setTextViewText(R.id.cfuTextView, user.printTotalCfu());
 
             // Instruct the widget manager to update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views);

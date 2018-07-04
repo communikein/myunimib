@@ -269,5 +269,7 @@
     <string name="action_add_lesson">Add lesson</string>
     <string name="exam_status_description">Exam status</string>
     <string name="action_delete_exam">Remove exam</string>
+    <string name="not_implemented">Feature not implemented yet.</string>
+    <string name="action_add_entry">Add entry</string>
 
 </resources>
