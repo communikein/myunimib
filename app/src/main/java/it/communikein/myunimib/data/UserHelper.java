@@ -5,8 +5,6 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -14,8 +12,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import java.io.IOException;
-import java.security.KeyStore;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,7 +19,6 @@ import javax.inject.Singleton;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.Faculty;
 import it.communikein.myunimib.data.model.User;
-import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.utilities.Utils;
 
 @Singleton

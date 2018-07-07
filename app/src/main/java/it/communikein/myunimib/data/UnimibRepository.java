@@ -30,7 +30,6 @@ import it.communikein.myunimib.data.model.ExamID;
 import it.communikein.myunimib.data.model.Faculty;
 import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
-import it.communikein.myunimib.data.model.UserAuthentication;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.data.network.loaders.CertificateLoader;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
@@ -742,19 +741,23 @@ public class UnimibRepository {
     public User getUser(final UserOperationsListener listener) {
         User user = mUserHelper.getUser();
 
-        mExecutors.diskIO().execute(() -> {
-            User userDb = mUserDao.getUser(user.getUsername());
-            if (userDb != null) {
-                userDb.setUsername(user.getUsername());
-                userDb.setPassword(user.getPassword());
-                userDb.setSessionId(user.getSessionId());
-                userDb.setSelectedFaculty(user.getSelectedFaculty());
-            }
-            else
-                userDb = user;
+        if (user != null) {
+            mExecutors.diskIO().execute(() -> {
+                User userDb = mUserDao.getUser(user.getUsername());
+                if (userDb != null) {
+                    userDb.setUsername(user.getUsername());
+                    userDb.setPassword(user.getPassword());
+                    userDb.setSessionId(user.getSessionId());
+                    userDb.setSelectedFaculty(user.getSelectedFaculty());
+                } else
+                    userDb = user;
 
-            if (listener != null) listener.onUserLoaded(userDb);
-        });
+                if (listener != null) listener.onUserLoaded(userDb);
+            });
+        }
+        else {
+            if (listener != null) listener.onUserLoaded(null);
+        }
 
         return user;
     }

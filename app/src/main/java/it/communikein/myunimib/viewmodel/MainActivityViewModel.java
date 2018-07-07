@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.content.Context;
-import android.widget.ImageView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -25,7 +23,6 @@ import it.communikein.myunimib.data.model.EnrolledExam;
 import it.communikein.myunimib.data.model.Exam;
 import it.communikein.myunimib.data.model.Lesson;
 import it.communikein.myunimib.data.model.User;
-import it.communikein.myunimib.data.network.ProfilePicturePicassoRequest;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
 import it.communikein.myunimib.data.network.loaders.EnrollLoader;
 import it.communikein.myunimib.data.network.loaders.S3Helper;
@@ -40,7 +37,6 @@ public class MainActivityViewModel extends ViewModel {
     private final UnimibRepository mRepository;
 
     private final ProfilePictureVolleyRequest mProfilePictureRequest;
-    private final ProfilePicturePicassoRequest mProfilePicturePicassoRequest;
 
     private MutableLiveData<User> mUser;
     private MutableLiveData<Building> mSelectedBuilding;
@@ -57,11 +53,9 @@ public class MainActivityViewModel extends ViewModel {
 
     @Inject
     public MainActivityViewModel(UnimibRepository repository,
-                                 ProfilePictureVolleyRequest profilePictureRequest,
-                                 ProfilePicturePicassoRequest profilePicturePicassoRequest) {
+                                 ProfilePictureVolleyRequest profilePictureRequest) {
         this.mRepository = repository;
         this.mProfilePictureRequest = profilePictureRequest;
-        this.mProfilePicturePicassoRequest = profilePicturePicassoRequest;
 
         this.mUser = new MutableLiveData<>();
         this.mSelectedBuilding = new MutableLiveData<>();
@@ -109,19 +103,6 @@ public class MainActivityViewModel extends ViewModel {
         );
 
         target.setImageUrl(S3Helper.URL_PROFILE_PICTURE, imageLoader);
-    }
-
-    public void loadProfilePicturePicasso(ProfilePicturePicassoRequest.ImageDownloadCallback callback) {
-        //this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
-
-        //this.mProfilePicturePicassoRequest.setImageDownloadCallback(callback);
-        //this.mProfilePicturePicassoRequest.displayProfilePicture();
-    }
-
-    public void loadProfilePicturePicassoTwo(Context app, ImageView target) {
-        //this.mProfilePicturePicassoRequest.changeUser(mRepository.getUserAuth());
-
-        //this.mProfilePicturePicassoRequest.displayProfilePicturePicasso(app, target);
     }
 
 

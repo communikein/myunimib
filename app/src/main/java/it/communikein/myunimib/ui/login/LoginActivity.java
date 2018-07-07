@@ -5,55 +5,33 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.net.Uri;
-import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 
 
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
 import dagger.android.AndroidInjection;
 import it.communikein.myunimib.R;
-import it.communikein.myunimib.data.UserHelper;
 import it.communikein.myunimib.data.model.User;
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 import it.communikein.myunimib.databinding.ActivityLoginBinding;
 import it.communikein.myunimib.ui.AuthAppCompatActivity;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.utilities.NetworkHelper;
-import it.communikein.myunimib.utilities.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import it.communikein.myunimib.ui.widget.WidgetUpdateService;
 import it.communikein.myunimib.viewmodel.LoginViewModel;
 import it.communikein.myunimib.viewmodel.factory.LoginViewModelFactory;
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -76,9 +54,11 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
     private AccountManager mAccountManager;
     private static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1001;
-    private static final String ARG_USERNAME = "arg_username";
-    private static final String ARG_PASSWORD = "arg_password";
-    private static final String ARG_NAME = "arg_name";
+    public static final String ARG_USERNAME = "arg_username";
+    public static final String ARG_PASSWORD = "arg_password";
+    public static final String ARG_NAME = "arg_name";
+    public static final String ARG_EMAIL = "arg_email";
+    public static final String ARG_FACULTY = "arg_faculty";
 
     private static final int LOADER_LOGIN_ID = 2100;
     private static final int LOADER_FAKE_LOGIN_ID = 2101;
@@ -139,7 +119,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
                     if (!isFacultyVisible) showFacultyChoiceView();
                 }
                 else
-                    startActivity(new Intent(this, MainActivity.class));
+                    finishLogin(null);
             }
         }
         else
@@ -172,6 +152,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
     @Override
     public void onBackPressed() {
         mFragmentManager.popBackStackImmediate();
+        super.onBackPressed();
     }
 
     private void initUI() {
@@ -252,13 +233,18 @@ public class LoginActivity extends AuthAppCompatActivity implements
     }
 
     private void finishLogin(User user) {
-        mViewModel.saveUser(user);
+        if (user != null)
+            mViewModel.saveUser(user);
         showLoginView();
         showProgress(false);
+
+        /* Start the widget update service to update the data shown in the widget */
+        WidgetUpdateService.startUpdateDataWidgets(this);
 
         /* Since the user is logged in, start the Main Activity */
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void showFacultyChoiceView() {
@@ -278,7 +264,7 @@ public class LoginActivity extends AuthAppCompatActivity implements
 
     private void showLoginView() {
         if (mFragmentManager.findFragmentByTag(LoginFragment.TAG) != null) {
-            mFragmentManager.popBackStack();
+            mFragmentManager.popBackStackImmediate();
         }
         else {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();

@@ -2,7 +2,6 @@ package it.communikein.myunimib.ui.login;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.model.Faculty;
@@ -63,6 +61,14 @@ public class FacultyFragment extends Fragment implements
         mCallback = null;
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Faculty chosen = mAdapter.getItem(mBinding.coursesSpinner.getSelectedItemPosition());
+        getViewModel().setFacultyChosen(chosen);
+    }
+
     private LoginViewModel getViewModel() {
         return ((LoginActivity) getActivity()).getViewModel();
     }
@@ -80,6 +86,12 @@ public class FacultyFragment extends Fragment implements
         mAdapter = new FacultiesArrayAdapter(getActivity(), getViewModel().getFaculties());
         mBinding.coursesSpinner.setAdapter(mAdapter);
         mBinding.coursesSpinner.setOnItemSelectedListener(this);
+
+        Faculty chosen = getViewModel().getFacultyChosen();
+        int position = 0;
+        if (chosen != null)
+            position = mAdapter.getPosition(chosen);
+        mBinding.coursesSpinner.setSelection(position);
 
         /* When the user has chosen the faculty */
         mBinding.dialogButtonOK.setOnClickListener(v -> {

@@ -29,7 +29,7 @@
             android:textColor="@color/primary_text"
             android:textStyle="bold"
             android:textSize="36sp"
-            android:text="FAKE"/>
+            android:text="@string/label_fake"/>
 
         <TextView
             android:id="@+id/mark_label"
@@ -54,7 +54,7 @@
             android:textStyle="bold"
             android:textColor="@color/primary_text"
             android:textSize="26sp"
-            android:text="FAKE"/>
+            android:text="@string/label_fake"/>
 
         <TextView
             android:id="@+id/cfu_label"

@@ -20,6 +20,10 @@ public class LoginViewModel extends ViewModel {
     private ArrayList<Faculty> mFaculties = new ArrayList<>();
     private Faculty mChosenFaculty = null;
 
+    private String mTempUsername = "";
+    private String mTempPassword = "";
+    private String mTempName = "";
+
     @Inject
     public LoginViewModel(UnimibRepository repository) {
         this.mRepository = repository;
@@ -55,6 +59,31 @@ public class LoginViewModel extends ViewModel {
 
     public Faculty getFacultyChosen() {
         return this.mChosenFaculty;
+    }
+
+
+    public void setTempUsername(String username) {
+        this.mTempUsername = username;
+    }
+
+    public void setTempPassword(String password) {
+        this.mTempPassword = password;
+    }
+
+    public void setTempName(String name) {
+        this.mTempName = name;
+    }
+
+    public String getTempUsername() {
+        return this.mTempUsername;
+    }
+
+    public String getTempPassword() {
+        return this.mTempPassword;
+    }
+
+    public String getTempName() {
+        return this.mTempName;
     }
 
 

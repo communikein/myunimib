@@ -199,8 +199,9 @@
                     app:layout_constraintEnd_toStartOf="@id/vertical_midline"
                     android:hint="@string/prompt_start_time"
                     android:textAlignment="center"
+                    android:maxLines="1"
                     tools:text="10:00"
-                    android:inputType="none"/>
+                    android:inputType="time"/>
 
                 <TextView
                     android:id="@+id/label_time_data_to"
@@ -225,8 +226,9 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     android:hint="@string/prompt_end_time"
                     android:textAlignment="center"
+                    android:maxLines="1"
                     tools:text="11:00"
-                    android:inputType="none"/>
+                    android:inputType="time"/>
 
             </android.support.constraint.ConstraintLayout>
 

@@ -81,7 +81,7 @@ public class ProfilePictureVolleyRequest implements ImageLoader.ImageCache{
         if (mRequestQueue == null) {
             Cache cache = new DiskBasedCache(context.getCacheDir(), 1024 * 1024);
             Network network = new BasicNetwork(
-                    new HurlStack(null, S3Helper.getSocketFactory(context, true)));
+                    new HurlStack(null, S3Helper.getSocketFactory(context, false)));
             mRequestQueue = new RequestQueue(cache, network);
             mRequestQueue.start();
         }

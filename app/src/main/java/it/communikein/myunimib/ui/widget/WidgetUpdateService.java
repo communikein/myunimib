@@ -19,7 +19,6 @@ import dagger.android.HasServiceInjector;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.data.UnimibRepository;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.utilities.Utils;
 
 public class WidgetUpdateService extends IntentService implements HasServiceInjector {
 
@@ -83,8 +82,15 @@ public class WidgetUpdateService extends IntentService implements HasServiceInje
         views.setOnClickPendingIntent(R.id.widget_container, pendingIntent);
 
         repository.getUser((user) -> {
-            views.setTextViewText(R.id.averageMarkTextView, user.printAverageScore());
-            views.setTextViewText(R.id.cfuTextView, user.printTotalCfu());
+            String averageScore = "-";
+            String totalCfu = "-";
+
+            if (user != null) {
+                averageScore = user.printAverageScore();
+                totalCfu = user.printTotalCfu();
+            }
+            views.setTextViewText(R.id.averageMarkTextView, averageScore);
+            views.setTextViewText(R.id.cfuTextView, totalCfu);
 
             // Instruct the widget manager to update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views);

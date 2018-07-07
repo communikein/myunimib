@@ -20,8 +20,6 @@ import it.communikein.myunimib.data.database.FacultiesDao;
 import it.communikein.myunimib.data.database.LessonsDao;
 import it.communikein.myunimib.data.database.UnimibDatabase;
 import it.communikein.myunimib.data.database.UserDao;
-import it.communikein.myunimib.data.model.AvailableExam;
-import it.communikein.myunimib.data.network.ProfilePicturePicassoRequest;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
 import it.communikein.myunimib.data.network.UnimibNetworkDataSource;
 import it.communikein.myunimib.utilities.NotificationHelper;
@@ -124,12 +122,6 @@ public class UnimibAppModule {
     ProfilePictureVolleyRequest provideProfilePictureRequest(UnimibRepository repository,
                                                              Application application) {
         return new ProfilePictureVolleyRequest(repository, application);
-    }
-
-    @Singleton @Provides
-    ProfilePicturePicassoRequest provideProfilePicturePicassoRequest(UnimibRepository repository,
-                                                              Application application) {
-        return new ProfilePicturePicassoRequest(repository, application);
     }
 
 }

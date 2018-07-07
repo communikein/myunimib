@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import javax.inject.Inject;
 
 import it.communikein.myunimib.data.UnimibRepository;
-import it.communikein.myunimib.data.network.ProfilePicturePicassoRequest;
 import it.communikein.myunimib.data.network.ProfilePictureVolleyRequest;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
@@ -15,23 +14,19 @@ public class MainActivityViewModelFactory extends ViewModelProvider.NewInstanceF
 
     private final UnimibRepository mRepository;
     private final ProfilePictureVolleyRequest mProfilePictureRequest;
-    private final ProfilePicturePicassoRequest mProfilePicturePicassoRequest;
 
     @Inject
     public MainActivityViewModelFactory(UnimibRepository repository,
-                                        ProfilePictureVolleyRequest profilePictureVolleyRequest,
-                                        ProfilePicturePicassoRequest profilePicturePicassoRequest) {
+                                        ProfilePictureVolleyRequest profilePictureVolleyRequest) {
         this.mRepository = repository;
         this.mProfilePictureRequest = profilePictureVolleyRequest;
-        this.mProfilePicturePicassoRequest = profilePicturePicassoRequest;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new MainActivityViewModel(mRepository,
-                mProfilePictureRequest, mProfilePicturePicassoRequest);
+        return (T) new MainActivityViewModel(mRepository, mProfilePictureRequest);
     }
 
 }

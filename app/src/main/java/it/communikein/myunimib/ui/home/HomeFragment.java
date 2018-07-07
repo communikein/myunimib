@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import it.communikein.myunimib.R;
 import it.communikein.myunimib.databinding.FragmentHomeBinding;
 import it.communikein.myunimib.ui.MainActivity;
-import it.communikein.myunimib.utilities.Utils;
 import it.communikein.myunimib.viewmodel.MainActivityViewModel;
 
 

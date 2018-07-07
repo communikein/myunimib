@@ -1,13 +1,11 @@
 package it.communikein.myunimib.ui.graduation.projection;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -84,8 +82,12 @@ public class AddProjectionDialog extends DialogFragment {
         getDialog().requestWindowFeature(FEATURE_NO_TITLE);
 
         mBinding.addProjectionButton.setOnClickListener(v -> {
-            createExam();
-            getDialog().dismiss();
+            BookletEntry entry = createExam();
+
+            if (entry != null) {
+                mListener.onAddClick(entry);
+                getDialog().dismiss();
+            }
         });
         mBinding.cancelButton.setOnClickListener(v -> {
             mListener.onCancelClick();
@@ -95,14 +97,24 @@ public class AddProjectionDialog extends DialogFragment {
         initCoursesAutoComplete(view.getContext());
     }
 
-    private void createExam() {
+    private BookletEntry createExam() {
         String name = mBinding.courseNameText.getText().toString();
         String score = mBinding.examScoreText.getText().toString();
         String cfu_str = mBinding.examCfuText.getText().toString();
-        int cfu = Integer.parseInt(cfu_str);
+        int cfu = -1;
 
-        BookletEntry entry = new BookletEntry(name, cfu, score);
-        mListener.onAddClick(entry);
+        if (name.isEmpty())
+            mBinding.courseNameWrapper.setError(getString(R.string.error_choose_course));
+        if (score.isEmpty())
+            mBinding.examScoreWrapper.setError(getString(R.string.error_set_score));
+        if (cfu_str.isEmpty())
+            mBinding.examCfuWrapper.setError(getString(R.string.error_set_cfu));
+        else
+            cfu = Integer.parseInt(cfu_str);
+
+        if (cfu == -1) return null;
+
+        return new BookletEntry(name, cfu, score);
     }
 
     private void initCoursesAutoComplete(Context context) {

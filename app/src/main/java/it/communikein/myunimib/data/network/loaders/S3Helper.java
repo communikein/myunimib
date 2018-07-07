@@ -179,10 +179,9 @@ public class S3Helper {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             Certificate ca;
-            try (InputStream caInput = context.getResources().openRawResource(R.raw.terenasslca3)) {
-                ca = cf.generateCertificate(caInput);
-                Log.e("CERT", "ca=" + ((X509Certificate) ca).getSubjectDN());
-            }
+            InputStream caInput = context.getResources().openRawResource(R.raw.terenasslca3);
+            ca = cf.generateCertificate(caInput);
+            Log.i("CERT", "ca=" + ((X509Certificate) ca).getSubjectDN());
 
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
@@ -196,6 +195,7 @@ public class S3Helper {
             return tmf.getTrustManagers();
         } catch (Exception e) {
             e.printStackTrace();
+            Log.e("CERT_ERROR", e.getMessage());
         }
 
         return null;
@@ -245,8 +245,8 @@ public class S3Helper {
             con.setDoOutput(true);
 
         /* For devices running Nougat (API 24) or above, use the network_security_config.xml */
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-            con.setSSLSocketFactory(getSocketFactory(context, true));
+        //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        con.setSSLSocketFactory(getSocketFactory(context, false));
 
         String cookie = con.getHeaderField("Set-Cookie");
         String sessionID = parseSessionID(cookie);

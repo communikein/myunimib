@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public static final String INTENT_PARAM_SHOW_FRAGMENT = "show-fragment";
     private static final String SAVE_FRAGMENT_SELECTED = "save-fragment-selected";
+    private static final String DRAWER_ITEM_SELECTED = "drawer-item-selected";
     private String FRAGMENT_SELECTED_TAG;
 
     private static final int INDEX_FRAGMENT_HOME = 0;
@@ -125,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(SAVE_FRAGMENT_SELECTED, FRAGMENT_SELECTED_TAG);
+        outState.putInt(DRAWER_ITEM_SELECTED, drawerItemSelectedId);
 
         super.onSaveInstanceState(outState);
     }
@@ -169,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements
 
         if (savedInstanceState != null) {
             /* Get the last selected drawer menu item ID */
-            String DRAWER_ITEM_SELECTED = "drawer-item-selected";
             drawerItemSelectedId = savedInstanceState.getInt(DRAWER_ITEM_SELECTED);
 
             /* Remove this entry to avoid problems further */
@@ -177,9 +178,11 @@ public class MainActivity extends AppCompatActivity implements
             if (savedInstanceState.size() == 0)
                 savedInstanceState = null;
 
-            mBinding.drawerNavigation.getMenu()
-                    .findItem(drawerItemSelectedId)
-                    .setChecked(true);
+            if (mBinding.drawerNavigation.getMenu() != null &&
+                    mBinding.drawerNavigation.getMenu().findItem(drawerItemSelectedId) != null)
+                mBinding.drawerNavigation.getMenu()
+                        .findItem(drawerItemSelectedId)
+                        .setChecked(true);
         }
 
         /*
@@ -307,6 +310,10 @@ public class MainActivity extends AppCompatActivity implements
 
         if (getSupportFragmentManager().findFragmentByTag(HomeFragment.TAG) == null)
             navigate(R.id.navigation_home);
+        else {
+            super.onBackPressed();
+            finish();
+        }
     }
 
     @Override

@@ -271,5 +271,13 @@
     <string name="action_delete_exam">Remove exam</string>
     <string name="not_implemented">Feature not implemented yet.</string>
     <string name="action_add_entry">Add entry</string>
+    <string name="label_fake">FAKE</string>
+    <string name="title_summary">Summary</string>
+    <string name="title_future_projection">Future Projection</string>
+    <string name="label_projection_explenation">This score is computed based on both the exams for which have been registered a score and the ones added below.</string>
+    <string name="title_list_exams_added">List of added exams</string>
+    <string name="error_choose_course">Choose a course</string>
+    <string name="error_set_score">Insert a score</string>
+    <string name="error_set_cfu">Insert CFU</string>
 
 </resources>

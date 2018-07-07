@@ -66,6 +66,15 @@ public class PersonalDataFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        getViewModel().setTempUsername(mBinding.emailEdittext.getText().toString());
+        getViewModel().setTempName(mBinding.nameEdittext.getText().toString());
+        getViewModel().setTempPassword(mBinding.passwordEdittext.getText().toString());
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 

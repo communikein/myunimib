@@ -23,6 +23,7 @@ import it.communikein.myunimib.R;
 import it.communikein.myunimib.databinding.FragmentLoginBinding;
 import it.communikein.myunimib.utilities.NetworkHelper;
 import it.communikein.myunimib.utilities.Utils;
+import it.communikein.myunimib.viewmodel.LoginViewModel;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,6 +46,10 @@ public class LoginFragment extends Fragment {
 
     public LoginFragment() {}
 
+    private LoginViewModel getViewModel() {
+        return ((LoginActivity) getActivity()).getViewModel();
+    }
+
     public static LoginFragment newInstance() {
         return new LoginFragment();
     }
@@ -56,8 +61,8 @@ public class LoginFragment extends Fragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false);
 
         mBinding.usernameEdittext.requestFocus();
-        mBinding.usernameEdittext.setText("");
-        mBinding.passwordEdittext.setText("");
+        mBinding.usernameEdittext.setText(getViewModel().getTempUsername());
+        mBinding.passwordEdittext.setText(getViewModel().getTempPassword());
 
         return mBinding.getRoot();
     }
@@ -71,6 +76,14 @@ public class LoginFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement LoginProcessCallback");
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        getViewModel().setTempPassword(mBinding.passwordEdittext.getText().toString());
+        getViewModel().setTempUsername(mBinding.usernameEdittext.getText().toString());
     }
 
     @Override

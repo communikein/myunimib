@@ -1,6 +1,5 @@
 package it.communikein.myunimib.data.model;
 
-import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
@@ -12,7 +11,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
 
 import it.communikein.myunimib.data.network.loaders.S3Helper;
 
